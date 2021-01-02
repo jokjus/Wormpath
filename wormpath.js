@@ -83,8 +83,8 @@ first.name = 'first';
 var bg = new Layer({position: view.center});
 bg.name = 'bg';
 
-var teksti = new Layer({position: view.center});
-teksti.name = 'teksti';
+var drawing = new Layer({position: view.center});
+drawing.name = 'drawing';
 
 
 // Set default parameters
@@ -233,31 +233,6 @@ function generateSprite() {
     group.visible = false;
 }
 
-// Update all params given in function parameters 
-function updateParams() {  
-    
-    for(key in arguments) {
-        var arg = arguments[key];
-
-        for (key in arg) {    
-            var val = arg[key];
-            eval("p." + key + " = " + val);
-            var uiel = document.getElementById(key);
-            if(val.components) {
-                uiel.value = rgb2hex(val);
-            }
-            else {      
-                if (uiel.type == "range") {
-                    var k = document.getElementById(key + 'Val');
-                    k.innerHTML = val;
-                }
-                uiel.value = val;
-            }
-        }
-    }
-
-    drawWord();
-}
 
 // Loop through all paths and pathgroups
 function drawWord() {    
@@ -265,9 +240,7 @@ function drawWord() {
     first.removeChildren();
 
     //Delete all previosly drawn worms
-    teksti.removeChildren();
-
-    
+    drawing.removeChildren();
 
     //Scale SVG
     var myScale = p.drawingSize / scale;
@@ -304,7 +277,7 @@ function drawPath(sprite, path) {
     for (k=0; k<p.density; k++) {
         
         var sCopy = sprite.clone();    
-        teksti.addChild(sCopy);
+        drawing.addChild(sCopy);
         sCopy.visible = true;
         var cPos = path.getLocationAt(path.length - (path.length - k*step)); 
         sCopy.position.x = cPos.point.x;
@@ -350,7 +323,7 @@ function drawPath(sprite, path) {
             fillColor: p.bgColor
         })
         cap.rotation = p.rotation + k*p.twist/100;
-        teksti.addChild(cap);
+        drawing.addChild(cap);
     }
 
     if (p.cap == 2) {
@@ -374,6 +347,31 @@ function drawPath(sprite, path) {
     }
 }
 
+// Update all params given in function parameters 
+function updateParams() {  
+    
+    for(key in arguments) {
+        var arg = arguments[key];
+
+        for (key in arg) {    
+            var val = arg[key];
+            eval("p." + key + " = " + val);
+            var uiel = document.getElementById(key);
+            if(val.components) {
+                uiel.value = rgb2hex(val);
+            }
+            else {      
+                if (uiel.type == "range") {
+                    var k = document.getElementById(key + 'Val');
+                    k.innerHTML = val;
+                }
+                uiel.value = val;
+            }
+        }
+    }
+
+    drawWord();
+}
 
 
 function updateFromUI(val) {
@@ -414,6 +412,14 @@ function buildUIparam(param) {
         }
         centerLayers();
     };
+
+    paramUIElement.oninput = function() {
+        var valel = document.getElementById(param + 'Val');
+        console.log(this.value);
+        if (paramUIElement.type != "color") {
+            valel.innerHTML = this.value;
+        }
+    }
 }
 
 
@@ -421,7 +427,7 @@ function buildUIparam(param) {
 function centerLayers() {
     project.activeLayer.position = view.center;
     first.position = view.center;
-    teksti.position = view.center;
+    drawing.position = view.center;
 }
 
 var animStep = document.getElementById('step-animation');
