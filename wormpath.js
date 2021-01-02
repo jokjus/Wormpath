@@ -134,11 +134,9 @@ project.importSVG(url, function(item) {
 
     words.visible = false;  //hide the guiding SVG lines
 
-    setTimeout(function(){ 
-        updateParams(p);
-        buildUI();
-        centerLayers();
-    }, 1000);
+    updateParams(p);
+    buildUI();
+    centerLayers();
     
 })
 
@@ -240,8 +238,8 @@ function updateParams() {
     
     for(key in arguments) {
         var arg = arguments[key];
-        
-        for (key in arg) {        
+
+        for (key in arg) {    
             var val = arg[key];
             eval("p." + key + " = " + val);
             var uiel = document.getElementById(key);
@@ -376,149 +374,9 @@ function drawPath(sprite, path) {
     }
 }
 
-// UI for manipulating the effect 
-function buildUI() {   
-    var drawingBgPicker = document.getElementById('drawingBgColor');
 
-    drawingBgPicker.onchange = function() {
-        updateFromUI({drawingBgColor: hex2rgb(this.value)});
-        centerLayers();
-    };
-
-    var sliderDrawingSize = document.getElementById('drawingSize');
-
-    sliderDrawingSize.onchange = function() {
-        updateFromUI({drawingSize: this.value});
-        centerLayers();
-    };
-    
-    // BACKGROUND
-    var slider = document.getElementById('density');
-
-    slider.onchange = function() {
-        updateFromUI({density: this.value});
-        centerLayers();
-    };
-
-    var sliderSize = document.getElementById('size');
-
-    sliderSize.onchange = function() {
-        updateFromUI({size: this.value});
-        centerLayers();
-    };
-
-    var sliderRotation = document.getElementById('rotation');
-    sliderRotation.onchange = function() {
-        updateFromUI({rotation: this.value});
-        centerLayers();
-    };
-
-    var bgPicker = document.getElementById('bgColor');
-
-    bgPicker.onchange = function() {
-        updateFromUI({bgColor: hex2rgb(this.value)});
-        centerLayers();
-    };
-
-    var bgStyleSelect = document.getElementById('bgStyle');
-
-    bgStyleSelect.onchange = function() {
-        updateFromUI({bgStyle: this.value});
-        centerLayers();
-    };
-
-    // LINES 
-    var sliderLines = document.getElementById('lines');
-
-    sliderLines.onchange = function() {
-        updateFromUI({lines: this.value});
-        centerLayers();
-    };
-
-    var sliderWidth = document.getElementById('lineWidth');
-
-    sliderWidth.onchange = function() {
-        updateFromUI({lineWidth: this.value});
-        centerLayers();
-    };
-
-    var lineColorPicker = document.getElementById('lineColor');
-
-    lineColorPicker.onchange = function() {
-        updateFromUI({lineColor: hex2rgb(this.value)});
-        centerLayers();
-    };
-
-    var styleSelect = document.getElementById('lineStyle');
-
-    styleSelect.onchange = function() {
-        updateFromUI({lineStyle: this.value});
-        centerLayers();
-    };
-
-    var sliderWaveAmp = document.getElementById('waveAmp');
-
-    sliderWaveAmp.onchange = function() {
-        updateFromUI({waveAmp: this.value});
-        
-        centerLayers();
-    };
-
-    var sliderWaveFreq = document.getElementById('waveFreq');
-
-    sliderWaveFreq.onchange = function() {
-        updateFromUI({waveFreq: this.value});
-        centerLayers();
-    };
-
-    var fadeRange = document.getElementById('fade');
-
-    fadeRange.onchange = function() {
-        updateFromUI({fade: this.value});
-        centerLayers();
-    };
-
-    // EFFECTS
-
-    var shadowRange = document.getElementById('shadow');
-
-    shadowRange.onchange = function() {
-        updateFromUI({shadow: this.value});
-        centerLayers();
-    };
-
-    var capSelect = document.getElementById('cap');
-
-    capSelect.onchange = function() {
-        updateFromUI({cap: this.value});
-        centerLayers();
-    };
-
-    var rotationRange = document.getElementById('twist');
-
-    rotationRange.onchange = function() {
-        updateFromUI({twist: this.value});
-        centerLayers();
-    };
-
-    var cornerRange = document.getElementById('corner');
-
-    cornerRange.onchange = function() {
-        updateFromUI({corner: this.value});
-        centerLayers();
-    };
-
-
-    var presetSelect = document.getElementById('preset');
-
-    presetSelect.onchange = function() {
-        var newParams = presets[this.value];
-        updateFromUI(newParams);
-    };
-}
 
 function updateFromUI(val) {
-    
     showProgress();
 
     setTimeout(function(){ 
@@ -526,10 +384,39 @@ function updateFromUI(val) {
         updateParams(val);
         centerLayers();
         hideProgress();
-        drawingBg.sendToBack();
+        // drawingBg.sendToBack();
      }, 50);
     
 }
+
+// UI for manipulating the effect. Initialize all properties defined in the main properties variable p 
+function buildUI() {   
+    for (i = 0; i< Object.keys(p).length; i++) {
+        buildUIparam(Object.keys(p)[i]);
+    }    
+}
+
+// Initialize a single UI component
+function buildUIparam(param) {
+    var paramUIElement = document.getElementById(param);
+    paramUIElement.onchange = function() {
+        if (paramUIElement.type == "color") {
+            var key = param;
+            var update = {};
+            update[key] = hex2rgb(this.value);
+            updateFromUI(eval(update));
+        }
+        else {
+            var key = param;
+            var update = {};
+            update[key] = this.value;
+            updateFromUI(update);
+        }
+        centerLayers();
+    };
+}
+
+
 
 function centerLayers() {
     project.activeLayer.position = view.center;
@@ -540,9 +427,7 @@ function centerLayers() {
 var animStep = document.getElementById('step-animation');
 
 animStep.onclick = function() {
-    // console.log('p.rotation: ' + p.rotation);
     var rotStep = p.rotation + parseInt(document.getElementById('aRotation').value);
-    // console.log('rotstep: ' + rotStep);
     updateFromUI({rotation:rotStep});
     centerLayers();
     // setTimeout(function(){
@@ -569,7 +454,6 @@ function hideProgress() {
 //Reposition the paths whenever the window is resized:
 function onResize(event) {
     centerLayers();
-    drawWord();
 }
 
 function downloadDataUri(options) {
