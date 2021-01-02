@@ -392,6 +392,8 @@ function buildUI() {
     for (i = 0; i< Object.keys(p).length; i++) {
         buildUIparam(Object.keys(p)[i]);
     }    
+    // build extra params
+    buildUIparam('preset');
 }
 
 // Initialize a single UI component
@@ -408,6 +410,9 @@ function buildUIparam(param) {
             var key = param;
             var update = {};
             update[key] = this.value;
+            if (paramUIElement.id == 'preset') {
+                update = presets[this.value]
+            }
             updateFromUI(update);
         }
         centerLayers();
@@ -415,8 +420,7 @@ function buildUIparam(param) {
 
     paramUIElement.oninput = function() {
         var valel = document.getElementById(param + 'Val');
-        console.log(this.value);
-        if (paramUIElement.type != "color") {
+        if (paramUIElement.type != "color" && paramUIElement.nodeName != "SELECT") {
             valel.innerHTML = this.value;
         }
     }
