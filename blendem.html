@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lazy fox</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+  crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://unpkg.com/acorn"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js" integrity="sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==" crossorigin="anonymous"></script>
+    <!-- <script type="text/javascript" src="html2canvas.min.js"></script> -->
+    
+    <script type="text/paperscript" canvas="canvas" src="blendem.js"></script>
+
+</head>
+<body>
+<canvas id="canvas" resize></canvas>
+<div id="progress"></div>
+
+<button id="export-button">Export SVG</button>
+
+<div id="rangeholder">
+    <div><label>Bg color:</label>
+        <input type="color" id="drawingBgColor" value="#ffffff"></div>
+
+    <div><label>Size:</label>
+        <input type="range" id="drawingSize" min="0" max="20" value="10">
+    </div>
+        
+    
+    <div><label>Density:</label>
+    <input type="range" id="density" min="0" max="500" value="200">
+    </div>
+    
+    
+    <div class="section"><label>Brush size:</label>
+    <input type="range" id="size" min="0" max="400" value="100"></div>
+
+    <div><label>Rotation:</label>
+        <input type="range" id="rotation" min="0" max="360" value="20"></div>
+
+    <div><label>Brush bg:</label>
+    <input type="color" id="bgColor" value="#000000"></div>
+    
+    <div><label>Brush bg style:</label>
+        <select id="bgStyle">
+            <option value=0 selected>Custom</option>
+            <option value=1>Unicorn</option>
+            <option value=2>None</option>
+          </select></div>
+
+    <div class="section"><label>Lines:</label>
+    <input type="range" id="lines" min="0" max="30" value="3"></div>
+
+    <div><label>Width:</label>
+    <input type="range" id="lineWidth" min="0" max="40" value="3"></div>
+
+    <div><label>Color:</label>
+    <input type="color" id="lineColor" value="#ffffff"></div>
+
+    <div><label>Style:</label>
+    <select id="lineStyle">
+        <option value=3 selected>Custom</option>
+        <option value=0>Unicorn</option>
+        <option value=1>White</option>
+        <option value=2>Black</option>  
+        <option value=4>Vertical</option>      
+        <option value=5>Horizontal</option>      
+        <option value=6>Wavy</option>   
+      </select></div>
+    
+      <div>
+        <label>Wave amp:</label>
+        <input type="range" id="waveAmp" min="0" max="50" value="7">
+    </div>
+    <div>
+        <label>Wave freq:</label>
+        <input type="range" id="waveFreq" min="0" max="100" value="20">
+    </div>
+      
+    <div>
+        <label>Fade:</label>
+        <input type="range" id="fade" min="0" max="100" value="50">
+    </div>
+
+      
+    <div class="section"><label>Shadow:</label>
+    <input type="range" id="shadow" min="0" max="100" value="20"></div>
+
+    <div><label>Cap:</label>
+    <select id="cap">
+        <option value=0>Filled</option>
+        <option value=1>Open</option>
+        <option value=2 selected>Horizontal</option>
+        <option value=3>Vertical</option>
+      </select></div>
+    
+    <div><label>Twist:</label>
+    <input type="range" id="twist" min="0" max="500" value="0"></div>
+
+    <div><label>Radius:</label>
+        <input type="range" id="corner" min="0" max="200" value="0"></div>
+    
+    <div class="section"><label>Preset:</label>
+        <select id="preset">
+            <option value=0>Default</option>
+            <option value=1>Big white</option>
+            <option value=2>Golden wave</option>
+            <option value=3>Blue ocean</option>
+        </select>
+    </div>
+
+</div>
+
+<div id="animation-controls">
+    <div>
+        <label>Rotation:</label>
+        <input type="number" id="aRotation" min="0" max="360" value="0">
+
+        <button type="button" id="step-animation">Step forward</button>
+    </div>
+    
+</div>
+
+
+
+</body>
+</html>
