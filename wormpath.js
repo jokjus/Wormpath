@@ -88,7 +88,7 @@ teksti.name = 'teksti';
 // Set default parameters
 var p = {
     drawingBgColor: new Color(1,1,1),
-    drawingSize: 10,
+    drawingSize: 5,
     size: 100,
     lines: 3,
     lineWidth: 3,
@@ -116,7 +116,7 @@ first.activate();
 var canvas = document.getElementById('canvas');
 var scope = paper.setup(canvas);
 
-var url = 'images/lazyfox.svg';
+var url = 'images/pathsource.svg';
 var words;
 
 
