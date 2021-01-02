@@ -50,7 +50,9 @@ var presets = [
         rotation: 20,
         shadow: 41,
         size: 183,
-        twist: 7     
+        twist: 7,
+        waveAmp: 7,
+        waveFreq: 20
     },
     {
         name: 'Blue ocean',
@@ -100,7 +102,7 @@ var p = {
     shadow: 20,
     cap: 2,
     twist: 0,
-    lineColor: '#ffffff',
+    lineColor: new Color(1,1,1),
     bgStyle: 0,
     fade: 50,
     corner: 0,
@@ -119,7 +121,6 @@ var scope = paper.setup(canvas);
 var url = 'images/pathsource.svg';
 var words;
 
-
 var drawingBg = new Path.Rectangle({
     point: [0, 0],
     size: [view.size.width, view.size.height]
@@ -133,11 +134,11 @@ project.importSVG(url, function(item) {
 
     words.visible = false;  //hide the guiding SVG lines
 
-    buildUI();
-    drawWord();
-    centerLayers();
-
-    
+    setTimeout(function(){ 
+        updateParams(p);
+        buildUI();
+        centerLayers();
+    }, 1000);
     
 })
 
@@ -247,7 +248,11 @@ function updateParams() {
             if(val.components) {
                 uiel.value = rgb2hex(val);
             }
-            else {           
+            else {      
+                if (uiel.type == "range") {
+                    var k = document.getElementById(key + 'Val');
+                    k.innerHTML = val;
+                }
                 uiel.value = val;
             }
         }
@@ -292,9 +297,6 @@ function drawWord() {
     drawingBg.fillColor = p.drawingBgColor;
     
 }
-
-
-
 
 // Rraw sprite along a path
 function drawPath(sprite, path) {
@@ -458,6 +460,7 @@ function buildUI() {
 
     sliderWaveAmp.onchange = function() {
         updateFromUI({waveAmp: this.value});
+        
         centerLayers();
     };
 
@@ -633,5 +636,3 @@ $('#export-button').click(function() {
         filename: 'export.svg'
     });
 });
-
-

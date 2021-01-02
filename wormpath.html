@@ -21,26 +21,26 @@
 
 <div id="rangeholder">
     <div><label>Bg color:</label>
-        <input type="color" id="drawingBgColor" value="#ffffff"></div>
+        <input type="color" id="drawingBgColor" value=""></div>
 
-    <div><label>Size:</label>
-        <input type="range" id="drawingSize" min="0" max="20" value="5">
+    <div><label>Size:</label><span id="drawingSizeVal">5</span>
+        <input type="range" id="drawingSize" min="0" max="20" value="">
     </div>
         
     
-    <div><label>Density:</label>
-    <input type="range" id="density" min="0" max="500" value="200">
+    <div><label>Density:</label><span id="densityVal"></span>
+    <input type="range" id="density" min="0" max="500" value="">
     </div>
     
     
-    <div class="section"><label>Brush size:</label>
-    <input type="range" id="size" min="0" max="400" value="100"></div>
+    <div class="section"><label>Brush size:</label><span id="sizeVal"></span>
+    <input type="range" id="size" min="0" max="400" value=""></div>
 
-    <div><label>Rotation:</label>
-        <input type="range" id="rotation" min="0" max="360" value="20"></div>
+    <div><label>Rotation:</label><span id="rotationVal"></span>
+        <input type="range" id="rotation" min="0" max="360" value=""></div>
 
     <div><label>Brush bg:</label>
-    <input type="color" id="bgColor" value="#000000"></div>
+    <input type="color" id="bgColor" value=""></div>
     
     <div><label>Brush bg style:</label>
         <select id="bgStyle">
@@ -49,14 +49,14 @@
             <option value=2>None</option>
           </select></div>
 
-    <div class="section"><label>Lines:</label>
-    <input type="range" id="lines" min="0" max="30" value="3"></div>
+    <div class="section"><label>Lines:</label><span id="linesVal"></span>
+    <input type="range" id="lines" min="0" max="30" value=""></div>
 
-    <div><label>Width:</label>
-    <input type="range" id="lineWidth" min="0" max="40" value="3"></div>
+    <div><label>Width:</label><span id="lineWidthVal"></span>
+    <input type="range" id="lineWidth" min="0" max="40" value=""></div>
 
     <div><label>Color:</label>
-    <input type="color" id="lineColor" value="#ffffff"></div>
+    <input type="color" id="lineColor" value=""></div>
 
     <div><label>Style:</label>
     <select id="lineStyle">
@@ -70,22 +70,22 @@
       </select></div>
     
       <div>
-        <label>Wave amp:</label>
-        <input type="range" id="waveAmp" min="0" max="50" value="7">
+        <label id='waveAmpLabel'>Wave amp:</label><span id="waveAmpVal"></span>
+        <input type="range" id="waveAmp" min="0" max="50" value="">
     </div>
     <div>
-        <label>Wave freq:</label>
-        <input type="range" id="waveFreq" min="0" max="100" value="20">
+        <label>Wave freq:</label><span id="waveFreqVal"></span>
+        <input type="range" id="waveFreq" min="0" max="100" value="">
     </div>
       
     <div>
-        <label>Fade:</label>
-        <input type="range" id="fade" min="0" max="100" value="50">
+        <label>Fade:</label><span id="fadeVal"></span>
+        <input type="range" id="fade" min="0" max="100" value="">
     </div>
 
       
-    <div class="section"><label>Shadow:</label>
-    <input type="range" id="shadow" min="0" max="100" value="20"></div>
+    <div class="section"><label>Shadow:</label><span id="shadowVal"></span>
+    <input type="range" id="shadow" min="0" max="100" value=""></div>
 
     <div><label>Cap:</label>
     <select id="cap">
@@ -95,11 +95,11 @@
         <option value=3>Vertical</option>
       </select></div>
     
-    <div><label>Twist:</label>
-    <input type="range" id="twist" min="0" max="500" value="0"></div>
+    <div><label>Twist:</label><span id="twistVal"></span>
+    <input type="range" id="twist" min="0" max="500" value=""></div>
 
-    <div><label>Radius:</label>
-        <input type="range" id="corner" min="0" max="200" value="0"></div>
+    <div><label>Radius:</label><span id="cornerVal"></span>
+        <input type="range" id="corner" min="0" max="200" value=""></div>
     
     <div class="section"><label>Preset:</label>
         <select id="preset">
