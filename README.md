@@ -1,9 +1,12 @@
 # WormPath
- Draw 'worms' along vector paths with parametrized brush block.
+ Draws "worms" along vector paths with parametrized brush block.
 
 ## Setup
  1. Copy files to some directory on your hard drive. 
  2. Launch a local server of your choice. (I'm using CodeKit or Visual Studio Code Live Server). 
+    - Visual Studio https://code.visualstudio.com/  
+    - Visual Studio Code https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
+    - CodeKit https://codekitapp.com/
  3. Open wormpath.html in a browser.
 
 ## Using your own paths for drawing 
