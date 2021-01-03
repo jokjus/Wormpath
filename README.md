@@ -1,6 +1,8 @@
 # WormPath
  Draws "worms" along vector paths with parametrized brush block.
 
+![Wormpath screenshot](/images/screenshot.png)
+
 ## Setup
  1. Copy files to some directory on your hard drive. 
  2. Launch a local server of your choice. (I'm using CodeKit or Visual Studio Code Live Server). 
