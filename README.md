@@ -32,3 +32,4 @@
  4. When all frames have been generated, *Stop capture*
 
  The animation will be downloaded as .webm video file.
+ Screen capture script by https://github.com/spite/ccapture.js
