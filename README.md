@@ -23,7 +23,7 @@
 ## Presets
  Hard coded for now.
 
-## Know issues
+## Known issues
  Drawing disappears on resize. Just change any value to redraw.
 
 ## Animation
