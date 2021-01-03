@@ -13,13 +13,17 @@ canvas[resize] {
     height: 100%;
 }
 
-#export-button, #switch {
+#export-button, #switch, #log-params {
 	position:fixed;
 	bottom:0;
 	right:0;
 	border: 1px solid black;
 	padding: 5px 10px;
 	font-family:sans-serif;	
+}
+
+#log-params {
+	right: 100px;
 }
 
 #rangeholder {

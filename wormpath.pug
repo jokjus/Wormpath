@@ -1,0 +1,97 @@
+mixin input(type, label, name, min=0, max, value='')
+    div()&attributes(attributes)
+        label=label
+        span(id=name + 'Val')
+        input(id=name, type=type, value=value, min=min, max=max)
+
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    title WormPath
+    link(rel='stylesheet' href='style.css')
+    script(src='https://code.jquery.com/jquery-3.5.1.min.js' integrity='sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=' crossorigin='anonymous')
+    script(type='text/javascript' src='https://unpkg.com/acorn')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js' integrity='sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==' crossorigin='anonymous')
+    script(src='CCapture.all.min.js')
+    // <script type="text/javascript" src="html2canvas.min.js"></script>
+    script(type='text/paperscript' canvas='canvas' src='wormpath.js')
+  body
+    canvas#canvas(resize='')
+
+    #progress
+    button#export-button Export SVG
+    button#log-params Log params
+
+    #rangeholder
+      +input('color', 'Bg color', 'drawingBgColor')
+      +input('range', 'Scale:', 'drawingSize', 0, 20)
+      +input('range', 'Density:', 'density', 0, 500)
+      +input('range', 'Brush size:', 'size', 0, 400)
+      +input('range', 'Rotation:', 'rotation', 0, 360)
+      +input('color', 'Brush Bg', 'bgColor')
+
+      div
+        label Brush color style:
+        select#bgStyle
+          option(value='0' selected='') Custom
+          option(value='1') Unicorn
+          option(value='2') None
+      div
+        label Brush effect:
+        select#bgEffect
+          option(value='0' selected='') None
+          option(value='1') Bulp          
+
+      
+      +input('range', 'Lines:', 'lines', 0, 30)(class='section')
+      +input('range', 'Width:', 'lineWidth', 0, 40)
+      +input('color', 'Line color', 'lineColor')
+        
+      div
+        label Style:
+        select#lineStyle
+          option(value='3' selected='') Custom
+          option(value='0') Unicorn
+          option(value='1') White
+          option(value='2') Black
+          option(value='4') Vertical
+          option(value='5') Horizontal
+          option(value='6') Wavy
+
+      +input('range', 'Wave amp:', 'waveAmp', 0, 50)
+      +input('range', 'Wave freq:', 'waveFreq', 0, 100)
+      +input('range', 'Fade:', 'fade', 0, 100)
+      +input('range', 'Shadow:', 'shadow', 0, 100)
+
+      div
+        label Cap:
+        select#cap
+          option(value='0') Filled
+          option(value='1') Open
+          option(value='2' selected='') Horizontal
+          option(value='3') Vertical
+
+      +input('range', 'Twist:', 'twist', 0, 500)
+      +input('range', 'Radius:', 'corner', 0, 200)
+
+      .section
+        label Preset:
+        select#preset
+          option(value='0') Default
+          option(value='1') Big white
+          option(value='2') Golden wave
+          option(value='3') Blue ocean
+          option(value='4') Green lantern
+
+    #animation-controls
+      div
+        label Rotation:
+        input#aRotation(type='number' min='0' max='360' value='0')
+        label Wave amp:
+        input#aWaveAmp(type='number' min='0' max='100' value='0')
+        button#step-animation(type='button') Step forward
+        button#start-animation(type='button') Start animation
+        button#stop-animation(type='button') Stop animation
+        button#start-capture(type='button') Start Capture
+        button#stop-capture(type='button') Stop Capture

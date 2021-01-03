@@ -4,6 +4,7 @@ var presets = [
     {
         name: 'Default',
         size: 100,
+        bgEffect: 0,
         lines: 3,
         lineWidth: 3,
         density: 200,
@@ -21,6 +22,7 @@ var presets = [
     {
         name: 'Black white',
         bgColor: hex2rgb("#ffffff"),
+        bgEffect: 0,
         bgStyle: 0,
         cap: 2,
         corner: 20,
@@ -38,6 +40,7 @@ var presets = [
     {
         name: 'Golden wave',
         bgColor: hex2rgb("#482205"),     
+        bgEffect: 0,
         bgStyle: 0,
         cap: 2,
         corner: 43,
@@ -52,11 +55,14 @@ var presets = [
         size: 183,
         twist: 7,
         waveAmp: 7,
-        waveFreq: 20
+        waveFreq: 20,
+        waveAmp: 9,
+        waveFreq: 9
     },
     {
         name: 'Blue ocean',
         bgColor: hex2rgb("#03D3E2"),
+        bgEffect: 0,
         bgStyle: 0,
         cap: 2,
         corner: 48,
@@ -69,7 +75,32 @@ var presets = [
         rotation: 20,
         shadow: 20,
         size: 125,
-        twist: 1
+        twist: 1,
+        waveAmp: 3,
+        waveFreq: 9
+    },
+
+    {
+        name: 'Green lantern',
+        bgColor: new Color(0, 0.21961, 0.01569),
+        bgEffect: 1,
+        bgStyle: 0,
+        cap: 2,
+        corner: 22,
+        density: 450,
+        drawingBgColor: new Color(1,1,1),
+        drawingSize: 9,
+        fade: 49,
+        lineColor:  new Color(0.06667, 1, 0),
+        lineStyle: 3,
+        lineWidth: 29,
+        lines: 3,
+        rotation: 279,
+        shadow: 35,
+        size: 346,
+        twist: 0,
+        waveAmp: 3,
+        waveFreq: 9
     }
 ];
 // Initialize main variables
@@ -178,7 +209,8 @@ var p = {
     bgStyle: 0,
     fade: 50,
     corner: 0,
-    rotation: 0
+    rotation: 0,
+    bgEffect: 0
 }
 
 var hue = 0;
@@ -369,6 +401,10 @@ function drawPath(sprite, path) {
             }     
             hue += .1;   
         }   
+        if (p.bgEffect == 1) {
+            sCopy.scale(sinBetween(1, p.waveAmp, scale)/10);
+            scale += p.waveFreq/100;  
+        }
 
         if (p.lineStyle == 6) {
             
@@ -435,7 +471,9 @@ function updateParams() {
             else {      
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
-                    k.innerHTML = Math.round((val + Number.EPSILON) * 100) / 100;
+                    // console.log(key + ' - ' + Math.round((val + Number.EPSILON) * 100) / 100 + ' - ' + val);
+                    // k.innerHTML = Math.round((val + Number.EPSILON) * 100) / 100;
+                    k.innerHTML = val;
                 }
                 uiel.value = val;
             }
@@ -618,4 +656,8 @@ $('#export-button').click(function() {
         data: 'data:image/svg+xml;base64,' + btoa(svg),
         filename: 'export.svg'
     });
+});
+
+$('#log-params').click(function() {
+    console.log(p);
 });
