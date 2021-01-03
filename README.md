@@ -30,6 +30,7 @@
  2. Press *Start animation*
  3. Press *Start Capture*
  4. When all frames have been generated, *Stop capture*
+ 5. Press *Stop animation*
 
  The animation will be downloaded as .webm video file.
  Screen capture script by https://github.com/spite/ccapture.js
