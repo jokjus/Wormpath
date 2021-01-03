@@ -7,7 +7,7 @@ var presets = [
         bgEffect: 0,
         lines: 3,
         lineWidth: 3,
-        density: 200,
+        density: 50,
         bgColor: new Color(0.2,0.2,0.2),
         lineStyle: 3,
         shadow: 20,
@@ -17,7 +17,9 @@ var presets = [
         bgStyle: 0,
         fade: 50,
         corner: 0,
-        rotation: 20          
+        rotation: 20,
+        bulbAmp: 15,
+        bulbFreq: 50     
     },
     {
         name: 'Black white',
@@ -26,7 +28,7 @@ var presets = [
         bgStyle: 0,
         cap: 2,
         corner: 20,
-        density: 402,
+        density: 96,
         fade: 0,
         lineColor: hex2rgb("#000000"),
         lineStyle: 3,
@@ -35,7 +37,10 @@ var presets = [
         rotation: 20,
         shadow: 20,
         size: 228,
-        twist: 0
+        twist: 0,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        drawingBgColor: hex2rgb("#ffffff"),
     },
     {
         name: 'Golden wave',
@@ -44,7 +49,7 @@ var presets = [
         bgStyle: 0,
         cap: 2,
         corner: 43,
-        density: 500,
+        density: 99,
         fade: 72,
         lineColor: hex2rgb("#ff9500"),
         lineStyle: 6,
@@ -57,16 +62,20 @@ var presets = [
         waveAmp: 7,
         waveFreq: 20,
         waveAmp: 9,
-        waveFreq: 9
+        waveFreq: 9,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        drawingBgColor: new Color(0.89804,0.82745, 0.76078)
     },
     {
         name: 'Blue ocean',
-        bgColor: hex2rgb("#03D3E2"),
+        bgColor: hex2rgb("#9ef0ff"),
         bgEffect: 0,
         bgStyle: 0,
         cap: 2,
+        drawingBgColor: hex2rgb("#A8F5FF"),
         corner: 48,
-        density: 500,
+        density: 99,
         fade: 100,
         lineColor: hex2rgb("#004B4D"),
         lineStyle: 6,
@@ -77,7 +86,9 @@ var presets = [
         size: 125,
         twist: 1,
         waveAmp: 3,
-        waveFreq: 9
+        waveFreq: 9,
+        bulbAmp: 15,
+        bulbFreq: 50
     },
 
     {
@@ -87,24 +98,51 @@ var presets = [
         bgStyle: 0,
         cap: 2,
         corner: 22,
-        density: 450,
+        density: 90,
         drawingBgColor: new Color(1,1,1),
-        drawingSize: 9,
+        drawingSize: 8,
         fade: 49,
         lineColor:  new Color(0.06667, 1, 0),
         lineStyle: 3,
-        lineWidth: 29,
+        lineWidth: 12,
         lines: 3,
         rotation: 279,
         shadow: 35,
-        size: 346,
+        size: 67,
         twist: 0,
         waveAmp: 3,
-        waveFreq: 9
+        waveFreq: 9,
+        bulbAmp: 11,
+        bulbFreq: 77
+    },
+
+    {
+        name: 'Orange twist',
+        bgColor: new Color(0.01961, 0.00392, 0.91373),
+        bgEffect: 1,
+        bgStyle: 0,
+        bulbAmp: 10,
+        bulbFreq: 34,
+        cap: 2,
+        corner: 0,
+        density: 96,
+        drawingBgColor: new Color(0.96078, 0.38431, 0),
+        drawingSize: 7,
+        fade: 76,
+        lineColor: new Color(1,1,1),
+        lineStyle: 6,
+        lineWidth: 3,
+        lines: 3,
+        rotation: 0,
+        shadow: 2,
+        size: 100,
+        twist: 0,
+        waveAmp: 7,
+        waveFreq: 20
     }
 ];
 // Initialize main variables
-
+var bulbPhase = 0;
 var rotStepVal, ampStepVal, 
     runAnimation = false
 // Create a capturer that exports a WebM video
@@ -165,6 +203,7 @@ function render() {
     // setTimeout(function() {
         var rotStep = p.rotation + rotStepVal;
         var ampStep = p.waveAmp + ampStepVal;
+        
 
         updateAnim({
             waveAmp:ampStep,
@@ -197,7 +236,7 @@ var p = {
     size: 100,
     lines: 3,
     lineWidth: 3,
-    density: 200,
+    density: 90,
     bgColor: new Color(0.2,0.2,0.2),
     lineStyle: 3,
     waveAmp: 7,
@@ -210,7 +249,9 @@ var p = {
     fade: 50,
     corner: 0,
     rotation: 0,
-    bgEffect: 0
+    bgEffect: 0,
+    bulbAmp: 15,
+    bulbFreq: 50
 }
 
 var hue = 0;
@@ -334,6 +375,7 @@ function generateSprite() {
         group.addChild(mask);
         mask.clipMask = true;
     }
+
     group.visible = false;
 }
 
@@ -375,18 +417,30 @@ function drawWord() {
 
 // Rraw sprite along a path
 function drawPath(sprite, path) {
+    var steps = path.length / ((100 - p.density)+1) * 2;
+    var wavePhase = 1;
+    var bulbscale = 1 + bulbPhase;
+    // bulbPhase += 0.05;
+    var bulbadd = p.bulbFreq * path.length/steps;
+    var twistadd = p.twist * path.length/steps;
+    var waveadd = p.waveFreq * path.length/steps;
+    
+    for (k=0; k<steps; k++) {
 
-    var step = path.length / p.density;
-    var scale = 1;
-    for (k=0; k<p.density; k++) {
-        
         var sCopy = sprite.clone();    
         drawing.addChild(sCopy);
         sCopy.visible = true;
-        var cPos = path.getLocationAt(path.length - (path.length - k*step)); 
-        sCopy.position.x = cPos.point.x;
-        sCopy.position.y = cPos.point.y;
 
+        var cPos = path.getLocationAt(path.length - (k*(path.length/steps))); 
+
+        // Bulb effect
+        if (p.bgEffect == 1) {
+            sCopy.scale(sinBetween(1, p.bulbAmp/20, bulbscale));
+            bulbscale += bulbadd/1000;     
+        }
+        
+        sCopy.position = cPos.point;
+        
         //Unicorn Background style
         if (p.bgStyle == 1) {
             sCopy.children[0].fillColor.hue += hue;
@@ -401,26 +455,26 @@ function drawPath(sprite, path) {
             }     
             hue += .1;   
         }   
-        if (p.bgEffect == 1) {
-            sCopy.scale(sinBetween(1, p.waveAmp, scale)/10);
-            scale += p.waveFreq/100;  
-        }
+       
+        
 
+        //Wavy line effect
         if (p.lineStyle == 6) {
             
             var thisLines = sCopy.children['lines 1'].children;
             for (i=0; i<thisLines.length; i++) {
                 if (thisLines[i].data.direction == 'vert') {
-                    thisLines[i].scale(1, sinBetween(1, p.waveAmp, scale));
+                    thisLines[i].scale(1, sinBetween(1, p.waveAmp, wavePhase));
                 }
                 if (thisLines[i].data.direction == 'horiz') {
-                    thisLines[i].scale(sinBetween(1, p.waveAmp, scale), 1);
+                    thisLines[i].scale(sinBetween(1, p.waveAmp, wavePhase), 1);
                 }
             }
-            scale += p.waveFreq/100;     
+            wavePhase += waveadd/100;     
         }
 
-        sCopy.rotation = p.rotation + k*p.twist/100;
+        //Rotation + twist
+        sCopy.rotation = p.rotation + k*twistadd/250;
     }
 
     //Cap styles
@@ -430,7 +484,8 @@ function drawPath(sprite, path) {
             size: [p.size, p.size],
             fillColor: p.bgColor
         })
-        cap.rotation = p.rotation + k*p.twist/100;
+       
+        cap.rotation = p.rotation + k* p.twist * path.length/steps;
         drawing.addChild(cap);
     }
 

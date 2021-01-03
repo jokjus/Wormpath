@@ -23,10 +23,10 @@ html
     button#export-button Export SVG
     button#log-params Log params
 
-    #rangeholder
+    #ui-row
       +input('color', 'Bg color', 'drawingBgColor')
       +input('range', 'Scale:', 'drawingSize', 0, 20)
-      +input('range', 'Density:', 'density', 0, 500)
+      +input('range', 'Density:', 'density', 0, 100)
       +input('range', 'Brush size:', 'size', 0, 400)
       +input('range', 'Rotation:', 'rotation', 0, 360)
       +input('color', 'Brush Bg', 'bgColor')
@@ -42,7 +42,8 @@ html
         select#bgEffect
           option(value='0' selected='') None
           option(value='1') Bulp          
-
+      +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
+      +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
       
       +input('range', 'Lines:', 'lines', 0, 30)(class='section')
       +input('range', 'Width:', 'lineWidth', 0, 40)
@@ -83,6 +84,7 @@ html
           option(value='2') Golden wave
           option(value='3') Blue ocean
           option(value='4') Green lantern
+          option(value='5') Orange twist
 
     #animation-controls
       div

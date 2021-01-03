@@ -26,7 +26,7 @@ canvas[resize] {
 	right: 100px;
 }
 
-#rangeholder {
+#ui-row {
 	background-color: #eee;
 	position: absolute;
 	top: 0px;
@@ -38,18 +38,18 @@ canvas[resize] {
 	border-top: 1px solid #ddd;
 }
 
-#rangeholder div {
+#ui-row div {
 	max-width: 80px;
 	padding: 10px 7px;
 	flex-grow: 1;
 	border-right: 1px solid #ddd;
 }
 
-#rangeholder div.section {
+#ui-row div.section {
 	border-left: 4px solid #bbb;}
 
-#rangeholder div input,
-#rangeholder div select {
+#ui-row div input,
+#ui-row div select {
 	max-width: 70px;
 	font-size: 10px;
 }
