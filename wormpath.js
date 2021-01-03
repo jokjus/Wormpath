@@ -74,6 +74,62 @@ var presets = [
 ];
 // Initialize main variables
 
+var rotStepVal, ampStepVal
+// Create a capturer that exports a WebM video
+var capturer = new CCapture( { 
+    format: 'webm',
+    framerate: 25,
+    quality: 95,
+    verbose: true } );  
+
+var startCaptureBtn = document.getElementById( 'start-capture' ),
+    stopCaptureBtn = document.getElementById( 'stop-capture' ),
+    startAnimationBtn = document.getElementById( 'start-animation' )
+
+    startAnimationBtn.addEventListener( 'click', function( e ) {
+        rotStepVal = parseInt(document.getElementById('aRotation').value);
+        ampStepVal = parseInt(document.getElementById('aWaveAmp').value);
+        animate();
+    }, false );
+
+startCaptureBtn.addEventListener( 'click', function( e ) {
+
+       
+
+    capturer.start();
+    this.style.display = 'none';
+    stopCaptureBtn.style.display = 'block';
+    e.preventDefault();
+}, false );
+
+stopCaptureBtn.addEventListener( 'click', function( e ) {
+    capturer.stop();
+    this.style.display = 'none';
+    capturer.save();
+}, false );
+
+function animate() {
+    requestAnimationFrame( animate );
+    render();
+}
+
+function render() {
+
+    // setTimeout(function() {
+        var rotStep = p.rotation + rotStepVal;
+        var ampStep = p.waveAmp + ampStepVal/100;
+
+        updateAnim({
+            waveAmp:ampStep,
+            rotation:rotStep
+        });
+        centerLayers();
+    // }, 500)
+    if( capturer ) capturer.capture( canvas );
+
+    // lastTime = currentTime;
+}
+
 // window.onload = function() {
 project.activeLayer.position = view.center;
 
@@ -373,6 +429,18 @@ function updateParams() {
     drawWord();
 }
 
+function updateAnim(val) {
+    // showProgress();
+
+    setTimeout(function(){ 
+        delete val.name;
+        updateParams(val);
+        centerLayers();
+        // hideProgress();
+        // drawingBg.sendToBack();
+     }, 50);
+    
+}
 
 function updateFromUI(val) {
     showProgress();
@@ -438,7 +506,12 @@ var animStep = document.getElementById('step-animation');
 
 animStep.onclick = function() {
     var rotStep = p.rotation + parseInt(document.getElementById('aRotation').value);
-    updateFromUI({rotation:rotStep});
+    // updateFromUI({rotation:rotStep});
+    var ampStep = p.waveAmp + parseInt(document.getElementById('aWaveAmp').value);
+    updateFromUI({
+        waveAmp:ampStep,
+        rotation:rotStep
+    });
     centerLayers();
     // setTimeout(function(){
     //     html2canvas(document.getElementById("rangeholder"), {

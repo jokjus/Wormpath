@@ -8,6 +8,7 @@
   crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://unpkg.com/acorn"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js" integrity="sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==" crossorigin="anonymous"></script>
+    <script src="CCapture.all.min.js"></script>
     <!-- <script type="text/javascript" src="html2canvas.min.js"></script> -->
     
     <script type="text/paperscript" canvas="canvas" src="wormpath.js"></script>
@@ -117,8 +118,14 @@
         <label>Rotation:</label>
         <input type="number" id="aRotation" min="0" max="360" value="0">
 
+        <label>Wave amp:</label>
+        <input type="number" id="aWaveAmp" min="0" max="100" value="0">
         <button type="button" id="step-animation">Step forward</button>
+        <button type="button" id="start-animation">Start animation</button>
+        <button type="button" id="start-capture">Start Capture</button>
+        <button type="button" id="stop-capture">Stop Capture</button>
     </div>
+    
     
 </div>
 

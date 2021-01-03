@@ -23,3 +23,12 @@
 
 ## Know issues
  Drawing disappears on resize. Just change any value to redraw.
+
+## Animation
+ Animation is in very early steps, only couple of properties are supported. 
+ 1. Enter the amount of change per frame to the bottom left corner inputs. Test with *Step forward* if you like.
+ 2. Press *Start animation*
+ 3. Press *Start Capture*
+ 4. When all frames have been generated, *Stop capture*
+
+ The animation will be downloaded as .webm video file.
