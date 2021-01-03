@@ -74,7 +74,8 @@ var presets = [
 ];
 // Initialize main variables
 
-var rotStepVal, ampStepVal
+var rotStepVal, ampStepVal, 
+    runAnimation = false
 // Create a capturer that exports a WebM video
 var capturer = new CCapture( { 
     format: 'webm',
@@ -84,21 +85,34 @@ var capturer = new CCapture( {
 
 var startCaptureBtn = document.getElementById( 'start-capture' ),
     stopCaptureBtn = document.getElementById( 'stop-capture' ),
-    startAnimationBtn = document.getElementById( 'start-animation' )
+    startAnimationBtn = document.getElementById( 'start-animation' ),
+    stopAnimationBtn = document.getElementById( 'stop-animation' )
+
+    stopAnimationBtn.style.display = 'none';
+    startCaptureBtn.style.display = 'none';
+    stopCaptureBtn.style.display = 'none';
 
     startAnimationBtn.addEventListener( 'click', function( e ) {
-        rotStepVal = parseInt(document.getElementById('aRotation').value);
-        ampStepVal = parseInt(document.getElementById('aWaveAmp').value);
+        runAnimation = true;
+        rotStepVal = parseFloat(document.getElementById('aRotation').value);
+        ampStepVal = parseFloat(document.getElementById('aWaveAmp').value);
+        this.style.display = 'none';
+        stopAnimationBtn.style.display = 'inline-block';
+        startCaptureBtn.style.display = 'inline-block';
         animate();
     }, false );
 
+    stopAnimationBtn.addEventListener( 'click', function( e ) {
+        runAnimation = false;
+        this.style.display = 'none';
+        startCaptureBtn.style.display = 'none';
+        startAnimationBtn.style.display = 'inline-block';
+    }, false );
+
 startCaptureBtn.addEventListener( 'click', function( e ) {
-
-       
-
     capturer.start();
     this.style.display = 'none';
-    stopCaptureBtn.style.display = 'block';
+    stopCaptureBtn.style.display = 'inline-block';
     e.preventDefault();
 }, false );
 
@@ -109,15 +123,17 @@ stopCaptureBtn.addEventListener( 'click', function( e ) {
 }, false );
 
 function animate() {
-    requestAnimationFrame( animate );
-    render();
+    if (runAnimation) {
+        requestAnimationFrame( animate );
+        render();
+    }
 }
 
 function render() {
 
     // setTimeout(function() {
         var rotStep = p.rotation + rotStepVal;
-        var ampStep = p.waveAmp + ampStepVal/100;
+        var ampStep = p.waveAmp + ampStepVal;
 
         updateAnim({
             waveAmp:ampStep,
@@ -419,7 +435,7 @@ function updateParams() {
             else {      
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
-                    k.innerHTML = val;
+                    k.innerHTML = Math.round((val + Number.EPSILON) * 100) / 100;
                 }
                 uiel.value = val;
             }
