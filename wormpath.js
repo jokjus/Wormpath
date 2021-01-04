@@ -502,7 +502,7 @@ var factorPhase = 0;
 function drawPath(sprite, path) {
     var steps = path.length / ((100 - p.density)+1) * 2;
     var wavePhase = 1;
-    
+    hue = 0;
     var factor = sinBetween(0.3,1.2, factorPhase);
     factorPhase += 0.1;
     // bulbPhase += 0.05;
