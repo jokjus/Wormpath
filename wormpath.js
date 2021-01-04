@@ -163,6 +163,37 @@ var presets = [
         twist: 431,
         waveAmp: 3,
         waveFreq: 10
+    },
+    {
+        name: 'Rainbow text',
+        bgColor: new Color(0, 0.8, 1),
+        bgEffect: 2,
+        bgOpacity: 12,
+        bgStyle: 1,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        cap: 2,
+        corner: 0,
+        density: 100,
+        drawingBgColor: new Color(0, 0.21569, 1),
+        drawingSize: 7,
+        fade: 50,
+        lineColor: new Color(1, 1, 1),
+        lineOpacity: 37,
+        lineStyle: 7,
+        lineWidth: 3,
+        lines: 3,
+        rotation: 20,
+        shadow: 0,
+        size: 177,
+        textColor: new Color(1, 1, 1),
+        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+        textSize: 35,
+        textSpread: 0,
+        textYPos: 0,
+        twist: 53,
+        waveAmp: 7,
+        waveFreq: 20
     }
 ];
 // Initialize main variables
