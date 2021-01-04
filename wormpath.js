@@ -174,7 +174,7 @@ var presets = [
         bulbFreq: 50,
         cap: 2,
         corner: 0,
-        density: 100,
+        density: 96,
         drawingBgColor: new Color(0, 0.21569, 1),
         drawingSize: 7,
         fade: 50,
