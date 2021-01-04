@@ -139,6 +139,30 @@ var presets = [
         twist: 0,
         waveAmp: 7,
         waveFreq: 20
+    },
+    {
+        name: 'Green Revolt',
+        bgColor: new Color(0.31765, 1, 0),
+        bgEffect: 2,
+        bgStyle: 0,
+        bulbAmp: 50,
+        bulbFreq: 34,
+        cap: 2,
+        corner: 0,
+        density: 100,
+        drawingBgColor: new Color(0.05882, 0.0549, 0.06275),
+        drawingSize: 6,
+        fade: 82,
+        lineColor: new Color(1, 1, 1),
+        lineStyle: 2,
+        lineWidth: 9,
+        lines: 9,
+        rotation: 104,
+        shadow: 61,
+        size: 73,
+        twist: 431,
+        waveAmp: 3,
+        waveFreq: 10
     }
 ];
 // Initialize main variables
@@ -232,12 +256,13 @@ drawing.name = 'drawing';
 // Set default parameters
 var p = {
     drawingBgColor: new Color(1,1,1),
-    drawingSize: 5,
+    drawingSize: 9,
     size: 100,
     lines: 3,
     lineWidth: 3,
     density: 90,
     bgColor: new Color(0.2,0.2,0.2),
+    bgOpacity: 100,
     lineStyle: 3,
     waveAmp: 7,
     waveFreq: 20,
@@ -245,13 +270,19 @@ var p = {
     cap: 2,
     twist: 0,
     lineColor: new Color(1,1,1),
+    lineOpacity: 100,
     bgStyle: 0,
     fade: 50,
     corner: 0,
-    rotation: 0,
+    rotation: 20,
     bgEffect: 0,
     bulbAmp: 15,
-    bulbFreq: 50
+    bulbFreq: 50,
+    textSize: 50,
+    textColor: new Color(1,1,1),
+    textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
+    textSpread: 0,
+    textYPos: 0
 }
 
 var hue = 0;
@@ -293,7 +324,8 @@ function generateSprite() {
     var rec = new Path.Rectangle({
         point: [0, 0],
         size: [p.size, p.size],
-        fillColor: p.bgColor
+        fillColor: p.bgColor,
+        opacity: p.bgOpacity/100
     });
 
     if (p.bgStyle == 2) {
@@ -320,23 +352,12 @@ function generateSprite() {
         name: 'sprite'
     });
 
+
     // Step for each line
     var rStep = p.size / p.lines;
 
     //Build lines
     for (x = 1; x<p.lines; x++ ) {
-        var lineColor = p.lineColor;
-
-
-        if (p.lineStyle == 1) { 
-            lineColor = 'white' 
-        } 
-
-        if (p.lineStyle == 2) { 
-            lineColor = 'black' 
-        } 
-      
-
 
         var thisOpacity = 1- ((x * (p.fade / p.lines)) / 100);
 
@@ -345,10 +366,10 @@ function generateSprite() {
             var l = new Path.Rectangle({
                 point: [rStep*x-p.lineWidth/2, 0],
                 size: [p.lineWidth, p.size],
-                fillColor: lineColor
+                fillColor: p.lineColor
             })
             
-            l.opacity = thisOpacity;  
+            l.opacity = thisOpacity - (1-p.lineOpacity/100);  
             l.data.direction = 'horiz';
             lines.addChild(l); //add line to main group
         }
@@ -358,13 +379,35 @@ function generateSprite() {
             var l2 = new Path.Rectangle({
                 point: [0, rStep*x-p.lineWidth/2],
                 size: [p.size, p.lineWidth],
-                fillColor: lineColor        
+                fillColor: p.lineColor,
+                opacity: p.lineOpacity/100
             });
 
-            l2.opacity = thisOpacity;
+            l2.opacity = thisOpacity - (1-p.lineOpacity/100);
             l2.data.direction = 'vert';
             lines.addChild(l2); //add line to main group 
         }
+    }
+ 
+
+    // Text effect
+    if (p.lineStyle == 7) {
+        
+        var text = new PointText(new Point(p.size, p.size-10-(p.size/100*p.textYPos)));
+        var textMask = new Path.Rectangle(new Point(p.size-5, 0), new Size(5, p.size));
+        text.content = document.getElementById('textContent').value;
+        text.fillColor = p.textColor;
+        text.fontSize = p.size * p.textSize/50;
+        text.fontFamily = "Germania One";
+        text.justification = 'right';
+
+        var textContainer = new Group({
+            name: 'textContainer',
+            children: [text, textMask]
+        })
+
+        textMask.clipMask = true;
+        group.addChild(textContainer);        
     }
 
     // Corner radius with clipping mask
@@ -372,6 +415,14 @@ function generateSprite() {
         var rectangle = new Rectangle(new Point(0, 0), new Size(p.size, p.size));
         var cornerSize = new Size(p.corner,p.corner);
         var mask = new Path.Rectangle(rectangle, cornerSize);
+        group.addChild(mask);
+        mask.clipMask = true;
+    }
+
+    if (p.bgEffect == 2) {
+        var rectangleOut = new Path.Rectangle(new Point(0, 0), new Size(p.size, p.size));
+        var rectangleIn = new Path.Rectangle(new Point(5, -5), new Size(p.size-10, p.size+10));
+        var mask = rectangleOut['subtract'](rectangleIn);
         group.addChild(mask);
         mask.clipMask = true;
     }
@@ -415,15 +466,22 @@ function drawWord() {
     
 }
 
+var factorPhase = 0;
 // Rraw sprite along a path
 function drawPath(sprite, path) {
     var steps = path.length / ((100 - p.density)+1) * 2;
     var wavePhase = 1;
-    var bulbscale = 1 + bulbPhase;
+    
+    var factor = sinBetween(0.3,1.2, factorPhase);
+    factorPhase += 0.1;
     // bulbPhase += 0.05;
-    var bulbadd = p.bulbFreq * path.length/steps;
+    var bulbscale = 1;
+    var bulbSizeChange = p.bulbAmp/20 * factor;
+    var bulbadd = p.bulbFreq * path.length/steps ;
     var twistadd = p.twist * path.length/steps;
     var waveadd = p.waveFreq * path.length/steps;
+    var textadd = path.length/steps - path.length/steps * (p.textSpread/100)
+    var textPos = 0;
     
     for (k=0; k<steps; k++) {
 
@@ -435,7 +493,7 @@ function drawPath(sprite, path) {
 
         // Bulb effect
         if (p.bgEffect == 1) {
-            sCopy.scale(sinBetween(1, p.bulbAmp/20, bulbscale));
+            sCopy.scale(sinBetween(1, bulbSizeChange, bulbscale));
             bulbscale += bulbadd/1000;     
         }
         
@@ -456,6 +514,12 @@ function drawPath(sprite, path) {
             hue += .1;   
         }   
        
+        // Text line style
+        if (p.lineStyle == 7) {
+            var text = sCopy.children['textContainer 1'].children[0];
+            text.position.x += textPos;
+            textPos += textadd;
+        }
         
 
         //Wavy line effect
@@ -470,7 +534,7 @@ function drawPath(sprite, path) {
                     thisLines[i].scale(sinBetween(1, p.waveAmp, wavePhase), 1);
                 }
             }
-            wavePhase += waveadd/100;     
+            wavePhase += waveadd/70;     
         }
 
         //Rotation + twist
@@ -518,18 +582,22 @@ function updateParams() {
 
         for (key in arg) {    
             var val = arg[key];
-            eval("p." + key + " = " + val);
+            if (key == 'textContent') {
+                p.textContent = val;
+            }
+            else {
+                eval("p." + key + " = " + val);
+            }
             var uiel = document.getElementById(key);
             if(val.components) {
                 uiel.value = rgb2hex(val);
             }
-            else {      
+            else {    
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
-                    // console.log(key + ' - ' + Math.round((val + Number.EPSILON) * 100) / 100 + ' - ' + val);
-                    // k.innerHTML = Math.round((val + Number.EPSILON) * 100) / 100;
                     k.innerHTML = val;
                 }
+                
                 uiel.value = val;
             }
         }
@@ -597,7 +665,7 @@ function buildUIparam(param) {
 
     paramUIElement.oninput = function() {
         var valel = document.getElementById(param + 'Val');
-        if (paramUIElement.type != "color" && paramUIElement.nodeName != "SELECT") {
+        if (paramUIElement.type != "color" && paramUIElement.nodeName != "SELECT" && paramUIElement.type != "text") {
             valel.innerHTML = this.value;
         }
     }
@@ -716,3 +784,22 @@ $('#export-button').click(function() {
 $('#log-params').click(function() {
     console.log(p);
 });
+
+$('#lineStyle').change(function() {
+    $(this).parent().find('.collapseui').hide();
+    if(this.value == 6) {
+        $('#wavecollapsible').show();
+    }
+    if(this.value == 7) {
+        $('#textcollapsible').show();
+    }
+
+});
+
+$('#bgEffect').change(function() {
+    $(this).parent().find('.collapseui').hide();
+    if(this.value == 1) {
+        $('#bulbcollapsible').show();
+    }   
+});
+

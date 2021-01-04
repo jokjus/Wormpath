@@ -38,11 +38,12 @@ canvas[resize] {
 	border-top: 1px solid #ddd;
 }
 
-#ui-row div {
+#ui-row > div {
 	max-width: 80px;
 	padding: 10px 7px;
 	flex-grow: 1;
 	border-right: 1px solid #ddd;
+	position: relative;
 }
 
 #ui-row div.section {
@@ -74,4 +75,20 @@ canvas[resize] {
 	bottom: 0;
 	left: 0;
 	padding: 10px;	
+}
+
+.collapseui {	
+	position: absolute;
+	top:60px;
+	display: flex;
+	background-color: #eee;
+}
+
+.collapseui div {
+	padding: 5px;
+	border-right: 1px solid #ddd;
+}
+
+input[type='text'] {
+	overflow: hidden;
 }

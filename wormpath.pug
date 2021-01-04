@@ -30,6 +30,7 @@ html
       +input('range', 'Brush size:', 'size', 0, 400)
       +input('range', 'Rotation:', 'rotation', 0, 360)
       +input('color', 'Brush Bg', 'bgColor')
+      +input('range', 'Brush opacity', 'bgOpacity', 0, 100)
 
       div
         label Brush color style:
@@ -41,13 +42,16 @@ html
         label Brush effect:
         select#bgEffect
           option(value='0' selected='') None
-          option(value='1') Bulp          
-      +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
-      +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
+          option(value='1') Bulp    
+          option(value="2") Hollow
+        div.collapseui#bulbcollapsible(style='display:none')
+            +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
+            +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
       
       +input('range', 'Lines:', 'lines', 0, 30)(class='section')
       +input('range', 'Width:', 'lineWidth', 0, 40)
       +input('color', 'Line color', 'lineColor')
+      +input('range', 'Line opacity', 'lineOpacity', 0, 100)
         
       div
         label Style:
@@ -59,9 +63,17 @@ html
           option(value='4') Vertical
           option(value='5') Horizontal
           option(value='6') Wavy
+          option(value='7') Text
+        div.collapseui#wavecollapsible(style='display:none')
+            +input('range', 'Wave amp:', 'waveAmp', 0, 50)
+            +input('range', 'Wave freq:', 'waveFreq', 0, 100)
 
-      +input('range', 'Wave amp:', 'waveAmp', 0, 50)
-      +input('range', 'Wave freq:', 'waveFreq', 0, 100)
+        div.collapseui#textcollapsible(style='display:none')
+            +input('text', 'Text', 'textContent')
+            +input('color', 'Text color', 'textColor')
+            +input('range', 'Text size:', 'textSize', 0, 100)
+            +input('range', 'Text spread:', 'textSpread', 0, 100)
+            +input('range', 'Text pos:', 'textYPos', 0, 100)
       +input('range', 'Fade:', 'fade', 0, 100)
       +input('range', 'Shadow:', 'shadow', 0, 100)
 
@@ -85,6 +97,7 @@ html
           option(value='3') Blue ocean
           option(value='4') Green lantern
           option(value='5') Orange twist
+          option(value='6') Green revolt
 
     #animation-controls
       div
