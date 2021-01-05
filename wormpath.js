@@ -3,23 +3,34 @@
 var presets = [
     {
         name: 'Default',
+        drawingBgColor: new Color(1,1,1),
+        drawingSize: 9,
         size: 100,
-        bgEffect: 0,
         lines: 3,
         lineWidth: 3,
-        density: 50,
+        density: 90,
         bgColor: new Color(0.2,0.2,0.2),
+        bgOpacity: 100,
         lineStyle: 3,
+        waveAmp: 7,
+        waveFreq: 20,
         shadow: 20,
         cap: 2,
         twist: 0,
         lineColor: new Color(1,1,1),
+        lineOpacity: 100,
         bgStyle: 0,
         fade: 50,
         corner: 0,
         rotation: 20,
+        bgEffect: 0,
         bulbAmp: 15,
-        bulbFreq: 50     
+        bulbFreq: 50,
+        textSize: 50,
+        textColor: new Color(1,1,1),
+        textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
+        textSpread: 0,
+        textYPos: 0  
     },
     {
         name: 'Black white',
@@ -31,6 +42,7 @@ var presets = [
         density: 96,
         fade: 0,
         lineColor: hex2rgb("#000000"),
+        lineOpacity: 100,
         lineStyle: 3,
         lineWidth: 3,
         lines: 16,
@@ -41,6 +53,7 @@ var presets = [
         bulbAmp: 15,
         bulbFreq: 50,
         drawingBgColor: hex2rgb("#ffffff"),
+        bgOpacity: 100
     },
     {
         name: 'Golden wave',
@@ -65,7 +78,8 @@ var presets = [
         waveFreq: 9,
         bulbAmp: 15,
         bulbFreq: 50,
-        drawingBgColor: new Color(0.89804,0.82745, 0.76078)
+        drawingBgColor: new Color(0.89804,0.82745, 0.76078),
+        bgOpacity: 100
     },
     {
         name: 'Blue ocean',
@@ -78,6 +92,7 @@ var presets = [
         density: 99,
         fade: 100,
         lineColor: hex2rgb("#004B4D"),
+        lineOpacity: 100,
         lineStyle: 6,
         lineWidth: 6,
         lines: 9,
@@ -88,7 +103,8 @@ var presets = [
         waveAmp: 3,
         waveFreq: 9,
         bulbAmp: 15,
-        bulbFreq: 50
+        bulbFreq: 50,
+        bgOpacity: 100
     },
 
     {
@@ -103,6 +119,7 @@ var presets = [
         drawingSize: 8,
         fade: 49,
         lineColor:  new Color(0.06667, 1, 0),
+        lineOpacity: 100,
         lineStyle: 3,
         lineWidth: 12,
         lines: 3,
@@ -113,7 +130,8 @@ var presets = [
         waveAmp: 3,
         waveFreq: 9,
         bulbAmp: 11,
-        bulbFreq: 77
+        bulbFreq: 77,
+        bgOpacity: 100
     },
 
     {
@@ -130,6 +148,7 @@ var presets = [
         drawingSize: 7,
         fade: 76,
         lineColor: new Color(1,1,1),
+        lineOpacity: 100,
         lineStyle: 6,
         lineWidth: 3,
         lines: 3,
@@ -138,7 +157,8 @@ var presets = [
         size: 100,
         twist: 0,
         waveAmp: 7,
-        waveFreq: 20
+        waveFreq: 20,
+        bgOpacity: 100
     },
     {
         name: 'Green Revolt',
@@ -154,6 +174,7 @@ var presets = [
         drawingSize: 6,
         fade: 82,
         lineColor: new Color(1, 1, 1),
+        lineOpacity: 100,
         lineStyle: 2,
         lineWidth: 9,
         lines: 9,
@@ -162,7 +183,8 @@ var presets = [
         size: 73,
         twist: 431,
         waveAmp: 3,
-        waveFreq: 10
+        waveFreq: 10,
+        bgOpacity: 100
     },
     {
         name: 'Rainbow text',
@@ -311,9 +333,12 @@ var p = {
     bulbFreq: 50,
     textSize: 50,
     textColor: new Color(1,1,1),
+    textBorderColor: new Color(1,1,1),
+    textBorderWidth: 0,
     textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
     textSpread: 0,
-    textYPos: 0
+    textYPos: 0,
+    wedge: 50
 }
 
 var hue = 0;
@@ -431,6 +456,8 @@ function generateSprite() {
         text.fontSize = p.size * p.textSize/50;
         text.fontFamily = "Germania One";
         text.justification = 'right';
+        text.strokeWidth = p.textBorderWidth;
+        text.strokeColor = p.textBorderColor;
 
         var textContainer = new Group({
             name: 'textContainer',
@@ -498,7 +525,7 @@ function drawWord() {
 }
 
 var factorPhase = 0;
-// Rraw sprite along a path
+// Draw sprite along a path
 function drawPath(sprite, path) {
     var steps = path.length / ((100 - p.density)+1) * 2;
     var wavePhase = 1;
@@ -521,6 +548,21 @@ function drawPath(sprite, path) {
         sCopy.visible = true;
 
         var cPos = path.getLocationAt(path.length - (k*(path.length/steps))); 
+
+        // Wedge effect
+        if (p.wedge != 50) {
+            if (p.wedge <= 50) {
+                var scaleWeight = k / steps;  
+                var wedgeval = (50 - p.wedge) / 50;
+            }
+            if (p.wedge > 50) {
+                var scaleWeight = 1 - k / steps;  
+                var wedgeval = (p.wedge - 50) / 50;
+            }
+            var wedgeScale = 1 - wedgeval * scaleWeight;
+           
+            sCopy.scale(wedgeScale);    
+        }
 
         // Bulb effect
         if (p.bgEffect == 1) {
@@ -834,3 +876,10 @@ $('#bgEffect').change(function() {
     }   
 });
 
+$('.ui-section-label').click(function(){
+    $(this).parent().find('.ui-control').toggle();
+});
+
+$('#wedgeVal').click(function(){
+    updateFromUI({wedge:50});
+});

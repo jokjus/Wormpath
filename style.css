@@ -30,20 +30,51 @@ canvas[resize] {
 	background-color: #eee;
 	position: absolute;
 	top: 0px;
-	left: 10px;
+	left: 0px;
 	z-index: 100;
 	display: flex;
 	width: 100vw;
 	border-bottom: 1px solid #ddd;
 	border-top: 1px solid #ddd;
+	height: 60px;
 }
 
-#ui-row > div {
+.ui-section {
+	display: flex;
+}
+
+.ui-section > .ui-control {
+	padding: 10px 7px;
+	flex-grow: 1;
+	border-right: 1px solid #ddd;
+	position: relative;
+}
+
+.ui-section-label {
+	background-color: #ddd;
+}
+
+.ui-section-label:hover {
+	cursor: pointer;
+}
+
+.ui-section-label span{
+	display: block;
+	transform: rotate(-90deg) translateX(-23px);
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+#ui-row > .ui-control {
 	max-width: 80px;
 	padding: 10px 7px;
 	flex-grow: 1;
 	border-right: 1px solid #ddd;
 	position: relative;
+}
+
+.ui-control label {
+	display: block;
 }
 
 #ui-row div.section {
@@ -89,6 +120,6 @@ canvas[resize] {
 	border-right: 1px solid #ddd;
 }
 
-input[type='text'] {
-	overflow: hidden;
+#extras-section .ui-control, #lines-section .ui-control {
+	display: none;
 }
