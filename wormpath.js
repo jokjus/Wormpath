@@ -241,7 +241,7 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
     startAnimationBtn.addEventListener( 'click', function( e ) {
         runAnimation = true;
         rotStepVal = parseFloat(document.getElementById('aRotation').value);
-        ampStepVal = parseFloat(document.getElementById('aWaveAmp').value);
+        // ampStepVal = parseFloat(document.getElementById('aWaveAmp').value);
         this.style.display = 'none';
         stopAnimationBtn.style.display = 'inline-block';
         startCaptureBtn.style.display = 'inline-block';
@@ -279,11 +279,11 @@ function render() {
 
     // setTimeout(function() {
         var rotStep = p.rotation + rotStepVal;
-        var ampStep = p.waveAmp + ampStepVal;
+        // var ampStep = p.waveAmp + ampStepVal;
         
 
         updateAnim({
-            waveAmp:ampStep,
+            // waveAmp:ampStep,
             rotation:rotStep
         });
         centerLayers();
