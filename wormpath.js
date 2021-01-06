@@ -282,6 +282,7 @@ var presets = [
         textSize: 37,
         textSpread: 8,
         textYPos: 21,
+        textBump: 5,
         twist: 0,
         waveAmp: 7,
         waveFreq: 20,
@@ -296,8 +297,8 @@ var rotStepVal, ampStepVal,
 // Create a capturer that exports a WebM video
 var capturer = new CCapture( { 
     format: 'webm',
-    framerate: 25,
-    quality: 95,
+    framerate: 60,
+    quality: 100,
     verbose: true } );  
 
 var startCaptureBtn = document.getElementById( 'start-capture' ),
@@ -411,6 +412,7 @@ var p = {
     textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
     textSpread: 0,
     textYPos: 0,
+    textBump: 0,
     wedge: 50,
     spikeAmp: 10,
     spikeFreq: 10
@@ -524,8 +526,8 @@ function generateSprite() {
     // Text effect
     if (p.lineStyle == 7) {
         
-        var text = new PointText(new Point(p.size, p.size-10-(p.size/100*p.textYPos)));
-        var textMask = new Path.Rectangle(new Point(p.size-5, 0), new Size(5, p.size));
+        var text = new PointText(new Point(p.size, p.size-20-(p.size/100*p.textYPos)));
+        var textMask = new Path.Rectangle(new Point(p.size-10, 0), new Size(10, p.size));
         text.content = document.getElementById('textContent').value;
         text.fillColor = p.textColor;
         text.fontSize = p.size * p.textSize/50;
@@ -687,8 +689,11 @@ function drawPath(sprite, path) {
        
         // Text line style
         if (p.lineStyle == 7) {
+            var textContainer = sCopy.children['textContainer 1'];
             var text = sCopy.children['textContainer 1'].children[0];
             text.position.x += textPos;
+            textContainer.position.x += p.textBump
+            // console.log(textContainer);
             textPos += textadd;
         }
         
