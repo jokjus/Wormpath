@@ -38,6 +38,8 @@ html
                 option(value='5') Orange twist
                 option(value='6') Green revolt
                 option(value='7') Rainbow text
+                option(value='8') Cream
+                option(value='9') NASA
         +input('color', 'Bg color', 'drawingBgColor')
         +input('range', 'Scale:', 'drawingSize', 0, 20)
         +input('range', 'Density:', 'density', 0, 100)
@@ -82,6 +84,7 @@ html
                 option(value='5') Horizontal
                 option(value='6') Wavy
                 option(value='7') Text
+                option(value='8') Spikes
             div.collapseui#wavecollapsible(style='display:none')
                 +input('range', 'Wave amp:', 'waveAmp', 0, 50)
                 +input('range', 'Wave freq:', 'waveFreq', 0, 100)
@@ -94,6 +97,10 @@ html
                 +input('range', 'Text size:', 'textSize', 0, 100)
                 +input('range', 'Text spread:', 'textSpread', 0, 100)
                 +input('range', 'Text pos:', 'textYPos', 0, 100)
+
+            div.collapseui#spikecollapsible(style='display:none')
+                +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
+                +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
         +input('range', 'Fade:', 'fade', 0, 100)
       div.ui-section#extras-section
         .ui-section-label.section 
@@ -109,7 +116,7 @@ html
                 option(value='3') Vertical
 
         +input('range', 'Twist:', 'twist', 0, 500)
-        +input('range', 'Radius:', 'corner', 0, 200)
+        +input('range', 'Roundness:', 'corner', 0, 200)
         +input('range', 'Wedge:', 'wedge', 0, 100)
 
        

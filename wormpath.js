@@ -216,7 +216,78 @@ var presets = [
         twist: 53,
         waveAmp: 7,
         waveFreq: 20
+    },
+    {
+        name: 'Cream',
+        bgColor: new Color(0.95294, 0.5098, 0.78824),
+        bgEffect: 0,
+        bgOpacity: 7,
+        bgStyle: 0,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        cap: 2,
+        corner: 111,
+        density: 97,
+        drawingBgColor: new Color( 1, 0.94118, 0.97647),
+        drawingSize: 6,
+        fade: 78,
+        lineColor: new Color(1, 0.94118, 0.98039),
+        lineOpacity: 100,
+        lineStyle: 3,
+        lineWidth: 2,
+        lines: 8,
+        rotation: 43,
+        shadow: 0,
+        size: 130,
+        textBorderColor: new Color( 1, 1,1),
+        textBorderWidth: 0,
+        textColor: new Color(1, 1,1),
+        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+        textSize: 50,
+        textSpread: 0,
+        textYPos: 0,
+        twist: 0,
+        waveAmp: 7,
+        waveFreq: 20,
+        wedge: 8
+    },
+    {
+        name:'Nasa',
+        bgColor: new Color(0.78039, 0, 0.11765),
+        bgEffect: 0,
+        bgOpacity: 100,
+        bgStyle: 0,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        cap: 2,
+        corner: 27,
+        density: 98,
+        drawingBgColor: new Color(0.02745, 0.16471, 0.57255),
+        drawingSize: 9,
+        fade: 50,
+        lineColor: new Color(1, 1, 1),
+        lineOpacity: 48,
+        lineStyle: 7,
+        lineWidth: 3,
+        lines: 11,
+        rotation: 461,
+        shadow: 38,
+        size: 100,
+        spikeAmp: 10,
+        spikeFreq: 10,
+        textBorderColor: new Color(1, 1, 1),
+        textBorderWidth: 2,
+        textColor: new Color(0.78039, 0, 0.11765),
+        textContent: "That’s one small step for man, one giant leap for mankind.",
+        textSize: 37,
+        textSpread: 8,
+        textYPos: 21,
+        twist: 0,
+        waveAmp: 7,
+        waveFreq: 20,
+        wedge: 50,
     }
+
 ];
 // Initialize main variables
 var bulbPhase = 0;
@@ -279,12 +350,14 @@ function render() {
 
     // setTimeout(function() {
         var rotStep = p.rotation + rotStepVal;
+        // var wedgenew = sinBetween(5, 95, p.rotation /50);
         // var ampStep = p.waveAmp + ampStepVal;
         
 
         updateAnim({
             // waveAmp:ampStep,
             rotation:rotStep
+            // wedge: wedgenew
         });
         centerLayers();
     // }, 500)
@@ -338,7 +411,9 @@ var p = {
     textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
     textSpread: 0,
     textYPos: 0,
-    wedge: 50
+    wedge: 50,
+    spikeAmp: 10,
+    spikeFreq: 10
 }
 
 var hue = 0;
@@ -454,7 +529,7 @@ function generateSprite() {
         text.content = document.getElementById('textContent').value;
         text.fillColor = p.textColor;
         text.fontSize = p.size * p.textSize/50;
-        text.fontFamily = "Germania One";
+        text.fontFamily = "Helvetica Neue";
         text.justification = 'right';
         text.strokeWidth = p.textBorderWidth;
         text.strokeColor = p.textBorderColor;
@@ -540,6 +615,7 @@ function drawPath(sprite, path) {
     var waveadd = p.waveFreq * path.length/steps;
     var textadd = path.length/steps - path.length/steps * (p.textSpread/100)
     var textPos = 0;
+    var spikeCounter = 0;
     
     for (k=0; k<steps; k++) {
 
@@ -562,6 +638,28 @@ function drawPath(sprite, path) {
             var wedgeScale = 1 - wedgeval * scaleWeight;
            
             sCopy.scale(wedgeScale);    
+        }
+
+        // Spike effect 
+        if (p.lineStyle == 8) {
+            if (spikeCounter < p.spikeFreq * path.length/steps) {
+
+                var thisLines = sCopy.children['lines 1'].children;
+
+                for (i=0; i<thisLines.length; i++) {
+                    if (thisLines[i].data.direction == 'vert') {
+                        thisLines[i].scale(1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq, 1);
+                    }
+                    if (thisLines[i].data.direction == 'horiz') {
+                        thisLines[i].scale(1, 1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq);
+                    }
+                }   
+
+                spikeCounter++;
+            }
+            else {
+                spikeCounter = 0;
+            }
         }
 
         // Bulb effect
@@ -663,6 +761,7 @@ function updateParams() {
             }
             var uiel = document.getElementById(key);
             if(val.components) {
+                console.log(key + ' - ' + val);
                 uiel.value = rgb2hex(val);
             }
             else {    
@@ -865,6 +964,9 @@ $('#lineStyle').change(function() {
     }
     if(this.value == 7) {
         $('#textcollapsible').show();
+    }
+    if(this.value == 8) {
+        $('#spikecollapsible').show();
     }
 
 });
