@@ -292,7 +292,7 @@ var presets = [
 ];
 // Initialize main variables
 var bulbPhase = 0;
-var rotStepVal, ampStepVal, 
+var rotStepVal, ampStepVal, brushSizeMin, brushSizeMax,
     runAnimation = false
 // Create a capturer that exports a WebM video
 var capturer = new CCapture( { 
@@ -313,6 +313,8 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
     startAnimationBtn.addEventListener( 'click', function( e ) {
         runAnimation = true;
         rotStepVal = parseFloat(document.getElementById('aRotation').value);
+        brushSizeMin = parseFloat(document.getElementById('aBrushSizeMin').value);
+        brushSizeMax = parseFloat(document.getElementById('aBrushSizeMax').value);
         // ampStepVal = parseFloat(document.getElementById('aWaveAmp').value);
         this.style.display = 'none';
         stopAnimationBtn.style.display = 'inline-block';
@@ -350,15 +352,20 @@ function animate() {
 function render() {
 
     // setTimeout(function() {
-        var rotStep = p.rotation + rotStepVal;
-        // var wedgenew = sinBetween(5, 95, p.rotation /50);
+        var rotStep = parseFloat(p.rotation + rotStepVal);
+        
+        var wedgenew = sinBetween(5, 95, p.rotation /50);
+        var brushSizeNew = sinBetween(brushSizeMin, brushSizeMax, p.rotation /50);
+        // var twistnew = sinBetween(0, 200, -1 * p.rotation /50);
         // var ampStep = p.waveAmp + ampStepVal;
         
 
         updateAnim({
             // waveAmp:ampStep,
-            rotation:rotStep
-            // wedge: wedgenew
+            rotation:rotStep,
+            // wedge: wedgenew,
+            // twist: twistnew
+            size: brushSizeNew
         });
         centerLayers();
     // }, 500)
@@ -383,12 +390,12 @@ drawing.name = 'drawing';
 // Set default parameters
 var p = {
     drawingBgColor: new Color(1,1,1),
-    drawingSize: 9,
+    drawingSize: 7,
     size: 100,
     lines: 3,
     lineWidth: 3,
     density: 90,
-    bgColor: new Color(0.2,0.2,0.2),
+    bgColor: new Color(0.78039, 0, 0.11765),
     bgOpacity: 100,
     lineStyle: 3,
     waveAmp: 7,
@@ -415,7 +422,12 @@ var p = {
     textBump: 0,
     wedge: 50,
     spikeAmp: 10,
-    spikeFreq: 10
+    spikeFreq: 10,
+    stitchOn: 0,
+    stitchContent: '[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]',
+    stitchColor1:  new Color(0.78039, 0, 0.11765),
+    stitchColor2: new Color(1,1,1),
+    stitchFreq: 5
 }
 
 var hue = 0;
@@ -545,6 +557,8 @@ function generateSprite() {
         group.addChild(textContainer);        
     }
 
+   
+
     // Corner radius with clipping mask
     if (p.corner != 0) {
         var rectangle = new Rectangle(new Point(0, 0), new Size(p.size, p.size));
@@ -618,6 +632,11 @@ function drawPath(sprite, path) {
     var textadd = path.length/steps - path.length/steps * (p.textSpread/100)
     var textPos = 0;
     var spikeCounter = 0;
+    var stitchCounter = 0;
+    var stitchFreqCounter = 0;
+    var stitchFreq = p.stitchFreq * steps/path.length;
+    // console.log(stitchFreq);
+    // console.log(path.length/steps);
     
     for (k=0; k<steps; k++) {
 
@@ -627,27 +646,13 @@ function drawPath(sprite, path) {
 
         var cPos = path.getLocationAt(path.length - (k*(path.length/steps))); 
 
-        // Wedge effect
-        if (p.wedge != 50) {
-            if (p.wedge <= 50) {
-                var scaleWeight = k / steps;  
-                var wedgeval = (50 - p.wedge) / 50;
-            }
-            if (p.wedge > 50) {
-                var scaleWeight = 1 - k / steps;  
-                var wedgeval = (p.wedge - 50) / 50;
-            }
-            var wedgeScale = 1 - wedgeval * scaleWeight;
-           
-            sCopy.scale(wedgeScale);    
-        }
-
+        
         // Spike effect 
         if (p.lineStyle == 8) {
             if (spikeCounter < p.spikeFreq * path.length/steps) {
-
+                
                 var thisLines = sCopy.children['lines 1'].children;
-
+                
                 for (i=0; i<thisLines.length; i++) {
                     if (thisLines[i].data.direction == 'vert') {
                         thisLines[i].scale(1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq, 1);
@@ -656,14 +661,44 @@ function drawPath(sprite, path) {
                         thisLines[i].scale(1, 1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq);
                     }
                 }   
-
+                
                 spikeCounter++;
             }
             else {
                 spikeCounter = 0;
             }
         }
-
+        
+        // Stitch effect 
+        if (p.stitchOn == 1) {
+            var stitchContent = eval(p.stitchContent);
+            var sNo = stitchContent[0].length;  // how many squares
+            var sPatLength = stitchContent.length; // how long pattern
+            var stitchColors = [];
+            stitchColors.push(p.stitchColor1)
+            stitchColors.push(p.stitchColor2)
+            
+            var stitchContainer = new Group({   // group for a line 
+                name: 'stitchContainer2'
+            })
+            
+            for (i=0; i<sNo; i++) {
+                var sRecPoint = new Point(i * (p.size / sNo), 0);
+                var sRecSize = new Size(p.size/ sNo, p.size / sNo);
+                var sRec = new Path.Rectangle(sRecPoint, sRecSize);
+                sRec.fillColor = stitchColors[stitchContent[stitchCounter][i]];
+                
+                stitchContainer.addChild(sRec);
+            }
+            sCopy.addChild(stitchContainer);
+            if (stitchFreqCounter > stitchFreq) {
+                stitchFreqCounter = 0;
+                stitchCounter++;
+                if (stitchCounter > sPatLength-1) {stitchCounter = 0}
+            }
+            else {stitchFreqCounter++}
+        }
+        
         // Bulb effect
         if (p.bgEffect == 1) {
             sCopy.scale(sinBetween(1, bulbSizeChange, bulbscale));
@@ -677,7 +712,7 @@ function drawPath(sprite, path) {
             sCopy.children[0].fillColor.hue += hue;
             hue += .1;
         }
-
+        
         //Unicorn Line style
         if (p.lineStyle == 0) {
             var thisLines = sCopy.children['lines 1'].children;        
@@ -686,7 +721,7 @@ function drawPath(sprite, path) {
             }     
             hue += .1;   
         }   
-       
+        
         // Text line style
         if (p.lineStyle == 7) {
             var textContainer = sCopy.children['textContainer 1'];
@@ -697,7 +732,7 @@ function drawPath(sprite, path) {
             textPos += textadd;
         }
         
-
+        
         //Wavy line effect
         if (p.lineStyle == 6) {
             
@@ -711,6 +746,20 @@ function drawPath(sprite, path) {
                 }
             }
             wavePhase += waveadd/70;     
+        }
+        // Wedge effect
+        if (p.wedge != 50) {
+            if (p.wedge <= 50) {
+                var scaleWeight = k / steps;  
+                var wedgeval = (50 - p.wedge) / 50;
+            }
+            if (p.wedge > 50) {
+                var scaleWeight = 1 - k / steps;  
+                var wedgeval = (p.wedge - 50) / 50;
+            }
+            var wedgeScale = 1 - wedgeval * scaleWeight;
+           
+            sCopy.scale(wedgeScale);    
         }
 
         //Rotation + twist
@@ -758,23 +807,24 @@ function updateParams() {
 
         for (key in arg) {    
             var val = arg[key];
-            if (key == 'textContent') {
-                p.textContent = val;
+            if (typeof val == 'string') {
+                eval("p." + key + " = '" + val + "'");
             }
             else {
                 eval("p." + key + " = " + val);
             }
+            
             var uiel = document.getElementById(key);
+            
             if(val.components) {
-                console.log(key + ' - ' + val);
                 uiel.value = rgb2hex(val);
             }
             else {    
+                
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
                     k.innerHTML = val;
                 }
-                
                 uiel.value = val;
             }
         }

@@ -17,7 +17,7 @@ html
     // <script type="text/javascript" src="html2canvas.min.js"></script>
     script(type='text/paperscript' canvas='canvas' src='wormpath.js')
   body
-    canvas#canvas(resize='')
+    canvas#canvas(resize='' hidpi="off")
 
     #progress
     button#export-button Export SVG
@@ -119,6 +119,15 @@ html
         +input('range', 'Twist:', 'twist', 0, 500)
         +input('range', 'Roundness:', 'corner', 0, 200)
         +input('range', 'Wedge:', 'wedge', 0, 100)
+        div.ui-control
+            label Stitch:
+            select#stitchOn
+                option(value='0' selected) Off
+                option(value='1') Stitch On
+        +input('text', 'Stitch content', 'stitchContent')
+        +input('color', 'Stitch color1', 'stitchColor1')
+        +input('color', 'Stitch color2', 'stitchColor2')
+        +input('range', 'Stitch freq:', 'stitchFreq')
 
        
 
@@ -128,6 +137,9 @@ html
         input#aRotation(type='number' min='0' max='360' value='0')
         //- label Wave amp:
         //- input#aWaveAmp(type='number' min='0' max='100' value='0')
+        label Brush size:
+        input#aBrushSizeMin(type='number' min='0' max='1000' value='20')
+        input#aBrushSizeMax(type='number' min='0' max='1000' value='100')
         button#step-animation(type='button') Step forward
         button#start-animation(type='button') Start animation
         button#stop-animation(type='button') Stop animation
