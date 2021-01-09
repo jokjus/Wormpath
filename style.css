@@ -13,7 +13,7 @@ canvas[resize] {
     height: 100vh;
 }
 
-#export-button, #switch, #log-params {
+#export-button, #switch, #log-params, #debug {
 	position:fixed;
 	bottom:0;
 	right:0;
@@ -29,6 +29,9 @@ canvas[resize] {
 
 #log-params {
 	right: 100px;
+}
+#debug {
+	right: 200px;
 }
 
 #ui-row {
@@ -82,6 +85,11 @@ canvas[resize] {
 	display: block;
 }
 
+.ui-control label span {
+	display: inline-block;
+	min-width: 30px;
+}
+
 #ui-row div.section {
 	border-left: 4px solid #bbb;}
 
@@ -111,6 +119,20 @@ canvas[resize] {
 	bottom: 0;
 	left: 0;
 	padding: 10px;	
+	background-color: #eee;
+	width: 100vw;
+	display: flex;	
+}
+
+#animation-controls > div {
+	padding-right: 10px;
+}
+
+.anim-control label {
+	display: block;
+}
+
+.anim-actions {
 }
 
 .collapseui {	

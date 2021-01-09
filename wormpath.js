@@ -169,7 +169,7 @@ var presets = [
         bulbFreq: 34,
         cap: 2,
         corner: 0,
-        density: 100,
+        density: 90,
         drawingBgColor: new Color(0.05882, 0.0549, 0.06275),
         drawingSize: 6,
         fade: 82,
@@ -287,13 +287,96 @@ var presets = [
         waveAmp: 7,
         waveFreq: 20,
         wedge: 50,
+    },
+    {
+        name:'Debug',
+        bgColor: new Color(0, 0, 0.6),
+        bgEffect: 0,
+        bgOpacity: 0,
+        bgStyle: 0,
+        bulbAmp: 15,
+        bulbFreq: 50,
+        cap: 1,
+        corner: 0,
+        density: 0,
+        drawingBgColor: new Color(1, 1, 1),
+        drawingSize: 9,
+        fade: 0,
+        lineColor: new Color(0, 0, 0.7),
+        lineOpacity: 100,
+        lineStyle: 1,
+        lineWidth: 1,
+        lines: 2,
+        rotation: 0,
+        shadow: 0,
+        size: 50,
+        spikeAmp: 0,
+        spikeFreq: 0,
+        textBorderColor: new Color(1, 1, 1),
+        textBorderWidth: 2,
+        textColor: new Color(0.78039, 0, 0.11765),
+        textContent: "That’s one small step for man, one giant leap for mankind.",
+        textSize: 37,
+        textSpread: 8,
+        textYPos: 21,
+        textBump: 5,
+        twist: 0,
+        waveAmp: 7,
+        waveFreq: 20,
+        wedge: 50,
     }
 
 ];
 // Initialize main variables
-var bulbPhase = 0;
-var rotStepVal, ampStepVal, brushSizeMin, brushSizeMax,
-    runAnimation = false
+var runAnimation = false
+
+// Variable for strogin animation frame
+var animFrame = 0;
+
+// Animation parameters
+var animP = {
+    aRotationInc: 1,
+    aBrushSizeMin: 80,
+    aBrushSizeMax: 80,
+    aTwistMin: 0,
+    aTwistMax: 0,
+    aBulbAmpMin: 0,
+    aBulbAmpMax: 0,
+    aBulbFreqMin: 0,
+    aBulbFreqMax: 0
+}
+
+// Get parameters from UI and update animation parameters
+$('.anim-control input').change(function() {
+    var id = $(this).attr('id');
+    var val = $(this).val();
+    var d = JSON.parse('{"' + id + '": ' + val + '}');
+    updateAnimP(d);
+});
+
+// Update animation parameters
+function updateAnimP() {
+    for(key in arguments) {
+        var arg = arguments[key];
+        for (key in arg) {    
+            var val = arg[key];
+            eval("animP." + key + " = " + val);        
+
+            var uiel = document.getElementById(key);
+            uiel.value = val;
+            
+        }
+    }
+}
+
+updateAnimP(animP);
+
+var animStep = document.getElementById('step-animation');
+
+animStep.onclick = function() {
+    render();
+}
+
 // Create a capturer that exports a WebM video
 var capturer = new CCapture( { 
     format: 'webm',
@@ -312,10 +395,6 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
 
     startAnimationBtn.addEventListener( 'click', function( e ) {
         runAnimation = true;
-        rotStepVal = parseFloat(document.getElementById('aRotation').value);
-        brushSizeMin = parseFloat(document.getElementById('aBrushSizeMin').value);
-        brushSizeMax = parseFloat(document.getElementById('aBrushSizeMax').value);
-        // ampStepVal = parseFloat(document.getElementById('aWaveAmp').value);
         this.style.display = 'none';
         stopAnimationBtn.style.display = 'inline-block';
         startCaptureBtn.style.display = 'inline-block';
@@ -340,6 +419,7 @@ stopCaptureBtn.addEventListener( 'click', function( e ) {
     capturer.stop();
     this.style.display = 'none';
     capturer.save();
+    animFrame = 0;
 }, false );
 
 function animate() {
@@ -352,22 +432,22 @@ function animate() {
 function render() {
 
     // setTimeout(function() {
-        var rotStep = parseFloat(p.rotation + rotStepVal);
+        var rotStep = parseFloat(p.rotation + animP.aRotationInc);
         
-        var wedgenew = sinBetween(5, 95, p.rotation /50);
-        var brushSizeNew = sinBetween(brushSizeMin, brushSizeMax, p.rotation /50);
-        // var twistnew = sinBetween(0, 200, -1 * p.rotation /50);
-        // var ampStep = p.waveAmp + ampStepVal;
+        var brushSizeNew = sinBetween(animP.aBrushSizeMin, animP.aBrushSizeMax, animFrame /50);
+        var twistNew = sinBetween(animP.aTwistMin, animP.aTwistMax, animFrame /50);
+        var bulbAmpNew = sinBetween(animP.aBulbAmpMin, animP.aBulbAmpMax, animFrame /50);
+        var bulbFreqNew = sinBetween(animP.aBulbFreqMin, animP.aBulbFreqMax, animFrame /50);
         
 
         updateAnim({
-            // waveAmp:ampStep,
             rotation:rotStep,
-            // wedge: wedgenew,
-            // twist: twistnew
+            twist: twistNew,
+            bulbAmp: bulbAmpNew,
+            bulbFreq: bulbFreqNew,
             size: brushSizeNew
         });
-        centerLayers();
+        animFrame++;
     // }, 500)
     if( capturer ) capturer.capture( canvas );
 
@@ -376,6 +456,9 @@ function render() {
 
 // window.onload = function() {
 project.activeLayer.position = view.center;
+
+var pathContainer = new Layer({position: view.center});
+pathContainer.name = 'pathContainer';
 
 var first = new Layer({position: view.center});
 first.name = 'first';
@@ -432,8 +515,9 @@ var p = {
 
 var hue = 0;
 var scale = 1;
+var debugMode = false;
 
-first.activate();
+
 
 // Load SVG from a file
 var canvas = document.getElementById('canvas');
@@ -448,30 +532,43 @@ var drawingBg = new Path.Rectangle({
 });
 bg.addChild(drawingBg);
 
+// var drawingContainer = new Path.Rectangle({
+//     point: [0, 0],
+//     size: [view.size.width, view.size.height],
+//     fillColor: 'green',
+//     selected: true
+// });
+// drawing.addChild(drawingContainer);
+
+
 //Import SVG to canvas and refresh art
+pathContainer.activate();
 project.importSVG(url, function(item) {
     words = item;
     words.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
 
-    words.visible = false;  //hide the guiding SVG lines
-
+    words.visible = false;
+    pathContainer.position = view.center;
+    // centerLayers();
     updateParams(p);
     buildUI();
-    centerLayers();
     
 })
 
 
 // Make the sprite ------------------------------
 function generateSprite() {
+    first.activate();
     
     // Base rectangle
     var rec = new Path.Rectangle({
         point: [0, 0],
         size: [p.size, p.size],
         fillColor: p.bgColor,
-        opacity: p.bgOpacity/100
+        opacity: p.bgOpacity/100,
+        strokeWidth: 0
     });
+
 
     if (p.bgStyle == 2) {
         rec.opacity = 0;
@@ -495,6 +592,7 @@ function generateSprite() {
     var group = new Group({
         children: [rec, recB, lines],
         name: 'sprite'
+        // pivot: myPivot
     });
 
 
@@ -534,7 +632,6 @@ function generateSprite() {
         }
     }
  
-
     // Text effect
     if (p.lineStyle == 7) {
         
@@ -556,8 +653,6 @@ function generateSprite() {
         textMask.clipMask = true;
         group.addChild(textContainer);        
     }
-
-   
 
     // Corner radius with clipping mask
     if (p.corner != 0) {
@@ -618,12 +713,14 @@ function drawWord() {
 var factorPhase = 0;
 // Draw sprite along a path
 function drawPath(sprite, path) {
-    var steps = path.length / ((100 - p.density)+1) * 2;
+    drawing.activate();
+    var steps = path.length / ((101 - p.density)) * 2;
+    
+    // Variables for effects
     var wavePhase = 1;
     hue = 0;
     var factor = sinBetween(0.3,1.2, factorPhase);
     factorPhase += 0.1;
-    // bulbPhase += 0.05;
     var bulbscale = 1;
     var bulbSizeChange = p.bulbAmp/20 * factor;
     var bulbadd = p.bulbFreq * path.length/steps ;
@@ -635,17 +732,27 @@ function drawPath(sprite, path) {
     var stitchCounter = 0;
     var stitchFreqCounter = 0;
     var stitchFreq = p.stitchFreq * steps/path.length;
-    // console.log(stitchFreq);
-    // console.log(path.length/steps);
+
+    var points = [];
+    for (k=0; k<steps; k++) {
+        points.push(path.getPointAt(path.length - (k*(path.length/steps))));
+    }
+
+    // debug only
+    if (debugMode) {
+        var debugpos = points[k];
+        var g = new Path.Circle(debugpos, 1);
+        g.fillColor = 'green';
+        g.selected = true;
+    }
     
     for (k=0; k<steps; k++) {
 
         var sCopy = sprite.clone();    
         drawing.addChild(sCopy);
         sCopy.visible = true;
-
-        var cPos = path.getLocationAt(path.length - (k*(path.length/steps))); 
-
+     
+        
         
         // Spike effect 
         if (p.lineStyle == 8) {
@@ -678,10 +785,11 @@ function drawPath(sprite, path) {
             stitchColors.push(p.stitchColor1)
             stitchColors.push(p.stitchColor2)
             
-            var stitchContainer = new Group({   // group for a line 
+            var stitchContainer = new Group({   // group for a single pattern line 
                 name: 'stitchContainer2'
             })
             
+            // create individual lines
             for (i=0; i<sNo; i++) {
                 var sRecPoint = new Point(i * (p.size / sNo), 0);
                 var sRecSize = new Size(p.size/ sNo, p.size / sNo);
@@ -690,7 +798,10 @@ function drawPath(sprite, path) {
                 
                 stitchContainer.addChild(sRec);
             }
+            //Add stitch pattern to the sprite
             sCopy.addChild(stitchContainer);
+
+            // Counters for stitch pattern repetition and stitch pattern length (= frequency)
             if (stitchFreqCounter > stitchFreq) {
                 stitchFreqCounter = 0;
                 stitchCounter++;
@@ -705,7 +816,7 @@ function drawPath(sprite, path) {
             bulbscale += bulbadd/1000;     
         }
         
-        sCopy.position = cPos.point;
+        
         
         //Unicorn Background style
         if (p.bgStyle == 1) {
@@ -728,7 +839,6 @@ function drawPath(sprite, path) {
             var text = sCopy.children['textContainer 1'].children[0];
             text.position.x += textPos;
             textContainer.position.x += p.textBump
-            // console.log(textContainer);
             textPos += textadd;
         }
         
@@ -762,8 +872,15 @@ function drawPath(sprite, path) {
             sCopy.scale(wedgeScale);    
         }
 
+
+        // Put sprite to it's place along the path
+        var cPos = points[k];
+        sCopy.position = cPos;
+
         //Rotation + twist
-        sCopy.rotation = p.rotation + k*twistadd/250;
+        var rot = p.rotation + parseInt(k*twistadd/250);
+        sCopy.rotate(rot);
+        
     }
 
     //Cap styles
@@ -774,7 +891,7 @@ function drawPath(sprite, path) {
             fillColor: p.bgColor
         })
        
-        cap.rotation = p.rotation + k* p.twist * path.length/steps;
+        cap.rotation = p.rotation + k*twistadd/250;
         drawing.addChild(cap);
     }
 
@@ -797,6 +914,8 @@ function drawPath(sprite, path) {
             }
         }
     }
+
+    
 }
 
 // Update all params given in function parameters 
@@ -823,7 +942,7 @@ function updateParams() {
                 
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
-                    k.innerHTML = val;
+                    k.innerHTML = Math.round(val * 100) / 100;
                 }
                 uiel.value = val;
             }
@@ -834,16 +953,11 @@ function updateParams() {
 }
 
 function updateAnim(val) {
-    // showProgress();
 
     setTimeout(function(){ 
         delete val.name;
         updateParams(val);
-        centerLayers();
-        // hideProgress();
-        // drawingBg.sendToBack();
      }, 50);
-    
 }
 
 function updateFromUI(val) {
@@ -852,12 +966,11 @@ function updateFromUI(val) {
     setTimeout(function(){ 
         delete val.name;
         updateParams(val);
-        centerLayers();
         hideProgress();
-        // drawingBg.sendToBack();
      }, 50);
-    
 }
+
+
 
 // UI for manipulating the effect. Initialize all properties defined in the main properties variable p 
 function buildUI() {   
@@ -887,7 +1000,6 @@ function buildUIparam(param) {
             }
             updateFromUI(update);
         }
-        centerLayers();
     };
 
     paramUIElement.oninput = function() {
@@ -902,31 +1014,13 @@ function buildUIparam(param) {
 
 function centerLayers() {
     project.activeLayer.position = view.center;
+    pathContainer.position = view.center;
     first.position = view.center;
     drawing.position = view.center;
+    bg.position = view.center;
 }
 
-var animStep = document.getElementById('step-animation');
 
-animStep.onclick = function() {
-    var rotStep = p.rotation + parseInt(document.getElementById('aRotation').value);
-    // updateFromUI({rotation:rotStep});
-    var ampStep = p.waveAmp + parseInt(document.getElementById('aWaveAmp').value);
-    updateFromUI({
-        waveAmp:ampStep,
-        rotation:rotStep
-    });
-    centerLayers();
-    // setTimeout(function(){
-    //     html2canvas(document.getElementById("rangeholder"), {
-    //         onrendered: function (canvas) {
-    //             document.body.appendChild(canvas);
-    //         }            
-    //     });
-
-
-    // }, 2000);
-}
 
 function showProgress() {
     var prog = document.getElementById('progress');
@@ -1010,6 +1104,21 @@ $('#export-button').click(function() {
 
 $('#log-params').click(function() {
     console.log(p);
+});
+
+
+$('#debug').click(function() {
+    debugMode = !debugMode;
+    console.log(debugMode);
+    if (debugMode) {
+        words.visible = true;
+        words.selected = true;
+    }
+    else {
+        words.visible = false;
+        words.selected = false;
+    }
+    // updateParams(p);
 });
 
 $('#lineStyle').change(function() {

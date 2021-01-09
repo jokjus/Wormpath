@@ -22,6 +22,7 @@ html
     #progress
     button#export-button Export SVG
     button#log-params Log params
+    button#debug Debug
 
     #ui-row
       div.ui-section
@@ -40,6 +41,7 @@ html
                 option(value='7') Rainbow text
                 option(value='8') Cream
                 option(value='9') NASA
+                option(value='10') *Debug*
         +input('color', 'Bg color', 'drawingBgColor')
         +input('range', 'Scale:', 'drawingSize', 0, 20)
         +input('range', 'Density:', 'density', 0, 100)
@@ -132,16 +134,30 @@ html
        
 
     #animation-controls
-      div
-        label Rotation:
-        input#aRotation(type='number' min='0' max='360' value='0')
+        .anim-control
+            label Rotation increment
+            input#aRotationInc(type='number' min='0' max='360' value='')
         //- label Wave amp:
         //- input#aWaveAmp(type='number' min='0' max='100' value='0')
-        label Brush size:
-        input#aBrushSizeMin(type='number' min='0' max='1000' value='20')
-        input#aBrushSizeMax(type='number' min='0' max='1000' value='100')
-        button#step-animation(type='button') Step forward
-        button#start-animation(type='button') Start animation
-        button#stop-animation(type='button') Stop animation
-        button#start-capture(type='button') Start Capture
-        button#stop-capture(type='button') Stop Capture
+        .anim-control
+            label Brush size variation:
+            input#aBrushSizeMin(type='number' min='0' max='1000' value='')
+            input#aBrushSizeMax(type='number' min='0' max='1000' value='')
+        .anim-control
+            label Twist variation
+            input#aTwistMin(type='number' min='0' max='500' value='')
+            input#aTwistMax(type='number' min='0' max='500' value='')
+        .anim-control
+            label Bulb amp variation
+            input#aBulbAmpMin(type='number' min='0' max='100' value='')
+            input#aBulbAmpMax(type='number' min='0' max='100' value='')    
+        .anim-control
+            label Bulb freq variation
+            input#aBulbFreqMin(type='number' min='0' max='100' value='')
+            input#aBulbFreqMax(type='number' min='0' max='100' value='')     
+        .anim-actions
+            button#step-animation(type='button') Step forward
+            button#start-animation(type='button') Start animation
+            button#stop-animation(type='button') Stop animation
+            button#start-capture(type='button') Start Capture
+            button#stop-capture(type='button') Stop Capture
