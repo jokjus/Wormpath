@@ -41,24 +41,58 @@ html
                 option(value='7') Rainbow text
                 option(value='8') Cream
                 option(value='9') NASA
-                option(value='10') *Debug*
+                option(value='10') Snö
+                option(value='11') *Debug*
         +input('color', 'Bg color', 'drawingBgColor')
         +input('range', 'Scale:', 'drawingSize', 0, 20)
         +input('range', 'Density:', 'density', 0, 100)
         div.ui-section#brush-section
             .ui-section-label.section 
                 span Brush
+            div.ui-control
+                label Brush type:
+                select#bgType
+                    option(value='0' selected='') Square
+                    option(value='1') Circle
+            div.collapseui#brushtypecollapsible(style='display:none')
+                +input('range', 'Innercircle size', 'inCircleSize')
+                +input('color', 'Innercircle color', 'inCircleColor')
+                +input('range', 'Innercircle opacity', 'inCircleOpacity')
+                div.ui-control
+                    label Brush color style:
+                    select#inCircleBlendmode
+                        option(value='normal' selected='') Normal
+                        option(value='add') Add
+                        option(value='screen') Screen
+                        option(value='multiply') Multiply
+                        option(value='color-dodge') Color-dodge
+                        option(value='darker') Darken
+                        option(value='overlay') Overlay
+                        option(value='soft-light') Soft-light
+                        option(value='hard-light') Hard-light
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
             +input('color', 'Brush Bg', 'bgColor')
             +input('range', 'Brush opacity', 'bgOpacity', 0, 100)
-
+            div.ui-control
+                label Brush blend:
+                select#brushBlend
+                    option(value='normal' selected='') Normal
+                    option(value='add') Add
+                    option(value='screen') Screen
+                    option(value='multiply') Multiply
+                    option(value='color-dodge') Color-dodge
+                    option(value='darker') Darken
+                    option(value='overlay') Overlay
+                    option(value='soft-light') Soft-light
+                    option(value='hard-light') Hard-light
             div.ui-control
                 label Brush color style:
                 select#bgStyle
                     option(value='0' selected='') Custom
                     option(value='1') Unicorn
                     option(value='2') None
+        
             div.ui-control
                 label Brush effect:
                 select#bgEffect
@@ -117,6 +151,7 @@ html
                 option(value='1') Open
                 option(value='2' selected='') Horizontal
                 option(value='3') Vertical
+                option(value='4') Dome
 
         +input('range', 'Twist:', 'twist', 0, 500)
         +input('range', 'Roundness:', 'corner', 0, 200)

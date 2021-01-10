@@ -289,11 +289,61 @@ var presets = [
         wedge: 50,
     },
     {
+        name: 'Snö',
+        bgColor: new Color( 0,0,0),
+        bgEffect: 0,
+        bgOpacity: 100,
+        bgStyle: 0,
+        bgType: 0,
+        brushBlend: "normal",
+        bulbAmp: 15,
+        bulbFreq: 50,
+        cap: 1,
+        corner: "17",
+        density: "98",
+        drawingBgColor: new Color( 0, 0, 0),
+        drawingSize: "11",
+        fade: "0",
+        inCircleBlendmode: "normal",
+        inCircleColor: new Color( 0, 1, 0),
+        inCircleOpacity: 100,
+        inCircleSize: 30,
+        lineColor: new Color( 1, 1, 1),
+        lineOpacity: "100",
+        lineStyle: "6",
+        lineWidth: "2",
+        lines: "4",
+        rotation: 20,
+        shadow: 20,
+        size: "138",
+        spikeAmp: 10,
+        spikeFreq: 10,
+        stitchColor1: new Color(0.01961, 0.01961, 0.01961),
+        stitchColor2: new Color(1, 1, 1),
+        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
+        stitchFreq: 5,
+        stitchOn: "1",
+        textBorderColor: new Color( 1, 1, 1),
+        textBorderWidth: 0,
+        textBump: 0,
+        textColor: new Color( 1, 1, 1),
+        textContent: "SNOW SNOW SNOW SNOW",
+        textSize: "24",
+        textSpread: 0,
+        textYPos: "8",
+        twist: "48",
+        waveAmp: "12",
+        waveFreq: "7",
+        wedge: "58"
+    },
+
+    {
         name:'Debug',
         bgColor: new Color(0, 0, 0.6),
         bgEffect: 0,
         bgOpacity: 0,
         bgStyle: 0,
+        bgBlend: 'normal',
         bulbAmp: 15,
         bulbFreq: 50,
         cap: 1,
@@ -323,7 +373,7 @@ var presets = [
         twist: 0,
         waveAmp: 7,
         waveFreq: 20,
-        wedge: 50,
+        wedge: 50        
     }
 
 ];
@@ -474,6 +524,8 @@ drawing.name = 'drawing';
 var p = {
     drawingBgColor: new Color(1,1,1),
     drawingSize: 7,
+    bgType: 0,
+    brushBlend: 'normal',
     size: 100,
     lines: 3,
     lineWidth: 3,
@@ -484,7 +536,7 @@ var p = {
     waveAmp: 7,
     waveFreq: 20,
     shadow: 20,
-    cap: 2,
+    cap: 1,
     twist: 0,
     lineColor: new Color(1,1,1),
     lineOpacity: 100,
@@ -510,7 +562,11 @@ var p = {
     stitchContent: '[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]',
     stitchColor1:  new Color(0.78039, 0, 0.11765),
     stitchColor2: new Color(1,1,1),
-    stitchFreq: 5
+    stitchFreq: 5,
+    inCircleSize: 30,
+    inCircleColor: new Color(0,1,0),
+    inCircleOpacity: 100,
+    inCircleBlendmode: 'normal'
 }
 
 var hue = 0;
@@ -561,27 +617,53 @@ function generateSprite() {
     first.activate();
     
     // Base rectangle
-    var rec = new Path.Rectangle({
-        point: [0, 0],
-        size: [p.size, p.size],
-        fillColor: p.bgColor,
-        opacity: p.bgOpacity/100,
-        strokeWidth: 0
-    });
+    if (p.bgType == 0) {
+        var brush = new Path.Rectangle({
+            point: [0, 0],
+            size: [p.size, p.size],
+            fillColor: p.bgColor,
+            opacity: p.bgOpacity/100,
+            strokeWidth: 0,
+            blendMode: p.brushBlend
+        });
 
+        //Bottom rectangle that creates shadow
+        var recB = new Shape.Rectangle({
+            point: [0, p.size-5],
+            size: [p.size, 5],
+            fillColor: 'black'
+        })
 
-    if (p.bgStyle == 2) {
-        rec.opacity = 0;
+         recB.opacity = p.shadow/100;
     }
 
-    //Bottom rectangle that creates shadow
-    var recB = new Shape.Rectangle({
-        point: [0, p.size-5],
-        size: [p.size, 5],
-        fillColor: 'black'
-    })
+    // Circle brush type
+    if (p.bgType == 1) {
+        // Outer circle
+        var brush = new Path.Circle({
+            center: [p.size/2,p.size/2],
+            radius: p.size/2,
+            strokeColor: p.bgColor,
+            opacity: p.bgOpacity/100,
+            strokeWidth: 10,
+            blendMode: p.brushBlend
+        });
 
-    recB.opacity = p.shadow/100;
+        // Inner circle
+        var brush2 = new Path.Circle({
+            center: [p.size/2,p.size/2],
+            radius: p.inCircleSize,
+            strokeColor: p.inCircleColor,
+            opacity: p.inCircleOpacity/100,
+            strokeWidth: 5,
+            blendMode: p.inCircleBlendmode
+        });
+    }
+
+    // Brush none
+    if (p.bgStyle == 2) {
+        brush.opacity = 0;
+    }
 
     //Group for all lines
     var lines = new Group({
@@ -590,7 +672,7 @@ function generateSprite() {
 
     //Group to hold the whole sprite
     var group = new Group({
-        children: [rec, recB, lines],
+        children: [brush, brush2, recB, lines],
         name: 'sprite'
         // pivot: myPivot
     });
@@ -663,6 +745,7 @@ function generateSprite() {
         mask.clipMask = true;
     }
 
+    // Hollow effect
     if (p.bgEffect == 2) {
         var rectangleOut = new Path.Rectangle(new Point(0, 0), new Size(p.size, p.size));
         var rectangleIn = new Path.Rectangle(new Point(5, -5), new Size(p.size-10, p.size+10));
@@ -716,6 +799,10 @@ function drawPath(sprite, path) {
     drawing.activate();
     var steps = path.length / ((101 - p.density)) * 2;
     
+    var capHeight = p.size / 2;
+    var capSteps = capHeight / ((101 - p.density));
+    console.log(capSteps);
+
     // Variables for effects
     var wavePhase = 1;
     hue = 0;
@@ -747,6 +834,7 @@ function drawPath(sprite, path) {
     }
     
     for (k=0; k<steps; k++) {
+        
 
         var sCopy = sprite.clone();    
         drawing.addChild(sCopy);
@@ -789,6 +877,21 @@ function drawPath(sprite, path) {
                 name: 'stitchContainer2'
             })
             
+
+            var thisLines = sCopy.children['lines 1'].children;
+                
+            for (i=0; i<thisLines.length; i++) {
+                // if (thisLines[i].data.direction == 'vert') {
+                //     thisLines[i].scale(1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq, 1);
+                // }
+                if (thisLines[i].data.direction == 'horiz') {
+                    var myl = thisLines[i]
+                    myl.pivot = myl.bounds.bottom;
+                    myl.scale(1, 0.9);
+                    myl.pivot = myl.bounds.center;
+                }
+            }   
+
             // create individual lines
             for (i=0; i<sNo; i++) {
                 var sRecPoint = new Point(i * (p.size / sNo), 0);
@@ -817,10 +920,14 @@ function drawPath(sprite, path) {
         }
         
         
-        
         //Unicorn Background style
         if (p.bgStyle == 1) {
-            sCopy.children[0].fillColor.hue += hue;
+            if(p.bgType == 0) {
+                sCopy.children[0].fillColor.hue += hue;
+            }
+            if(p.bgType == 0) {
+                sCopy.children[0].strokeColor.hue += hue;
+            }   
             hue += .1;
         }
         
@@ -880,6 +987,13 @@ function drawPath(sprite, path) {
         //Rotation + twist
         var rot = p.rotation + parseInt(k*twistadd/250);
         sCopy.rotate(rot);
+
+        if (p.cap == 4) {
+            if (k > steps - capSteps) {
+                var s = Math.abs((steps-k)- capSteps);
+                sCopy.scale(1 / ((1+0.2) ** s));
+            }
+        }
         
     }
 
@@ -915,6 +1029,7 @@ function drawPath(sprite, path) {
         }
     }
 
+    
     
 }
 
@@ -1139,6 +1254,13 @@ $('#bgEffect').change(function() {
     $(this).parent().find('.collapseui').hide();
     if(this.value == 1) {
         $('#bulbcollapsible').show();
+    }   
+});
+
+$('#bgType').change(function() {
+    $(this).parent().find('.collapseui').hide();
+    if(this.value == 1) {
+        $('#brushtypecollapsible').show();
     }   
 });
 
