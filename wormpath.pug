@@ -42,7 +42,8 @@ html
                 option(value='8') Cream
                 option(value='9') NASA
                 option(value='10') Snö
-                option(value='11') *Debug*
+                option(value='11') Gradient worm
+                option(value='12') *Debug*
         +input('color', 'Bg color', 'drawingBgColor')
         +input('range', 'Scale:', 'drawingSize', 0, 20)
         +input('range', 'Density:', 'density', 0, 100)
@@ -54,22 +55,27 @@ html
                 select#bgType
                     option(value='0' selected='') Square
                     option(value='1') Circle
-            div.collapseui#brushtypecollapsible(style='display:none')
-                +input('range', 'Innercircle size', 'inCircleSize')
-                +input('color', 'Innercircle color', 'inCircleColor')
-                +input('range', 'Innercircle opacity', 'inCircleOpacity')
-                div.ui-control
-                    label Brush color style:
-                    select#inCircleBlendmode
-                        option(value='normal' selected='') Normal
-                        option(value='add') Add
-                        option(value='screen') Screen
-                        option(value='multiply') Multiply
-                        option(value='color-dodge') Color-dodge
-                        option(value='darker') Darken
-                        option(value='overlay') Overlay
-                        option(value='soft-light') Soft-light
-                        option(value='hard-light') Hard-light
+                    option(value='2') Double diamond
+                    option(value='3') Cross
+                    option(value='4') Pyramid
+                div.collapseui#brushtypecollapsible(style='display:none')
+                    +input('range', 'Innercircle size', 'inCircleSize')
+                    +input('color', 'Innercircle color', 'inCircleColor')
+                    +input('range', 'Innercircle opacity', 'inCircleOpacity')
+                    div.ui-control
+                        label Brush color style:
+                        select#inCircleBlendmode
+                            option(value='normal' selected='') Normal
+                            option(value='add') Add
+                            option(value='screen') Screen
+                            option(value='multiply') Multiply
+                            option(value='color-dodge') Color-dodge
+                            option(value='darker') Darken
+                            option(value='overlay') Overlay
+                            option(value='soft-light') Soft-light
+                            option(value='hard-light') Hard-light
+                div.collapseui#brushcrosscollapsible(style='display:none')
+                    +input('range', 'Cross Width:', 'brushCrossWidth')
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
             +input('color', 'Brush Bg', 'bgColor')
@@ -92,6 +98,16 @@ html
                     option(value='0' selected='') Custom
                     option(value='1') Unicorn
                     option(value='2') None
+                    option(value='3') Gradient
+                div.collapseui#brushgradientcollapsible(style='display:none')
+                    +input('color', 'Gradient color', 'brushGradientColor')
+                    +input('range', 'Transparency:', 'brushGradientTransparency', 0, 100)
+                    div.ui-control
+                        label Gradient type:
+                        select#brushGradientType(type='select')
+                            option(value=false selected='') Radial
+                            option(value=true) Linear
+                    +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
         
             div.ui-control
                 label Brush effect:
@@ -172,6 +188,10 @@ html
         .anim-control
             label Rotation increment
             input#aRotationInc(type='number' min='0' max='360' value='')
+        .anim-control
+            label Rotation variation
+            input#aRotationMin(type='number' min='0' max='1000' value='')
+            input#aRotationMax(type='number' min='0' max='1000' value='')
         //- label Wave amp:
         //- input#aWaveAmp(type='number' min='0' max='100' value='0')
         .anim-control

@@ -338,6 +338,59 @@ var presets = [
     },
 
     {
+        name: 'Gradient worm',
+        bgColor: new Color(0.67059, 0.00392, 0.91373),
+        bgEffect: "1",
+        bgOpacity: 100,
+        bgStyle: "3",
+        bgType: "0",
+        brushBlend: "normal",
+        brushGradientBalance: "48",
+        brushGradientColor: new Color(0, 0.76471, 0.90196),
+        brushGradientTransparency: "100",
+        brushGradientType: "",
+        bulbAmp: 20,
+        bulbFreq: 48,
+        cap: 1,
+        corner: "24",
+        density: "95",
+        drawingBgColor: new Color(1, 1, 1),
+        drawingSize: 7,
+        fade: 50,
+        inCircleBlendmode: "normal",
+        inCircleColor: new Color(0, 1, 0),
+        inCircleOpacity: 100,
+        inCircleSize: 30,
+        lineColor: new Color(1, 1, 1),
+        lineOpacity: "47",
+        lineStyle: "6",
+        lineWidth: "11",
+        lines: "2",
+        rotation: 20,
+        shadow: "11",
+        size: 180,
+        spikeAmp: 10,
+        spikeFreq: 10,
+        stitchColor1: new Color(0.78039, 0, 0.11765),
+        stitchColor2: new Color(1, 1, 1),
+        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
+        stitchFreq: 5,
+        stitchOn: 0,
+        textBorderColor: new Color(1, 1, 1),
+        textBorderWidth: 0,
+        textBump: 0,
+        textColor: new Color(1, 1, 1),
+        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+        textSize: 50,
+        textSpread: 0,
+        textYPos: 0,
+        twist: 95.43167480579416,
+        waveAmp: "9",
+        waveFreq: "3",
+        wedge: "32"
+    },
+
+    {
         name:'Debug',
         bgColor: new Color(0, 0, 0.6),
         bgEffect: 0,
@@ -386,6 +439,8 @@ var animFrame = 0;
 // Animation parameters
 var animP = {
     aRotationInc: 1,
+    aRotationMin: 0,
+    aRotationMax: 0,
     aBrushSizeMin: 80,
     aBrushSizeMax: 80,
     aTwistMin: 0,
@@ -429,7 +484,7 @@ animStep.onclick = function() {
 
 // Create a capturer that exports a WebM video
 var capturer = new CCapture( { 
-    format: 'webm',
+    format: 'png',
     framerate: 60,
     quality: 100,
     verbose: true } );  
@@ -481,27 +536,24 @@ function animate() {
 
 function render() {
 
-    // setTimeout(function() {
         var rotStep = parseFloat(p.rotation + animP.aRotationInc);
         
+        var rotationNew = sinBetween(animP.aRotationMin, animP.aRotationMax, animFrame /50);
         var brushSizeNew = sinBetween(animP.aBrushSizeMin, animP.aBrushSizeMax, animFrame /50);
         var twistNew = sinBetween(animP.aTwistMin, animP.aTwistMax, animFrame /50);
         var bulbAmpNew = sinBetween(animP.aBulbAmpMin, animP.aBulbAmpMax, animFrame /50);
         var bulbFreqNew = sinBetween(animP.aBulbFreqMin, animP.aBulbFreqMax, animFrame /50);
-        
 
         updateAnim({
-            rotation:rotStep,
+            rotation:rotationNew,
             twist: twistNew,
             bulbAmp: bulbAmpNew,
             bulbFreq: bulbFreqNew,
             size: brushSizeNew
         });
         animFrame++;
-    // }, 500)
     if( capturer ) capturer.capture( canvas );
 
-    // lastTime = currentTime;
 }
 
 // window.onload = function() {
@@ -526,8 +578,8 @@ var p = {
     drawingSize: 7,
     bgType: 0,
     brushBlend: 'normal',
-    size: 100,
-    lines: 3,
+    size: 50,
+    lines: 1,
     lineWidth: 3,
     density: 90,
     bgColor: new Color(0.78039, 0, 0.11765),
@@ -566,7 +618,12 @@ var p = {
     inCircleSize: 30,
     inCircleColor: new Color(0,1,0),
     inCircleOpacity: 100,
-    inCircleBlendmode: 'normal'
+    inCircleBlendmode: 'normal',
+    brushGradientColor: new Color(0,0,1),
+    brushGradientTransparency: 0,
+    brushGradientType: true,
+    brushGradientBalance: 50,
+    brushCrossWidth: 10
 }
 
 var hue = 0;
@@ -616,7 +673,7 @@ project.importSVG(url, function(item) {
 function generateSprite() {
     first.activate();
     
-    // Base rectangle
+    // Rectangle type brush
     if (p.bgType == 0) {
         var brush = new Path.Rectangle({
             point: [0, 0],
@@ -626,6 +683,7 @@ function generateSprite() {
             strokeWidth: 0,
             blendMode: p.brushBlend
         });
+       
 
         //Bottom rectangle that creates shadow
         var recB = new Shape.Rectangle({
@@ -658,6 +716,109 @@ function generateSprite() {
             strokeWidth: 5,
             blendMode: p.inCircleBlendmode
         });
+    }
+
+    //Double diamond brush
+    if (p.bgType == 2) {
+        var rec1 = new Path.Rectangle({
+            point: [0, 0],
+            size: [p.size/2, p.size/2],
+        });
+
+        var rec2 = new Path.Rectangle({
+            point: [p.size/2, p.size/2],
+            size: [p.size/2, p.size/2],
+        });
+        var brush = rec1.unite(rec2);
+
+        var strC = p.lineColor;
+        strC.alpha = p.lineOpacity/100;
+        brush.strokeColor = strC;
+        brush.blendMode = p.brushBlend;
+        brush.opacity = p.bgOpacity/100;
+        brush.fillColor = p.bgColor;
+        brush.strokeWidth = p.lineWidth;
+
+    }
+
+    // Cross type brush
+    if (p.bgType == 3) {
+        var crossWidth = p.brushCrossWidth;
+        var cp = (p.size-crossWidth) /2;
+
+        var rec1 = new Path.Rectangle({
+            point: [cp, 0],
+            size: [crossWidth, p.size],
+        });
+        var rec2 = new Path.Rectangle({
+            point: [0, cp],
+            size: [p.size, crossWidth],
+ 
+        });
+
+        var brush = rec1.unite(rec2);
+        
+        var strC = p.lineColor;
+        strC.alpha = p.lineOpacity;
+        brush.strokeColor = strC;
+        brush.blendMode = p.brushBlend;
+        brush.opacity = p.bgOpacity/100;
+        brush.fillColor = p.bgColor;
+        brush.strokeWidth = p.lineWidth;
+    }
+
+    // Pyramid brush type
+    if (p.bgType == 4) {
+        // var triangle = new Path.RegularPolygon({
+        //     center: new Point(50, 50), 
+        //     sides: 3, 
+        //     radius: 50});
+        // triangle.fillColor = '#e9e9ff';
+
+        var tri1 = new Path.RegularPolygon({
+            center: new Point(p.size/2, p.size*3/4),
+            sides: 3,
+            radius: p.size/2
+        });
+        var tri2 = tri1.clone();
+        tri2.pivot = tri2.bounds.top;
+        tri2.rotate(180);
+
+        var brush = tri1.unite(tri2);
+
+        // console.log(brush);
+
+        var strC = p.lineColor;
+        strC.alpha = p.lineOpacity/100;
+        brush.strokeColor = strC;
+        brush.blendMode = p.brushBlend;
+        brush.opacity = p.bgOpacity/100;
+        brush.fillColor = p.bgColor;
+        brush.strokeWidth = p.lineWidth;
+    }
+
+    // Gradient
+    if (p.bgStyle == 3) {
+        var endCol = p.brushGradientColor;
+        endCol.alpha = (100 - p.brushGradientTransparency) /100;    
+        var orig = [p.size/2,p.size/2];
+        if (!p.brushGradientType) {
+            var orig = brush.bounds.leftCenter;
+        }
+
+        var start = (p.brushGradientBalance-50)/100*2;
+        if (p.brushGradientBalance <= 50) start = 0;
+        var end = (p.brushGradientBalance)/100*2;
+        if (p.brushGradientBalance >= 50) end = 1;
+        
+        brush.fillColor = {
+            gradient: {
+                stops: [[p.bgColor, start], [endCol, end]],
+                radial: p.brushGradientType
+            },
+            origin: orig,
+            destination: brush.bounds.rightCenter
+        }
     }
 
     // Brush none
@@ -799,9 +960,9 @@ function drawPath(sprite, path) {
     drawing.activate();
     var steps = path.length / ((101 - p.density)) * 2;
     
-    var capHeight = p.size / 2;
+    var capHeight = p.size;
     var capSteps = capHeight / ((101 - p.density));
-    console.log(capSteps);
+    // console.log(capSteps);
 
     // Variables for effects
     var wavePhase = 1;
@@ -988,6 +1149,7 @@ function drawPath(sprite, path) {
         var rot = p.rotation + parseInt(k*twistadd/250);
         sCopy.rotate(rot);
 
+        // Cap style dome
         if (p.cap == 4) {
             if (k > steps - capSteps) {
                 var s = Math.abs((steps-k)- capSteps);
@@ -1224,7 +1386,7 @@ $('#log-params').click(function() {
 
 $('#debug').click(function() {
     debugMode = !debugMode;
-    console.log(debugMode);
+    // console.log(debugMode);
     if (debugMode) {
         words.visible = true;
         words.selected = true;
@@ -1258,9 +1420,19 @@ $('#bgEffect').change(function() {
 });
 
 $('#bgType').change(function() {
-    $(this).parent().find('.collapseui').hide();
+    $(this).parent().parent().find('.collapseui').hide();
     if(this.value == 1) {
         $('#brushtypecollapsible').show();
+    }  
+    if(this.value == 3) {
+        $('#brushcrosscollapsible').show();
+    }   
+});
+
+$('#bgStyle').change(function() {
+    $(this).parent().find('.collapseui').hide();
+    if(this.value == 3) {
+        $('#brushgradientcollapsible').show();
     }   
 });
 
