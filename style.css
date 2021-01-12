@@ -150,3 +150,7 @@ canvas[resize] {
 #extras-section .ui-control, #lines-section .ui-control {
 	display: none;
 }
+
+[data-type="color"] {
+	display: none;
+}

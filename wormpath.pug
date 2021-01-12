@@ -1,7 +1,7 @@
 mixin input(type, label, name, min=0, max, value='')
     div(class='ui-control')&attributes(attributes)
         label=label
-            span(id=name + 'Val')
+            span(id=name + 'Val', data-type=type)
         input(id=name, type=type, value=value, min=min, max=max)
 
 doctype html

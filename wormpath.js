@@ -1238,6 +1238,7 @@ function updateParams() {
             var uiel = document.getElementById(key);
             
             if(val.components) {
+                console.log(key);
                 uiel.value = rgb2hex(val);
             }
             else {    
@@ -1363,7 +1364,7 @@ function rgb2hex(rgb){
 }
 
 function componentToHex(c) {
-    var hex = (c*255).toString(16);
+    var hex = parseInt(c*255).toString(16);
     var padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
 
     while (hex.length < padding) {
