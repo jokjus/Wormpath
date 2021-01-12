@@ -58,6 +58,7 @@ html
                     option(value='2') Double diamond
                     option(value='3') Cross
                     option(value='4') Pyramid
+                    option(value='5') Bubble
                 div.collapseui#brushtypecollapsible(style='display:none')
                     +input('range', 'Innercircle size', 'inCircleSize')
                     +input('color', 'Innercircle color', 'inCircleColor')
@@ -76,6 +77,9 @@ html
                             option(value='hard-light') Hard-light
                 div.collapseui#brushcrosscollapsible(style='display:none')
                     +input('range', 'Cross Width:', 'brushCrossWidth')
+                div.collapseui#brushbubblesizecollapsible(style='display:none')
+                    +input('range', 'Bubble size:', 'brushBubbleSize', 0, 100)
+                    +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 20)
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
             +input('color', 'Brush Bg', 'bgColor')
@@ -185,9 +189,9 @@ html
        
 
     #animation-controls
-        .anim-control
-            label Rotation increment
-            input#aRotationInc(type='number' min='0' max='360' value='')
+        //- .anim-control
+        //-     label Rotation increment
+        //-     input#aRotationInc(type='number' min='0' max='360' value='')
         .anim-control
             label Rotation variation
             input#aRotationMin(type='number' min='0' max='1000' value='')

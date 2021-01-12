@@ -438,7 +438,7 @@ var animFrame = 0;
 
 // Animation parameters
 var animP = {
-    aRotationInc: 1,
+    // aRotationInc: 1,
     aRotationMin: 0,
     aRotationMax: 0,
     aBrushSizeMin: 80,
@@ -623,7 +623,9 @@ var p = {
     brushGradientTransparency: 0,
     brushGradientType: true,
     brushGradientBalance: 50,
-    brushCrossWidth: 10
+    brushCrossWidth: 10,
+    brushBubbleSize: 10,
+    brushBubbleAmount: 4
 }
 
 var hue = 0;
@@ -769,24 +771,17 @@ function generateSprite() {
 
     // Pyramid brush type
     if (p.bgType == 4) {
-        // var triangle = new Path.RegularPolygon({
-        //     center: new Point(50, 50), 
-        //     sides: 3, 
-        //     radius: 50});
-        // triangle.fillColor = '#e9e9ff';
-
         var tri1 = new Path.RegularPolygon({
             center: new Point(p.size/2, p.size*3/4),
             sides: 3,
             radius: p.size/2
         });
         var tri2 = tri1.clone();
-        tri2.pivot = tri2.bounds.top;
+        tri2.pivot = tri2.bounds.topCenter;
         tri2.rotate(180);
+        tri2.position.y += 3;
 
         var brush = tri1.unite(tri2);
-
-        // console.log(brush);
 
         var strC = p.lineColor;
         strC.alpha = p.lineOpacity/100;
@@ -796,6 +791,37 @@ function generateSprite() {
         brush.fillColor = p.bgColor;
         brush.strokeWidth = p.lineWidth;
     }
+
+    if (p.bgType == 5) {
+        var rad = p.brushBubbleSize;
+
+        var e = new Path.Circle({
+            center: new Point(p.size/2, p.size/2),
+            radius: p.size/2-rad
+        });
+
+        var brush = new Path();
+
+        for (b = 0; b < p.brushBubbleAmount; b++) {
+            var bcenter = e.getPointAt(e.length / p.brushBubbleAmount * b);
+            var c = new Path.Circle({
+                center: bcenter,
+                radius: rad,
+            });
+
+            brush = brush.unite(c);
+        }       
+
+        var strC = p.lineColor;
+        strC.alpha = p.lineOpacity/100;
+        var fillC = p.bgColor;
+        fillC.alpha = p.bgOpacity/100;
+        brush.strokeColor = strC;
+        brush.blendMode = p.brushBlend;
+        brush.fillColor = fillC;
+        brush.strokeWidth = p.lineWidth;
+    }
+
 
     // Gradient
     if (p.bgStyle == 3) {
@@ -921,8 +947,7 @@ function generateSprite() {
 
 // Loop through all paths and pathgroups
 function drawWord() {    
-    //Clear previous sprite
-    first.removeChildren();
+
 
     //Delete all previosly drawn worms
     drawing.removeChildren();
@@ -933,7 +958,7 @@ function drawWord() {
     scale = p.drawingSize; 
 
     //Generate new drawing sprite
-    generateSprite();
+    // generateSprite();
 
     //Run Draw path function for every path in the text
     
@@ -1225,7 +1250,9 @@ function updateParams() {
             }
         }
     }
-
+    //Clear previous sprite
+    first.removeChildren();
+    generateSprite();
     drawWord();
 }
 
@@ -1426,6 +1453,10 @@ $('#bgType').change(function() {
     }  
     if(this.value == 3) {
         $('#brushcrosscollapsible').show();
+    }   
+
+    if(this.value == 5) {
+        $('#brushbubblesizecollapsible').show();
     }   
 });
 
