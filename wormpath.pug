@@ -4,6 +4,10 @@ mixin input(type, label, name, min=0, max, value='')
             span(id=name + 'Val', data-type=type)
         input(id=name, type=type, value=value, min=min, max=max)
 
+mixin section(label)
+    .ui-section-label.section 
+        span=label
+
 doctype html
 html
   head
@@ -60,8 +64,7 @@ html
             +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
         div.ui-section#brush
-            //- .ui-section-label.section 
-            //-     span Brush
+
             div.ui-control
                 label Brush type:
                 select#bgType
@@ -94,8 +97,17 @@ html
                     +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 20)
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
+
+            +section("Bg")
             +input('color', 'Brush Bg', 'bgColor')
             +input('range', 'Brush opacity', 'bgOpacity', 0, 100)
+
+            +section("Stroke")
+            +input('color', 'Brush stroke color', 'brushStrokeColor')
+            +input('range', 'Brush stroke width', 'brushStrokeWidth', 0, 100)
+            +input('range', 'Brush stroke opacity', 'brushStrokeOpacity', 0, 100)
+
+            +section("Style")
             div.ui-control
                 label Brush blend:
                 select#brushBlend

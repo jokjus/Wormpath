@@ -584,6 +584,9 @@ var p = {
     density: 90,
     bgColor: new Color(0.78039, 0, 0.11765),
     bgOpacity: 100,
+    brushStrokeColor: new Color(0, 0, 0),
+    brushStrokeWidth: 0,
+    brushStrokeOpacity: 100,
     lineStyle: 3,
     waveAmp: 7,
     waveFreq: 20,
@@ -676,15 +679,21 @@ project.importSVG(url, function(item) {
 function generateSprite() {
     first.activate();
     
+    var bc = p.brushStrokeColor;
+    bc.alpha = p.brushStrokeOpacity / 100;
+
     // Rectangle type brush
     if (p.bgType == 0) {
+        
+
         var brush = new Path.Rectangle({
             point: [0, 0],
             size: [p.size, p.size],
             fillColor: p.bgColor,
             opacity: p.bgOpacity/100,
-            strokeWidth: 0,
-            blendMode: p.brushBlend
+            blendMode: p.brushBlend,
+            strokeWidth: p.brushStrokeWidth,
+            strokeColor: bc
         });
        
 
@@ -698,15 +707,17 @@ function generateSprite() {
          recB.opacity = p.shadow/100;
     }
 
+
     // Circle brush type
     if (p.bgType == 1) {
         // Outer circle
+
         var brush = new Path.Circle({
             center: [p.size/2,p.size/2],
             radius: p.size/2,
-            strokeColor: p.bgColor,
+            strokeColor: bc,
             opacity: p.bgOpacity/100,
-            strokeWidth: 10,
+            strokeWidth: p.brushStrokeWidth,
             blendMode: p.brushBlend
         });
 
@@ -721,6 +732,7 @@ function generateSprite() {
         });
     }
 
+
     //Double diamond brush
     if (p.bgType == 2) {
         var rec1 = new Path.Rectangle({
@@ -734,13 +746,13 @@ function generateSprite() {
         });
         var brush = rec1.unite(rec2);
 
-        var strC = p.lineColor;
+        var strC = p.brushStrokeColor;
         strC.alpha = p.lineOpacity/100;
-        brush.strokeColor = strC;
+        brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
         brush.opacity = p.bgOpacity/100;
         brush.fillColor = p.bgColor;
-        brush.strokeWidth = p.lineWidth;
+        brush.strokeWidth = p.brushStrokeWidth;
 
     }
 
@@ -760,14 +772,12 @@ function generateSprite() {
         });
 
         var brush = rec1.unite(rec2);
-        
-        var strC = p.lineColor;
-        strC.alpha = p.lineOpacity;
-        brush.strokeColor = strC;
+                
+        brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
         brush.opacity = p.bgOpacity/100;
         brush.fillColor = p.bgColor;
-        brush.strokeWidth = p.lineWidth;
+        brush.strokeWidth = p.brushStrokeWidth;
     }
 
     // Pyramid brush type
@@ -784,15 +794,14 @@ function generateSprite() {
 
         var brush = tri1.unite(tri2);
 
-        var strC = p.lineColor;
-        strC.alpha = p.lineOpacity/100;
-        brush.strokeColor = strC;
+        brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
         brush.opacity = p.bgOpacity/100;
         brush.fillColor = p.bgColor;
-        brush.strokeWidth = p.lineWidth;
+        brush.strokeWidth = p.brushStrokeWidth;
     }
 
+    // Bubbles brush type
     if (p.bgType == 5) {
         var rad = p.brushBubbleSize;
 
@@ -813,14 +822,12 @@ function generateSprite() {
             brush = brush.unite(c);
         }       
 
-        var strC = p.lineColor;
-        strC.alpha = p.lineOpacity/100;
         var fillC = p.bgColor;
         fillC.alpha = p.bgOpacity/100;
-        brush.strokeColor = strC;
+        brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
         brush.fillColor = fillC;
-        brush.strokeWidth = p.lineWidth;
+        brush.strokeWidth = p.brushStrokeWidth;
     }
 
 
