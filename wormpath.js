@@ -1127,7 +1127,7 @@ function drawPath(sprite, path) {
         }   
         
         // Text line style
-        if (p.lineStyle == 7) {
+        if (p.textOn == 1) {
             var textContainer = sCopy.children['textContainer 1'];
             var text = sCopy.children['textContainer 1'].children[0];
             text.position.x += textPos;
