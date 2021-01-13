@@ -599,6 +599,7 @@ var p = {
     bgEffect: 0,
     bulbAmp: 15,
     bulbFreq: 50,
+    textOn: 0,
     textSize: 50,
     textColor: new Color(1,1,1),
     textBorderColor: new Color(1,1,1),
@@ -866,10 +867,10 @@ function generateSprite() {
 
 
     // Step for each line
-    var rStep = p.size / p.lines;
+    var rStep = p.size / (parseInt(p.lines) + 1);
 
     //Build lines
-    for (x = 1; x<p.lines; x++ ) {
+    for (x = 1; x < parseInt(p.lines) + 1; x++ ) {
 
         var thisOpacity = 1- ((x * (p.fade / p.lines)) / 100);
 
@@ -902,7 +903,7 @@ function generateSprite() {
     }
  
     // Text effect
-    if (p.lineStyle == 7) {
+    if (p.textOn == 1) {
         
         var text = new PointText(new Point(p.size, p.size-20-(p.size/100*p.textYPos)));
         var textMask = new Path.Rectangle(new Point(p.size-10, 0), new Size(10, p.size));
@@ -987,7 +988,6 @@ function drawPath(sprite, path) {
     
     var capHeight = p.size;
     var capSteps = capHeight / ((101 - p.density));
-    // console.log(capSteps);
 
     // Variables for effects
     var wavePhase = 1;
@@ -1238,7 +1238,6 @@ function updateParams() {
             var uiel = document.getElementById(key);
             
             if(val.components) {
-                console.log(key);
                 uiel.value = rgb2hex(val);
             }
             else {    
@@ -1431,9 +1430,6 @@ $('#lineStyle').change(function() {
     if(this.value == 6) {
         $('#wavecollapsible').show();
     }
-    if(this.value == 7) {
-        $('#textcollapsible').show();
-    }
     if(this.value == 8) {
         $('#spikecollapsible').show();
     }
@@ -1475,3 +1471,13 @@ $('.ui-section-label').click(function(){
 $('#wedgeVal').click(function(){
     updateFromUI({wedge:50});
 });
+
+$('.tab').click(function(){
+    $('.ui-section').hide();
+    var act = $(this).data('target');
+    $('#' + act).show();
+    $('.tab').removeClass('active');
+    $(this).addClass('active');
+});
+
+$('#effect, #brush, #lines-section, #text, #stitch').hide();

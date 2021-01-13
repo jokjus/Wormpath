@@ -24,32 +24,42 @@ html
     button#log-params Log params
     button#debug Debug
 
+    #ui-tabs
+        .tab(data-target="general").active   General
+        .tab(data-target="brush") Brush
+        .tab(data-target="lines-section") Lines
+        .tab(data-target="effects") Effects
+        .tab(data-target="text") Text
+        .tab(data-target="stitch") Stitch
+
+        .brand Wormpath 2021 by Jussi Jokinen 
+            a(href='https://github.com/jokjus/Wormpath') Fork on Github
     #ui-row
-      div.ui-section
-        .ui-section-label.section 
-            span General
-        div.ui-control        
-            label Preset:
-            select#preset
-                option(value='0') Default
-                option(value='1') Big white
-                option(value='2') Golden wave
-                option(value='3') Blue ocean
-                option(value='4') Green lantern
-                option(value='5') Orange twist
-                option(value='6') Green revolt
-                option(value='7') Rainbow text
-                option(value='8') Cream
-                option(value='9') NASA
-                option(value='10') Snö
-                option(value='11') Gradient worm
-                option(value='12') *Debug*
-        +input('color', 'Bg color', 'drawingBgColor')
-        +input('range', 'Scale:', 'drawingSize', 0, 20)
-        +input('range', 'Density:', 'density', 0, 100)
-        div.ui-section#brush-section
-            .ui-section-label.section 
-                span Brush
+        div.ui-section#general
+            //- .ui-section-label.section 
+            //-     span General
+            div.ui-control        
+                label Preset:
+                select#preset
+                    option(value='0') Default
+                    option(value='1') Big white
+                    option(value='2') Golden wave
+                    option(value='3') Blue ocean
+                    option(value='4') Green lantern
+                    option(value='5') Orange twist
+                    option(value='6') Green revolt
+                    option(value='7') Rainbow text
+                    option(value='8') Cream
+                    option(value='9') NASA
+                    option(value='10') Snö
+                    option(value='11') Gradient worm
+                    option(value='12') *Debug*
+            +input('color', 'Bg color', 'drawingBgColor')
+            +input('range', 'Scale:', 'drawingSize', 0, 20)
+            +input('range', 'Density:', 'density', 0, 100)
+        div.ui-section#brush
+            //- .ui-section-label.section 
+            //-     span Brush
             div.ui-control
                 label Brush type:
                 select#bgType
@@ -112,6 +122,15 @@ html
                             option(value=false selected='') Radial
                             option(value=true) Linear
                     +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
+            
+            div.ui-control
+                label Cap:
+                select#cap
+                    option(value='0') Filled
+                    option(value='1') Open
+                    option(value='2' selected='') Horizontal
+                    option(value='3') Vertical
+                    option(value='4') Dome
         
             div.ui-control
                 label Brush effect:
@@ -123,68 +142,63 @@ html
                     +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
                     +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
         
-      div.ui-section#lines-section
-        .ui-section-label.section 
-            span Lines
-        +input('range', 'Lines:', 'lines', 0, 30)
-        +input('range', 'Width:', 'lineWidth', 0, 40)
-        +input('color', 'Line color', 'lineColor')
-        +input('range', 'Line opacity', 'lineOpacity', 0, 100)
-            
-        div.ui-control
-            label Style:
-            select#lineStyle
-                option(value='3' selected='') Custom
-                option(value='0') Unicorn
-                option(value='4') Vertical
-                option(value='5') Horizontal
-                option(value='6') Wavy
-                option(value='7') Text
-                option(value='8') Spikes
-            div.collapseui#wavecollapsible(style='display:none')
-                +input('range', 'Wave amp:', 'waveAmp', 0, 50)
-                +input('range', 'Wave freq:', 'waveFreq', 0, 100)
+        div.ui-section#lines-section
+            +input('range', 'Lines:', 'lines', 0, 30)
+            +input('range', 'Width:', 'lineWidth', 0, 40)
+            +input('color', 'Line color', 'lineColor')
+            +input('range', 'Line opacity', 'lineOpacity', 0, 100)
+                
+            div.ui-control
+                label Style:
+                select#lineStyle
+                    option(value='3' selected='') Custom
+                    option(value='0') Unicorn
+                    option(value='4') Vertical
+                    option(value='5') Horizontal
+                    option(value='6') Wavy
+                    option(value='8') Spikes
 
-            div.collapseui#textcollapsible(style='display:none')
-                +input('text', 'Text', 'textContent')
-                +input('color', 'Text color', 'textColor')
-                +input('color', 'Border color', 'textBorderColor')
-                +input('range', 'Border width:', 'textBorderWidth', 0, 100)
-                +input('range', 'Text size:', 'textSize', 0, 100)
-                +input('range', 'Text spread:', 'textSpread', 0, 100)
-                +input('range', 'Text pos:', 'textYPos', 0, 100)
-                +input('range', 'Text bump:', 'textBump', 0, 100)
+                div.collapseui#wavecollapsible(style='display:none')
+                    +input('range', 'Wave amp:', 'waveAmp', 0, 50)
+                    +input('range', 'Wave freq:', 'waveFreq', 0, 100)                                    
 
-            div.collapseui#spikecollapsible(style='display:none')
-                +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
-                +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
-        +input('range', 'Fade:', 'fade', 0, 100)
-      div.ui-section#extras-section
-        .ui-section-label.section 
-            span Extras
-        +input('range', 'Shadow:', 'shadow', 0, 100)
+                div.collapseui#spikecollapsible(style='display:none')
+                    +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
+                    +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
 
-        div.ui-control
-            label Cap:
-            select#cap
-                option(value='0') Filled
-                option(value='1') Open
-                option(value='2' selected='') Horizontal
-                option(value='3') Vertical
-                option(value='4') Dome
+            +input('range', 'Fade:', 'fade', 0, 100)
 
-        +input('range', 'Twist:', 'twist', 0, 500)
-        +input('range', 'Roundness:', 'corner', 0, 200)
-        +input('range', 'Wedge:', 'wedge', 0, 100)
-        div.ui-control
-            label Stitch:
-            select#stitchOn
-                option(value='0' selected) Off
-                option(value='1') Stitch On
-        +input('text', 'Stitch content', 'stitchContent')
-        +input('color', 'Stitch color1', 'stitchColor1')
-        +input('color', 'Stitch color2', 'stitchColor2')
-        +input('range', 'Stitch freq:', 'stitchFreq')
+        div.ui-section#effects
+            +input('range', 'Shadow:', 'shadow', 0, 100)        
+            +input('range', 'Twist:', 'twist', 0, 500)
+            +input('range', 'Roundness:', 'corner', 0, 200)
+            +input('range', 'Wedge:', 'wedge', 0, 100)
+
+        div.ui-section#text
+            div.ui-control
+                    label Text:
+                    select#textOn
+                        option(value='0' selected) Off
+                        option(value='1') Text On
+            +input('text', 'Text', 'textContent')
+            +input('color', 'Text color', 'textColor')
+            +input('color', 'Border color', 'textBorderColor')
+            +input('range', 'Border width:', 'textBorderWidth', 0, 100)
+            +input('range', 'Text size:', 'textSize', 0, 100)
+            +input('range', 'Text spread:', 'textSpread', 0, 100)
+            +input('range', 'Text pos:', 'textYPos', 0, 100)
+            +input('range', 'Text bump:', 'textBump', 0, 100)
+
+        div.ui-section#stitch
+            div.ui-control
+                label Stitch:
+                select#stitchOn
+                    option(value='0' selected) Off
+                    option(value='1') Stitch On
+            +input('text', 'Stitch content', 'stitchContent')
+            +input('color', 'Stitch color1', 'stitchColor1')
+            +input('color', 'Stitch color2', 'stitchColor2')
+            +input('range', 'Stitch freq:', 'stitchFreq')
 
        
 

@@ -37,7 +37,7 @@ canvas[resize] {
 #ui-row {
 	background-color: #eee;
 	position: absolute;
-	top: 0px;
+	top: 20px;
 	left: 0px;
 	z-index: 100;
 	display: flex;
@@ -147,10 +147,36 @@ canvas[resize] {
 	border-right: 1px solid #ddd;
 }
 
-#extras-section .ui-control, #lines-section .ui-control {
-	display: none;
-}
 
 [data-type="color"] {
 	display: none;
+}
+
+#ui-tabs {
+	position: absolute;
+	top: 0px;
+	width: 100vW;
+	display: flex;
+	background-color: #ccc;
+}
+
+.tab {
+	padding: 5px 10px;
+}
+
+.tab:hover {
+	cursor: pointer;
+}
+
+.tab.active {
+	background-color: #eee;
+}
+
+.brand {
+	padding: 5px 10px;
+	margin-left: auto;
+}
+
+input[type='color'] {
+	height: 20px;
 }
