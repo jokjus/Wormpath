@@ -904,6 +904,7 @@ function generateSprite() {
  
     // Text effect
     if (p.textOn == 1) {
+        // console.log('tehdään teksti');
         
         var text = new PointText(new Point(p.size, p.size-20-(p.size/100*p.textYPos)));
         var textMask = new Path.Rectangle(new Point(p.size-10, 0), new Size(10, p.size));
