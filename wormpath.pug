@@ -120,14 +120,14 @@ html
                     +input('range', 'Transparency:', 'brushGradientTransparency', 0, 100)
                     div.ui-control
                         label Gradient type:
-                        select#brushGradientType(type='select')
+                        select#brushGradientType
                             option(value=false selected='') Radial
                             option(value=true) Linear
                     +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
             
             div.ui-control
                 label Cap:
-                select#cap
+                select#cap 
                     option(value='0') Filled
                     option(value='1') Open
                     option(value='2' selected='') Horizontal
@@ -139,7 +139,7 @@ html
                 select#bgEffect
                     option(value='0' selected='') None
                     option(value='1') Bulp    
-                    option(value="2") Hollow
+                    option(value='2') Hollow
                 div.collapseui#bulbcollapsible(style='display:none')
                     +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
                     +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)

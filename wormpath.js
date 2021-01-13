@@ -1229,14 +1229,15 @@ function updateParams() {
 
         for (key in arg) {    
             var val = arg[key];
+            var uiel = document.getElementById(key);
+            
             if (typeof val == 'string') {
                 eval("p." + key + " = '" + val + "'");
             }
+
             else {
                 eval("p." + key + " = " + val);
-            }
-            
-            var uiel = document.getElementById(key);
+            }                    
             
             if(val.components) {
                 uiel.value = rgb2hex(val);
@@ -1247,6 +1248,7 @@ function updateParams() {
                     var k = document.getElementById(key + 'Val');
                     k.innerHTML = Math.round(val * 100) / 100;
                 }
+                
                 uiel.value = val;
             }
         }
@@ -1279,34 +1281,47 @@ function updateFromUI(val) {
 
 // UI for manipulating the effect. Initialize all properties defined in the main properties variable p 
 function buildUI() {   
+    // go through the properties in p
     for (i = 0; i< Object.keys(p).length; i++) {
         buildUIparam(Object.keys(p)[i]);
     }    
-    // build extra params
+    // Preset selector is an exection (does it need to be?)
     buildUIparam('preset');
 }
 
 // Initialize a single UI component
 function buildUIparam(param) {
+    // get the input element that is responsible for a given parameter
     var paramUIElement = document.getElementById(param);
+
+    // when the value is changed, update value to drawing and p -variable
     paramUIElement.onchange = function() {
-        if (paramUIElement.type == "color") {
-            var key = param;
-            var update = {};
-            update[key] = hex2rgb(this.value);
+        var update = {};
+
+        // If element is color, convert to RGB value for paper.js
+        if (paramUIElement.type == "color") {            
+            update[param] = hex2rgb(this.value);
             updateFromUI(eval(update));
         }
+
+        // Make sure we're sending numerical values from range inputs
+        if (paramUIElement.type == "range") {
+            update[param] = parseInt(this.value);
+            updateFromUI(update);
+        } 
+    
         else {
-            var key = param;
-            var update = {};
-            update[key] = this.value;
+            update[param] = this.value;
+        
             if (paramUIElement.id == 'preset') {
                 update = presets[this.value]
             }
+
             updateFromUI(update);
         }
     };
 
+    // Bind the input to update in real time next to input label
     paramUIElement.oninput = function() {
         var valel = document.getElementById(param + 'Val');
         if (paramUIElement.type != "color" && paramUIElement.nodeName != "SELECT" && paramUIElement.type != "text") {
@@ -1315,8 +1330,6 @@ function buildUIparam(param) {
     }
 }
 
-
-
 function centerLayers() {
     project.activeLayer.position = view.center;
     pathContainer.position = view.center;
@@ -1324,8 +1337,6 @@ function centerLayers() {
     drawing.position = view.center;
     bg.position = view.center;
 }
-
-
 
 function showProgress() {
     var prog = document.getElementById('progress');
