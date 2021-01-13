@@ -618,6 +618,8 @@ var p = {
     stitchContent: '[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]',
     stitchColor1:  new Color(0.78039, 0, 0.11765),
     stitchColor2: new Color(1,1,1),
+    stitchColor1Opacity: 100,
+    stitchColor2Opacity: 100,
     stitchFreq: 5,
     inCircleSize: 30,
     inCircleColor: new Color(0,1,0),
@@ -1063,9 +1065,15 @@ function drawPath(sprite, path) {
             var stitchContent = eval(p.stitchContent);
             var sNo = stitchContent[0].length;  // how many squares
             var sPatLength = stitchContent.length; // how long pattern
+
             var stitchColors = [];
-            stitchColors.push(p.stitchColor1)
-            stitchColors.push(p.stitchColor2)
+            var c1 = p.stitchColor1;
+            c1.alpha = p.stitchColor1Opacity / 100;
+            var c2 = p.stitchColor2;
+            c2.alpha = p.stitchColor2Opacity / 100;
+            stitchColors.push(c1);
+            stitchColors.push(c2);
+            // console.log(stitchColors);
             
             var stitchContainer = new Group({   // group for a single pattern line 
                 name: 'stitchContainer2'
@@ -1306,8 +1314,11 @@ function buildUIparam(param) {
         var update = {};
 
         // If element is color, convert to RGB value for paper.js
-        if (paramUIElement.type == "color") {            
-            update[param] = hex2rgb(this.value);
+        if (paramUIElement.type == "color") {  
+            var d = hex2rgb(this.value);
+            console.log(d)
+            update[param] = d;
+            console.log(update);
             updateFromUI(eval(update));
         }
 
@@ -1317,7 +1328,7 @@ function buildUIparam(param) {
             updateFromUI(update);
         } 
     
-        else {
+        if (paramUIElement.type != "range" && paramUIElement.type != "color") {
             update[param] = this.value;
         
             if (paramUIElement.id == 'preset') {

@@ -71,6 +71,7 @@ canvas[resize] {
 	transform: rotate(-90deg) translateX(-23px);
 	font-weight: bold;
 	text-transform: uppercase;
+	
 }
 
 #ui-row > .ui-control {
