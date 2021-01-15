@@ -1510,4 +1510,4 @@ $('.tab').click(function(){
     $(this).addClass('active');
 });
 
-$('#effect, #brush, #lines-section, #text, #stitch').hide();
+$('#effect, #brush, #lines-section, #text, #stitch, #anim').hide();

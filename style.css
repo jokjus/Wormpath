@@ -74,12 +74,16 @@ canvas[resize] {
 	
 }
 
-#ui-row > .ui-control {
+#ui-row > .ui-control, .anim-control {
 	max-width: 80px;
 	padding: 10px 7px;
 	flex-grow: 1;
 	border-right: 1px solid #ddd;
 	position: relative;
+}
+
+.anim-control {
+	max-width: 250px;
 }
 
 .ui-control label {
@@ -134,6 +138,7 @@ canvas[resize] {
 }
 
 .anim-actions {
+	padding: 15px 10px 5px;
 }
 
 .collapseui {	

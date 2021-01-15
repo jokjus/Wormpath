@@ -35,6 +35,7 @@ html
         .tab(data-target="effects") Effects
         .tab(data-target="text") Text
         .tab(data-target="stitch") Stitch
+        .tab(data-target="anim") Animation
 
         .brand Wormpath 2021 by 
             a(href='https://www.instagram.com/jussijokinen/') Jussi Jokinen 
@@ -215,38 +216,37 @@ html
             +input('color', 'Stitch color2', 'stitchColor2')
             +input('range', 'Color2 opacity:', 'stitchColor2Opacity', 0, 100)
             +input('range', 'Stitch freq:', 'stitchFreq')
-
+        
+        .ui-section#anim
+            .anim-control
+                label Rotation variation
+                input#aRotationMin(type='number' min='0' max='1000' value='')
+                input#aRotationMax(type='number' min='0' max='1000' value='')
+            //- label Wave amp:
+            //- input#aWaveAmp(type='number' min='0' max='100' value='0')
+            .anim-control
+                label Brush size variation:
+                input#aBrushSizeMin(type='number' min='0' max='1000' value='')
+                input#aBrushSizeMax(type='number' min='0' max='1000' value='')
+            .anim-control
+                label Twist variation
+                input#aTwistMin(type='number' min='0' max='500' value='')
+                input#aTwistMax(type='number' min='0' max='500' value='')
+            .anim-control
+                label Bulb amp variation
+                input#aBulbAmpMin(type='number' min='0' max='100' value='')
+                input#aBulbAmpMax(type='number' min='0' max='100' value='')    
+            .anim-control
+                label Bulb freq variation
+                input#aBulbFreqMin(type='number' min='0' max='100' value='')
+                input#aBulbFreqMax(type='number' min='0' max='100' value='')     
+            .anim-actions
+                button#step-animation(type='button') Step forward
+                button#start-animation(type='button') Start animation
+                button#stop-animation(type='button') Stop animation
+                button#start-capture(type='button') Start Capture
+                button#stop-capture(type='button') Stop Capture
+             //- .anim-control
+             //-     label Rotation increment
+             //-     input#aRotationInc(type='number' min='0' max='360' value='')
        
-
-    #animation-controls
-        //- .anim-control
-        //-     label Rotation increment
-        //-     input#aRotationInc(type='number' min='0' max='360' value='')
-        .anim-control
-            label Rotation variation
-            input#aRotationMin(type='number' min='0' max='1000' value='')
-            input#aRotationMax(type='number' min='0' max='1000' value='')
-        //- label Wave amp:
-        //- input#aWaveAmp(type='number' min='0' max='100' value='0')
-        .anim-control
-            label Brush size variation:
-            input#aBrushSizeMin(type='number' min='0' max='1000' value='')
-            input#aBrushSizeMax(type='number' min='0' max='1000' value='')
-        .anim-control
-            label Twist variation
-            input#aTwistMin(type='number' min='0' max='500' value='')
-            input#aTwistMax(type='number' min='0' max='500' value='')
-        .anim-control
-            label Bulb amp variation
-            input#aBulbAmpMin(type='number' min='0' max='100' value='')
-            input#aBulbAmpMax(type='number' min='0' max='100' value='')    
-        .anim-control
-            label Bulb freq variation
-            input#aBulbFreqMin(type='number' min='0' max='100' value='')
-            input#aBulbFreqMax(type='number' min='0' max='100' value='')     
-        .anim-actions
-            button#step-animation(type='button') Step forward
-            button#start-animation(type='button') Start animation
-            button#stop-animation(type='button') Stop animation
-            button#start-capture(type='button') Start Capture
-            button#stop-capture(type='button') Stop Capture
