@@ -18,13 +18,13 @@ html
     script(type='text/javascript' src='https://unpkg.com/acorn')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js' integrity='sha512-ehNJ9gpOQJn8EYlA3P1zUtfrh97G/6WNsjfPfpnMxbo6PX6UXHRj8Ny5MCd36w2eTPlvOSVuXLZmY+/VLVhI4A==' crossorigin='anonymous')
     script(src='CCapture.all.min.js')
-    // <script type="text/javascript" src="html2canvas.min.js"></script>
+    script(src='http://joeiddon.github.io/perlin/perlin.js')
     script(type='text/paperscript' canvas='canvas' src='wormpath.js')
   body
     canvas#canvas(resize='' hidpi="off")
 
     #progress
-    button#export-button Export SVG
+    button#export-button Export SVGx
     button#log-params Log params
     button#debug Debug
 
@@ -35,6 +35,7 @@ html
         .tab(data-target="effects") Effects
         .tab(data-target="text") Text
         .tab(data-target="stitch") Stitch
+        .tab(data-target="noise") Noise
         .tab(data-target="anim") Animation
 
         .brand Wormpath 2021 by 
@@ -215,7 +216,17 @@ html
             +input('range', 'Color1 opacity:', 'stitchColor1Opacity', 0, 100)
             +input('color', 'Stitch color2', 'stitchColor2')
             +input('range', 'Color2 opacity:', 'stitchColor2Opacity', 0, 100)
-            +input('range', 'Stitch freq:', 'stitchFreq')
+            +input('range', 'Stitch freq:', 'stitchFreq', 0, 100)        
+        div.ui-section#noise
+            div.ui-control
+                label Noise:
+                select#noiseOn
+                    option(value='0' selected) Off
+                    option(value='1') Noise On
+            +input('range', 'Noise freq:', 'noiseFreq')    
+            +input('range', 'Noise Amp:', 'noiseAmp') 
+            +input('range', 'Noise Phase:', 'noisePhase', 0, 100) 
+
         
         .ui-section#anim
             .anim-control
@@ -246,7 +257,6 @@ html
                 button#stop-animation(type='button') Stop animation
                 button#start-capture(type='button') Start Capture
                 button#stop-capture(type='button') Stop Capture
-             //- .anim-control
-             //-     label Rotation increment
-             //-     input#aRotationInc(type='number' min='0' max='360' value='')
-       
+                //- .anim-control
+                //-     label Rotation increment
+                //-     input#aRotationInc(type='number' min='0' max='360' value='')

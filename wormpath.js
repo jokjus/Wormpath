@@ -631,13 +631,18 @@ var p = {
     brushGradientBalance: 50,
     brushCrossWidth: 10,
     brushBubbleSize: 10,
-    brushBubbleAmount: 4
+    brushBubbleAmount: 4,
+    noiseOn: 0,
+    noiseFreq: 10,
+    noiseAmp: 50,
+    noisePhase: 10
 }
 
 var hue = 0;
 var scale = 1;
 var debugMode = false;
-
+var xin = p.noisePhase / 10;
+var yin = p.noisePhase;
 
 
 // Load SVG from a file
@@ -652,15 +657,6 @@ var drawingBg = new Path.Rectangle({
     size: [view.size.width, view.size.height]
 });
 bg.addChild(drawingBg);
-
-// var drawingContainer = new Path.Rectangle({
-//     point: [0, 0],
-//     size: [view.size.width, view.size.height],
-//     fillColor: 'green',
-//     selected: true
-// });
-// drawing.addChild(drawingContainer);
-
 
 //Import SVG to canvas and refresh art
 pathContainer.activate();
@@ -684,6 +680,9 @@ function generateSprite() {
     var bc = p.brushStrokeColor;
     bc.alpha = p.brushStrokeOpacity / 100;
 
+    var brushFill = p.bgColor;
+    brushFill.alpha = p.bgOpacity / 100;
+
     // Rectangle type brush
     if (p.bgType == 0) {
         
@@ -691,8 +690,7 @@ function generateSprite() {
         var brush = new Path.Rectangle({
             point: [0, 0],
             size: [p.size, p.size],
-            fillColor: p.bgColor,
-            opacity: p.bgOpacity/100,
+            fillColor: brushFill,
             blendMode: p.brushBlend,
             strokeWidth: p.brushStrokeWidth,
             strokeColor: bc
@@ -718,7 +716,6 @@ function generateSprite() {
             center: [p.size/2,p.size/2],
             radius: p.size/2,
             strokeColor: bc,
-            opacity: p.bgOpacity/100,
             strokeWidth: p.brushStrokeWidth,
             blendMode: p.brushBlend
         });
@@ -752,8 +749,7 @@ function generateSprite() {
         strC.alpha = p.lineOpacity/100;
         brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
-        brush.opacity = p.bgOpacity/100;
-        brush.fillColor = p.bgColor;
+        brush.fillColor = brushFill;
         brush.strokeWidth = p.brushStrokeWidth;
 
     }
@@ -777,8 +773,7 @@ function generateSprite() {
                 
         brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
-        brush.opacity = p.bgOpacity/100;
-        brush.fillColor = p.bgColor;
+        brush.fillColor = brushFill;
         brush.strokeWidth = p.brushStrokeWidth;
     }
 
@@ -798,8 +793,7 @@ function generateSprite() {
 
         brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
-        brush.opacity = p.bgOpacity/100;
-        brush.fillColor = p.bgColor;
+        brush.fillColor = brushFill;
         brush.strokeWidth = p.brushStrokeWidth;
     }
 
@@ -824,11 +818,10 @@ function generateSprite() {
             brush = brush.unite(c);
         }       
 
-        var fillC = p.bgColor;
-        fillC.alpha = p.bgOpacity/100;
+
         brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
-        brush.fillColor = fillC;
+        brush.fillColor = brushFill;
         brush.strokeWidth = p.brushStrokeWidth;
     }
 
@@ -991,6 +984,7 @@ function drawWord() {
 }
 
 var factorPhase = 0;
+
 // Draw sprite along a path
 function drawPath(sprite, path) {
     drawing.activate();
@@ -1015,6 +1009,9 @@ function drawPath(sprite, path) {
     var stitchCounter = 0;
     var stitchFreqCounter = 0;
     var stitchFreq = p.stitchFreq * steps/path.length;
+    xin = p.noisePhase / 10;
+    yin = p.noisePhase;
+  
 
     var points = [];
     for (k=0; k<steps; k++) {
@@ -1031,11 +1028,10 @@ function drawPath(sprite, path) {
     
     for (k=0; k<steps; k++) {
         
-
+        //First let's take a clone that we can manipulate with effects
         var sCopy = sprite.clone();    
         drawing.addChild(sCopy);
         sCopy.visible = true;
-     
         
         
         // Spike effect 
@@ -1119,6 +1115,14 @@ function drawPath(sprite, path) {
         if (p.bgEffect == 1) {
             sCopy.scale(sinBetween(1, bulbSizeChange, bulbscale));
             bulbscale += bulbadd/1000;     
+        }
+
+        // Noise effect
+        if (p.noiseOn == 1) {
+            var noiseScale = 1 + perlin.get(xin, yin) * p.noiseAmp / 50;
+            sCopy.scale(noiseScale);
+            xin += p.noiseFreq/1000 * path.length/steps / 2;
+            yin += p.noiseFreq/1000 * path.length/steps / 2;
         }
         
         
@@ -1212,6 +1216,7 @@ function drawPath(sprite, path) {
         drawing.addChild(cap);
     }
 
+    //Vertical lines only
     if (p.cap == 2) {
         var myLines = sCopy.children['lines 1'];
         var l = myLines.children.length;
@@ -1222,6 +1227,7 @@ function drawPath(sprite, path) {
         }
     }
 
+    //Horizontal lines only
     if (p.cap == 3) {
         var myLines = sCopy.children['lines 1'];
         var l = myLines.children.length;
@@ -1316,9 +1322,7 @@ function buildUIparam(param) {
         // If element is color, convert to RGB value for paper.js
         if (paramUIElement.type == "color") {  
             var d = hex2rgb(this.value);
-            console.log(d)
             update[param] = d;
-            console.log(update);
             updateFromUI(eval(update));
         }
 
@@ -1346,6 +1350,12 @@ function buildUIparam(param) {
             valel.innerHTML = this.value;
         }
     }
+}
+
+function onFrame() {
+    // console.log(perlin.get(xin,yin));
+    xin += 0.1;
+    yin += 0.1;
 }
 
 function centerLayers() {
