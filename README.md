@@ -9,6 +9,7 @@
     - Visual Studio https://code.visualstudio.com/  
     - Visual Studio Code https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
     - CodeKit https://codekitapp.com/
+ 3. Install a pug compiler. CodeKit has it built-in, for Visual Code Studio you can use eg.:https://marketplace.visualstudio.com/items?itemName=jaheenafsarsyed.live-pug-compiler 
  3. Open wormpath.html in a browser.
 
 ## Using your own paths for drawing 
