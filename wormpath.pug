@@ -251,6 +251,11 @@ html
                 label Bulb freq variation
                 input#aBulbFreqMin(type='number' min='0' max='100' value='')
                 input#aBulbFreqMax(type='number' min='0' max='100' value='')     
+            .anim-control
+                label Animation format
+                select#aFormat
+                    option(value='webm') WEBM
+                    option(value='png') PNG
             .anim-actions
                 button#step-animation(type='button') Step forward
                 button#start-animation(type='button') Start animation

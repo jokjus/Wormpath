@@ -448,14 +448,20 @@ var animP = {
     aBulbAmpMin: 0,
     aBulbAmpMax: 0,
     aBulbFreqMin: 0,
-    aBulbFreqMax: 0
+    aBulbFreqMax: 0,
+    aFormat: 'webm'
 }
 
 // Get parameters from UI and update animation parameters
-$('.anim-control input').change(function() {
+$('.anim-control input, .anim-control select').change(function() {
     var id = $(this).attr('id');
     var val = $(this).val();
-    var d = JSON.parse('{"' + id + '": ' + val + '}');
+    if (typeof val == 'string') {
+        var d = JSON.parse('{"' + id + '": "' + val + '"}');    
+    }
+    else{
+        var d = JSON.parse('{"' + id + '": ' + val + '}');
+    }
     updateAnimP(d);
 });
 
@@ -465,8 +471,12 @@ function updateAnimP() {
         var arg = arguments[key];
         for (key in arg) {    
             var val = arg[key];
-            eval("animP." + key + " = " + val);        
-
+            if (typeof val == 'string') {
+                eval("animP." + key + " = '" + val + "'");
+            }
+            else {
+                eval("animP." + key + " = " + val);        
+            }
             var uiel = document.getElementById(key);
             uiel.value = val;
             
@@ -482,12 +492,8 @@ animStep.onclick = function() {
     render();
 }
 
-// Create a capturer that exports a WebM video
-var capturer = new CCapture( { 
-    format: 'png',
-    framerate: 60,
-    quality: 100,
-    verbose: true } );  
+
+var capturer;
 
 var startCaptureBtn = document.getElementById( 'start-capture' ),
     stopCaptureBtn = document.getElementById( 'stop-capture' ),
@@ -514,6 +520,13 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
     }, false );
 
 startCaptureBtn.addEventListener( 'click', function( e ) {
+    // Create a capturer that exports a WebM video
+    capturer = new CCapture( { 
+        format: document.getElementById('aFormat').value,
+        framerate: 60,
+        quality: 100,
+        verbose: true } );  
+
     capturer.start();
     this.style.display = 'none';
     stopCaptureBtn.style.display = 'inline-block';
@@ -537,23 +550,24 @@ function animate() {
 function render() {
 
         var rotStep = parseFloat(p.rotation + animP.aRotationInc);
-        
-        var rotationNew = sinBetween(animP.aRotationMin, animP.aRotationMax, animFrame /50);
-        var brushSizeNew = sinBetween(animP.aBrushSizeMin, animP.aBrushSizeMax, animFrame /50);
-        var twistNew = sinBetween(animP.aTwistMin, animP.aTwistMax, animFrame /50);
-        var bulbAmpNew = sinBetween(animP.aBulbAmpMin, animP.aBulbAmpMax, animFrame /50);
-        var bulbFreqNew = sinBetween(animP.aBulbFreqMin, animP.aBulbFreqMax, animFrame /50);
-
+        //TODO: more features for selecting animation speed and easing, looping
         updateAnim({
-            rotation:rotationNew,
-            twist: twistNew,
-            bulbAmp: bulbAmpNew,
-            bulbFreq: bulbFreqNew,
-            size: brushSizeNew
+            rotation: sinAnim(animP.aRotationMin, animP.aRotationMax),
+            twist: sinAnim(animP.aTwistMin, animP.aTwistMax),
+            bulbAmp: sinAnim(animP.aBulbAmpMin, animP.aBulbAmpMax),
+            bulbFreq: sinAnim(animP.aBulbFreqMin, animP.aBulbFreqMax),
+            size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax)
         });
         animFrame++;
-    if( capturer ) capturer.capture( canvas );
+    
+    if( typeof capturer !== 'undefined') {
+        if( capturer) capturer.capture( canvas );
+    }    
+}
 
+function sinAnim(min, max, phase=animFrame/50) {
+    var f = sinBetween(parseInt(min), parseInt(max), phase); 
+    return f;
 }
 
 // window.onload = function() {
@@ -906,8 +920,6 @@ function generateSprite() {
  
     // Text effect
     if (p.textOn == 1) {
-        // console.log('tehdään teksti');
-        
         var text = new PointText(new Point(p.size, p.size-20-(p.size/100*p.textYPos)));
         var textMask = new Path.Rectangle(new Point(p.size-10, 0), new Size(10, p.size));
         text.content = document.getElementById('textContent').value;
@@ -1069,7 +1081,6 @@ function drawPath(sprite, path) {
             c2.alpha = p.stitchColor2Opacity / 100;
             stitchColors.push(c1);
             stitchColors.push(c2);
-            // console.log(stitchColors);
             
             var stitchContainer = new Group({   // group for a single pattern line 
                 name: 'stitchContainer2'
@@ -1353,9 +1364,6 @@ function buildUIparam(param) {
 }
 
 function onFrame() {
-    // console.log(perlin.get(xin,yin));
-    xin += 0.1;
-    yin += 0.1;
 }
 
 function centerLayers() {
