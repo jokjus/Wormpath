@@ -22,18 +22,18 @@
  Probably only works with very slow density and low line count. Screenshots are the way to go right now.
 
 ## Presets
- Hard coded for now.
+ There are a few hard coded presets, but you can save settings into your browser's localstorage. Controls are at the bottom of the screen.
 
 ## Known issues
  Drawing disappears on resize. Just change any value to redraw.
 
 ## Animation
- Animation is in very early steps, only couple of properties are supported. 
- 1. Enter the amount of change per frame to the bottom left corner inputs. Test with *Step forward* if you like.
+ Animation is in very early steps, only a few properties are supported. Animations are loops where properties change according to sine wave. 
+ 1. Enter the min/max values of each property in the animation tab. Test with *Step forward* if you like.
  2. Press *Start animation*
  3. Press *Start Capture*
  4. When all frames have been generated, *Stop capture*
  5. Press *Stop animation*
 
- The animation will be downloaded as .webm video file.
+ The animation will be downloaded in a format of choice.
  Screen capture script by https://github.com/spite/ccapture.js
