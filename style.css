@@ -13,7 +13,7 @@ canvas[resize] {
     height: 100vh;
 }
 
-#export-button, #switch, #log-params, #debug {
+#export-button, #switch, #log-params, #debug, #savePresets, #presetName {
 	position:fixed;
 	bottom:0;
 	right:0;
@@ -33,6 +33,15 @@ canvas[resize] {
 #debug {
 	right: 200px;
 }
+
+#savePresets {
+	right: 280px;
+}
+
+#presetName {
+	right: 350px;
+}
+
 
 #ui-row {
 	background-color: #eee;

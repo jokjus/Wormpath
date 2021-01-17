@@ -1,503 +1,547 @@
-
 // Set default parameters
-var presets = [
-    {
-        name: 'Default',
-        drawingBgColor: new Color(1,1,1),
-        drawingSize: 9,
-        size: 100,
-        lines: 3,
-        lineWidth: 3,
-        density: 90,
-        bgColor: new Color(0.2,0.2,0.2),
-        bgOpacity: 100,
-        lineStyle: 3,
-        waveAmp: 7,
-        waveFreq: 20,
-        shadow: 20,
-        cap: 2,
-        twist: 0,
-        lineColor: new Color(1,1,1),
-        lineOpacity: 100,
-        bgStyle: 0,
-        fade: 50,
-        corner: 0,
-        rotation: 20,
-        bgEffect: 0,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        textSize: 50,
-        textColor: new Color(1,1,1),
-        textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
-        textSpread: 0,
-        textYPos: 0  
-    },
-    {
-        name: 'Black white',
-        bgColor: hex2rgb("#ffffff"),
-        bgEffect: 0,
-        bgStyle: 0,
-        cap: 2,
-        corner: 20,
-        density: 96,
-        fade: 0,
-        lineColor: hex2rgb("#000000"),
-        lineOpacity: 100,
-        lineStyle: 3,
-        lineWidth: 3,
-        lines: 16,
-        rotation: 20,
-        shadow: 20,
-        size: 228,
-        twist: 0,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        drawingBgColor: hex2rgb("#ffffff"),
-        bgOpacity: 100
-    },
-    {
-        name: 'Golden wave',
-        bgColor: hex2rgb("#482205"),     
-        bgEffect: 0,
-        bgStyle: 0,
-        cap: 2,
-        corner: 43,
-        density: 99,
-        fade: 72,
-        lineColor: hex2rgb("#ff9500"),
-        lineStyle: 6,
-        lineWidth: 2,
-        lines: 6,
-        rotation: 20,
-        shadow: 41,
-        size: 183,
-        twist: 7,
-        waveAmp: 7,
-        waveFreq: 20,
-        waveAmp: 9,
-        waveFreq: 9,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        drawingBgColor: new Color(0.89804,0.82745, 0.76078),
-        bgOpacity: 100
-    },
-    {
-        name: 'Blue ocean',
-        bgColor: hex2rgb("#9ef0ff"),
-        bgEffect: 0,
-        bgStyle: 0,
-        cap: 2,
-        drawingBgColor: hex2rgb("#A8F5FF"),
-        corner: 48,
-        density: 99,
-        fade: 100,
-        lineColor: hex2rgb("#004B4D"),
-        lineOpacity: 100,
-        lineStyle: 6,
-        lineWidth: 6,
-        lines: 9,
-        rotation: 20,
-        shadow: 20,
-        size: 125,
-        twist: 1,
-        waveAmp: 3,
-        waveFreq: 9,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        bgOpacity: 100
-    },
+// var presets = [
+//     {
+//         name: 'Default',
+//         drawingBgColor: new Color(1,1,1),
+//         drawingSize: 9,
+//         size: 100,
+//         lines: 3,
+//         lineWidth: 3,
+//         density: 90,
+//         bgColor: new Color(0.2,0.2,0.2),
+//         bgOpacity: 100,
+//         lineStyle: 3,
+//         waveAmp: 7,
+//         waveFreq: 20,
+//         shadow: 20,
+//         cap: 2,
+//         twist: 0,
+//         lineColor: new Color(1,1,1),
+//         lineOpacity: 100,
+//         bgStyle: 0,
+//         fade: 50,
+//         corner: 0,
+//         rotation: 20,
+//         bgEffect: 0,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         textSize: 50,
+//         textColor: new Color(1,1,1),
+//         textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
+//         textSpread: 0,
+//         textYPos: 0  
+//     },
+//     {
+//         name: 'Black white',
+//         bgColor: hex2rgb("#ffffff"),
+//         bgEffect: 0,
+//         bgStyle: 0,
+//         cap: 2,
+//         corner: 20,
+//         density: 96,
+//         fade: 0,
+//         lineColor: hex2rgb("#000000"),
+//         lineOpacity: 100,
+//         lineStyle: 3,
+//         lineWidth: 3,
+//         lines: 16,
+//         rotation: 20,
+//         shadow: 20,
+//         size: 228,
+//         twist: 0,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         drawingBgColor: hex2rgb("#ffffff"),
+//         bgOpacity: 100
+//     },
+//     {
+//         name: 'Golden wave',
+//         bgColor: hex2rgb("#482205"),     
+//         bgEffect: 0,
+//         bgStyle: 0,
+//         cap: 2,
+//         corner: 43,
+//         density: 99,
+//         fade: 72,
+//         lineColor: hex2rgb("#ff9500"),
+//         lineStyle: 6,
+//         lineWidth: 2,
+//         lines: 6,
+//         rotation: 20,
+//         shadow: 41,
+//         size: 183,
+//         twist: 7,
+//         waveAmp: 7,
+//         waveFreq: 20,
+//         waveAmp: 9,
+//         waveFreq: 9,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         drawingBgColor: new Color(0.89804,0.82745, 0.76078),
+//         bgOpacity: 100
+//     },
+//     {
+//         name: 'Blue ocean',
+//         bgColor: hex2rgb("#9ef0ff"),
+//         bgEffect: 0,
+//         bgStyle: 0,
+//         cap: 2,
+//         drawingBgColor: hex2rgb("#A8F5FF"),
+//         corner: 48,
+//         density: 99,
+//         fade: 100,
+//         lineColor: hex2rgb("#004B4D"),
+//         lineOpacity: 100,
+//         lineStyle: 6,
+//         lineWidth: 6,
+//         lines: 9,
+//         rotation: 20,
+//         shadow: 20,
+//         size: 125,
+//         twist: 1,
+//         waveAmp: 3,
+//         waveFreq: 9,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         bgOpacity: 100
+//     },
 
-    {
-        name: 'Green lantern',
-        bgColor: new Color(0, 0.21961, 0.01569),
-        bgEffect: 1,
-        bgStyle: 0,
-        cap: 2,
-        corner: 22,
-        density: 90,
-        drawingBgColor: new Color(1,1,1),
-        drawingSize: 8,
-        fade: 49,
-        lineColor:  new Color(0.06667, 1, 0),
-        lineOpacity: 100,
-        lineStyle: 3,
-        lineWidth: 12,
-        lines: 3,
-        rotation: 279,
-        shadow: 35,
-        size: 67,
-        twist: 0,
-        waveAmp: 3,
-        waveFreq: 9,
-        bulbAmp: 11,
-        bulbFreq: 77,
-        bgOpacity: 100
-    },
+//     {
+//         name: 'Green lantern',
+//         bgColor: new Color(0, 0.21961, 0.01569),
+//         bgEffect: 1,
+//         bgStyle: 0,
+//         cap: 2,
+//         corner: 22,
+//         density: 90,
+//         drawingBgColor: new Color(1,1,1),
+//         drawingSize: 8,
+//         fade: 49,
+//         lineColor:  new Color(0.06667, 1, 0),
+//         lineOpacity: 100,
+//         lineStyle: 3,
+//         lineWidth: 12,
+//         lines: 3,
+//         rotation: 279,
+//         shadow: 35,
+//         size: 67,
+//         twist: 0,
+//         waveAmp: 3,
+//         waveFreq: 9,
+//         bulbAmp: 11,
+//         bulbFreq: 77,
+//         bgOpacity: 100
+//     },
 
-    {
-        name: 'Orange twist',
-        bgColor: new Color(0.01961, 0.00392, 0.91373),
-        bgEffect: 1,
-        bgStyle: 0,
-        bulbAmp: 10,
-        bulbFreq: 34,
-        cap: 2,
-        corner: 0,
-        density: 96,
-        drawingBgColor: new Color(0.96078, 0.38431, 0),
-        drawingSize: 7,
-        fade: 76,
-        lineColor: new Color(1,1,1),
-        lineOpacity: 100,
-        lineStyle: 6,
-        lineWidth: 3,
-        lines: 3,
-        rotation: 0,
-        shadow: 2,
-        size: 100,
-        twist: 0,
-        waveAmp: 7,
-        waveFreq: 20,
-        bgOpacity: 100
-    },
-    {
-        name: 'Green Revolt',
-        bgColor: new Color(0.31765, 1, 0),
-        bgEffect: 2,
-        bgStyle: 0,
-        bulbAmp: 50,
-        bulbFreq: 34,
-        cap: 2,
-        corner: 0,
-        density: 90,
-        drawingBgColor: new Color(0.05882, 0.0549, 0.06275),
-        drawingSize: 6,
-        fade: 82,
-        lineColor: new Color(1, 1, 1),
-        lineOpacity: 100,
-        lineStyle: 2,
-        lineWidth: 9,
-        lines: 9,
-        rotation: 104,
-        shadow: 61,
-        size: 73,
-        twist: 431,
-        waveAmp: 3,
-        waveFreq: 10,
-        bgOpacity: 100
-    },
-    {
-        name: 'Rainbow text',
-        bgColor: new Color(0, 0.8, 1),
-        bgEffect: 2,
-        bgOpacity: 12,
-        bgStyle: 1,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        cap: 2,
-        corner: 0,
-        density: 96,
-        drawingBgColor: new Color(0, 0.21569, 1),
-        drawingSize: 7,
-        fade: 50,
-        lineColor: new Color(1, 1, 1),
-        lineOpacity: 37,
-        lineStyle: 7,
-        lineWidth: 3,
-        lines: 3,
-        rotation: 20,
-        shadow: 0,
-        size: 177,
-        textColor: new Color(1, 1, 1),
-        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-        textSize: 35,
-        textSpread: 0,
-        textYPos: 0,
-        twist: 53,
-        waveAmp: 7,
-        waveFreq: 20
-    },
-    {
-        name: 'Cream',
-        bgColor: new Color(0.95294, 0.5098, 0.78824),
-        bgEffect: 0,
-        bgOpacity: 7,
-        bgStyle: 0,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        cap: 2,
-        corner: 111,
-        density: 97,
-        drawingBgColor: new Color( 1, 0.94118, 0.97647),
-        drawingSize: 6,
-        fade: 78,
-        lineColor: new Color(1, 0.94118, 0.98039),
-        lineOpacity: 100,
-        lineStyle: 3,
-        lineWidth: 2,
-        lines: 8,
-        rotation: 43,
-        shadow: 0,
-        size: 130,
-        textBorderColor: new Color( 1, 1,1),
-        textBorderWidth: 0,
-        textColor: new Color(1, 1,1),
-        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-        textSize: 50,
-        textSpread: 0,
-        textYPos: 0,
-        twist: 0,
-        waveAmp: 7,
-        waveFreq: 20,
-        wedge: 8
-    },
-    {
-        name:'Nasa',
-        bgColor: new Color(0.78039, 0, 0.11765),
-        bgEffect: 0,
-        bgOpacity: 100,
-        bgStyle: 0,
-        bulbAmp: 15,
-        bulbFreq: 50,
-        cap: 2,
-        corner: 27,
-        density: 98,
-        drawingBgColor: new Color(0.02745, 0.16471, 0.57255),
-        drawingSize: 9,
-        fade: 50,
-        lineColor: new Color(1, 1, 1),
-        lineOpacity: 48,
-        lineStyle: 7,
-        lineWidth: 3,
-        lines: 11,
-        rotation: 461,
-        shadow: 38,
-        size: 100,
-        spikeAmp: 10,
-        spikeFreq: 10,
-        textBorderColor: new Color(1, 1, 1),
-        textBorderWidth: 2,
-        textColor: new Color(0.78039, 0, 0.11765),
-        textContent: "That’s one small step for man, one giant leap for mankind.",
-        textSize: 37,
-        textSpread: 8,
-        textYPos: 21,
-        textBump: 5,
-        twist: 0,
-        waveAmp: 7,
-        waveFreq: 20,
-        wedge: 50,
-    },
-    {
-        name: 'Snö',
-        bgColor: new Color( 0,0,0),
-        bgEffect: 0,
-        bgOpacity: 100,
-        bgStyle: 0,
-        bgType: 0,
-        brushBlend: "normal",
-        bulbAmp: 15,
-        bulbFreq: 50,
-        cap: 1,
-        corner: "17",
-        density: "98",
-        drawingBgColor: new Color( 0, 0, 0),
-        drawingSize: "11",
-        fade: "0",
-        inCircleBlendmode: "normal",
-        inCircleColor: new Color( 0, 1, 0),
-        inCircleOpacity: 100,
-        inCircleSize: 30,
-        lineColor: new Color( 1, 1, 1),
-        lineOpacity: "100",
-        lineStyle: "6",
-        lineWidth: "2",
-        lines: "4",
-        rotation: 20,
-        shadow: 20,
-        size: "138",
-        spikeAmp: 10,
-        spikeFreq: 10,
-        stitchColor1: new Color(0.01961, 0.01961, 0.01961),
-        stitchColor2: new Color(1, 1, 1),
-        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
-        stitchFreq: 5,
-        stitchOn: "1",
-        textBorderColor: new Color( 1, 1, 1),
-        textBorderWidth: 0,
-        textBump: 0,
-        textColor: new Color( 1, 1, 1),
-        textContent: "SNOW SNOW SNOW SNOW",
-        textSize: "24",
-        textSpread: 0,
-        textYPos: "8",
-        twist: "48",
-        waveAmp: "12",
-        waveFreq: "7",
-        wedge: "58"
-    },
+//     {
+//         name: 'Orange twist',
+//         bgColor: new Color(0.01961, 0.00392, 0.91373),
+//         bgEffect: 1,
+//         bgStyle: 0,
+//         bulbAmp: 10,
+//         bulbFreq: 34,
+//         cap: 2,
+//         corner: 0,
+//         density: 96,
+//         drawingBgColor: new Color(0.96078, 0.38431, 0),
+//         drawingSize: 7,
+//         fade: 76,
+//         lineColor: new Color(1,1,1),
+//         lineOpacity: 100,
+//         lineStyle: 6,
+//         lineWidth: 3,
+//         lines: 3,
+//         rotation: 0,
+//         shadow: 2,
+//         size: 100,
+//         twist: 0,
+//         waveAmp: 7,
+//         waveFreq: 20,
+//         bgOpacity: 100
+//     },
+//     {
+//         name: 'Green Revolt',
+//         bgColor: new Color(0.31765, 1, 0),
+//         bgEffect: 2,
+//         bgStyle: 0,
+//         bulbAmp: 50,
+//         bulbFreq: 34,
+//         cap: 2,
+//         corner: 0,
+//         density: 90,
+//         drawingBgColor: new Color(0.05882, 0.0549, 0.06275),
+//         drawingSize: 6,
+//         fade: 82,
+//         lineColor: new Color(1, 1, 1),
+//         lineOpacity: 100,
+//         lineStyle: 2,
+//         lineWidth: 9,
+//         lines: 9,
+//         rotation: 104,
+//         shadow: 61,
+//         size: 73,
+//         twist: 431,
+//         waveAmp: 3,
+//         waveFreq: 10,
+//         bgOpacity: 100
+//     },
+//     {
+//         name: 'Rainbow text',
+//         bgColor: new Color(0, 0.8, 1),
+//         bgEffect: 2,
+//         bgOpacity: 12,
+//         bgStyle: 1,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         cap: 2,
+//         corner: 0,
+//         density: 96,
+//         drawingBgColor: new Color(0, 0.21569, 1),
+//         drawingSize: 7,
+//         fade: 50,
+//         lineColor: new Color(1, 1, 1),
+//         lineOpacity: 37,
+//         lineStyle: 7,
+//         lineWidth: 3,
+//         lines: 3,
+//         rotation: 20,
+//         shadow: 0,
+//         size: 177,
+//         textColor: new Color(1, 1, 1),
+//         textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+//         textSize: 35,
+//         textSpread: 0,
+//         textYPos: 0,
+//         twist: 53,
+//         waveAmp: 7,
+//         waveFreq: 20
+//     },
+//     {
+//         name: 'Cream',
+//         bgColor: new Color(0.95294, 0.5098, 0.78824),
+//         bgEffect: 0,
+//         bgOpacity: 7,
+//         bgStyle: 0,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         cap: 2,
+//         corner: 111,
+//         density: 97,
+//         drawingBgColor: new Color( 1, 0.94118, 0.97647),
+//         drawingSize: 6,
+//         fade: 78,
+//         lineColor: new Color(1, 0.94118, 0.98039),
+//         lineOpacity: 100,
+//         lineStyle: 3,
+//         lineWidth: 2,
+//         lines: 8,
+//         rotation: 43,
+//         shadow: 0,
+//         size: 130,
+//         textBorderColor: new Color( 1, 1,1),
+//         textBorderWidth: 0,
+//         textColor: new Color(1, 1,1),
+//         textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+//         textSize: 50,
+//         textSpread: 0,
+//         textYPos: 0,
+//         twist: 0,
+//         waveAmp: 7,
+//         waveFreq: 20,
+//         wedge: 8
+//     },
+//     {
+//         name:'Nasa',
+//         bgColor: new Color(0.78039, 0, 0.11765),
+//         bgEffect: 0,
+//         bgOpacity: 100,
+//         bgStyle: 0,
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         cap: 2,
+//         corner: 27,
+//         density: 98,
+//         drawingBgColor: new Color(0.02745, 0.16471, 0.57255),
+//         drawingSize: 9,
+//         fade: 50,
+//         lineColor: new Color(1, 1, 1),
+//         lineOpacity: 48,
+//         lineStyle: 7,
+//         lineWidth: 3,
+//         lines: 11,
+//         rotation: 461,
+//         shadow: 38,
+//         size: 100,
+//         spikeAmp: 10,
+//         spikeFreq: 10,
+//         textBorderColor: new Color(1, 1, 1),
+//         textBorderWidth: 2,
+//         textColor: new Color(0.78039, 0, 0.11765),
+//         textContent: "That’s one small step for man, one giant leap for mankind.",
+//         textSize: 37,
+//         textSpread: 8,
+//         textYPos: 21,
+//         textBump: 5,
+//         twist: 0,
+//         waveAmp: 7,
+//         waveFreq: 20,
+//         wedge: 50,
+//     },
+//     {
+//         name: 'Snö',
+//         bgColor: new Color( 0,0,0),
+//         bgEffect: 0,
+//         bgOpacity: 100,
+//         bgStyle: 0,
+//         bgType: 0,
+//         brushBlend: "normal",
+//         bulbAmp: 15,
+//         bulbFreq: 50,
+//         cap: 1,
+//         corner: "17",
+//         density: "98",
+//         drawingBgColor: new Color( 0, 0, 0),
+//         drawingSize: "11",
+//         fade: "0",
+//         inCircleBlendmode: "normal",
+//         inCircleColor: new Color( 0, 1, 0),
+//         inCircleOpacity: 100,
+//         inCircleSize: 30,
+//         lineColor: new Color( 1, 1, 1),
+//         lineOpacity: "100",
+//         lineStyle: "6",
+//         lineWidth: "2",
+//         lines: "4",
+//         rotation: 20,
+//         shadow: 20,
+//         size: "138",
+//         spikeAmp: 10,
+//         spikeFreq: 10,
+//         stitchColor1: new Color(0.01961, 0.01961, 0.01961),
+//         stitchColor2: new Color(1, 1, 1),
+//         stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
+//         stitchFreq: 5,
+//         stitchOn: "1",
+//         textBorderColor: new Color( 1, 1, 1),
+//         textBorderWidth: 0,
+//         textBump: 0,
+//         textColor: new Color( 1, 1, 1),
+//         textContent: "SNOW SNOW SNOW SNOW",
+//         textSize: "24",
+//         textSpread: 0,
+//         textYPos: "8",
+//         twist: "48",
+//         waveAmp: "12",
+//         waveFreq: "7",
+//         wedge: "58"
+//     },
 
-    {
-        name: 'Gradient worm',
-        bgColor: new Color(0.67059, 0.00392, 0.91373),
-        bgEffect: "1",
-        bgOpacity: 100,
-        bgStyle: "3",
-        bgType: "0",
-        brushBlend: "normal",
-        brushGradientBalance: "48",
-        brushGradientColor: new Color(0, 0.76471, 0.90196),
-        brushGradientTransparency: "100",
-        brushGradientType: "",
-        bulbAmp: 20,
-        bulbFreq: 48,
-        cap: 1,
-        corner: "24",
-        density: "95",
-        drawingBgColor: new Color(1, 1, 1),
-        drawingSize: 7,
-        fade: 50,
-        inCircleBlendmode: "normal",
-        inCircleColor: new Color(0, 1, 0),
-        inCircleOpacity: 100,
-        inCircleSize: 30,
-        lineColor: new Color(1, 1, 1),
-        lineOpacity: "47",
-        lineStyle: "6",
-        lineWidth: "11",
-        lines: "2",
-        rotation: 20,
-        shadow: "11",
-        size: 180,
-        spikeAmp: 10,
-        spikeFreq: 10,
-        stitchColor1: new Color(0.78039, 0, 0.11765),
-        stitchColor2: new Color(1, 1, 1),
-        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
-        stitchFreq: 5,
-        stitchOn: 0,
-        textBorderColor: new Color(1, 1, 1),
-        textBorderWidth: 0,
-        textBump: 0,
-        textColor: new Color(1, 1, 1),
-        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-        textSize: 50,
-        textSpread: 0,
-        textYPos: 0,
-        twist: 95.43167480579416,
-        waveAmp: "9",
-        waveFreq: "3",
-        wedge: "32"
-    },
+//     
 
-    {
-        name: 'Wavee',
-        bgColor: (0, 0, 0),
-        bgEffect: 0,
-        bgOpacity: 100,
-        bgStyle: 0,
-        bgType: 0,
-        brushBlend: "normal",
-        brushBubbleAmount: 4,
-        brushBubbleSize: 10,
-        brushCrossWidth: 10,
-        brushGradientBalance: 50,
-        brushGradientColor: (0, 0, 1),
-        brushGradientTransparency: 0,
-        brushGradientType: true,
-        brushStrokeColor: (0, 0, 0),
-        brushStrokeOpacity: 100,
-        brushStrokeWidth: 0,
-        bulbAmp: 0,
-        bulbFreq: 0,
-        cap: 1,
-        corner: 0,
-        density: 96,
-        drawingBgColor: (1, 1, 1),
-        drawingSize: 8,
-        fade: 0,
-        inCircleBlendmode: "normal",
-        inCircleColor: (0, 1, 0),
-        inCircleOpacity: 100,
-        inCircleSize: 30,
-        lineColor: (1, 1, 1),
-        lineOpacity: 100,
-        lineStyle: "6",
-        lineWidth: 12,
-        lines: 3,
-        noiseAmp: 28,
-        noiseFreq: 10,
-        noiseOn: "1",
-        noisePhase: 1.087762994515314,
-        rotation: 0,
-        shadow: 20,
-        size: 150,
-        spikeAmp: 10,
-        spikeFreq: 10,
-        stitchColor1: (0.78039, 0, 0.11765),
-        stitchColor1Opacity: 100,
-        stitchColor2: (1, 1, 1),
-        stitchColor2Opacity: 100,
-        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
-        stitchFreq: 5,
-        stitchOn: 0,
-        textBorderColor: (1, 1, 1),
-        textBorderWidth: 0,
-        textBump: 0,
-        textColor: (1, 1, 1),
-        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-        textOn: 0,
-        textSize: 50,
-        textSpread: 0,
-        textYPos: 0,
-        twist: 0,
-        waveAmp: 4,
-        waveFreq: 4,
-        waveNoiseOffset: 31,
-        waveNoiseOn: "1",
-        wedge: 50
-    },
+//     
 
-    {
-        name:'Debug',
-        bgColor: new Color(0, 0, 0.6),
-        bgEffect: 0,
-        bgOpacity: 0,
-        bgStyle: 0,
-        bgBlend: 'normal',
-        bulbAmp: 15,
-        bulbFreq: 50,
-        cap: 1,
-        corner: 0,
-        density: 0,
-        drawingBgColor: new Color(1, 1, 1),
-        drawingSize: 9,
-        fade: 0,
-        lineColor: new Color(0, 0, 0.7),
-        lineOpacity: 100,
-        lineStyle: 1,
-        lineWidth: 1,
-        lines: 2,
-        rotation: 0,
-        shadow: 0,
-        size: 50,
-        spikeAmp: 0,
-        spikeFreq: 0,
-        textBorderColor: new Color(1, 1, 1),
-        textBorderWidth: 2,
-        textColor: new Color(0.78039, 0, 0.11765),
-        textContent: "That’s one small step for man, one giant leap for mankind.",
-        textSize: 37,
-        textSpread: 8,
-        textYPos: 21,
-        textBump: 5,
-        twist: 0,
-        waveAmp: 7,
-        waveFreq: 20,
-        wedge: 50        
+//     
+
+// ];
+// localStorage.clear();
+var presets;
+var origPresets;
+
+function setOrigPresets() {
+    origPresets = [
+        {
+            name: 'Snö',
+            bgColor: new Color( 0,0,0),
+            bgEffect: 0,
+            bgOpacity: 100,
+            bgStyle: 0,
+            bgType: 0,
+            brushBlend: "normal",
+            bulbAmp: 15,
+            bulbFreq: 50,
+            cap: 1,
+            corner: "17",
+            density: "98",
+            drawingBgColor: new Color( 0, 0, 0),
+            drawingSize: "11",
+            fade: "0",
+            inCircleBlendmode: "normal",
+            inCircleColor: new Color( 0, 1, 0),
+            inCircleOpacity: 100,
+            inCircleSize: 30,
+            lineColor: new Color( 1, 1, 1),
+            lineOpacity: "100",
+            lineStyle: "6",
+            lineWidth: "2",
+            lines: "4",
+            rotation: 20,
+            shadow: 20,
+            size: "138",
+            spikeAmp: 10,
+            spikeFreq: 10,
+            stitchColor1: new Color(0.01961, 0.01961, 0.01961),
+            stitchColor2: new Color(1, 1, 1),
+            stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
+            stitchFreq: 5,
+            stitchOn: "1",
+            textBorderColor: new Color( 1, 1, 1),
+            textBorderWidth: 0,
+            textBump: 0,
+            textColor: new Color( 1, 1, 1),
+            textContent: "SNOW SNOW SNOW SNOW",
+            textSize: "24",
+            textSpread: 0,
+            textYPos: "8",
+            twist: "48",
+            waveAmp: "12",
+            waveFreq: "7",
+            wedge: "58"
+        },
+        {
+            name: 'Cream',
+            bgColor: new Color(0.95294, 0.5098, 0.78824),
+            bgEffect: 0,
+            bgOpacity: 7,
+            bgStyle: 0,
+            bulbAmp: 15,
+            bulbFreq: 50,
+            cap: 2,
+            corner: 111,
+            density: 97,
+            drawingBgColor: new Color( 1, 0.94118, 0.97647),
+            drawingSize: 6,
+            fade: 78,
+            lineColor: new Color(1, 0.94118, 0.98039),
+            lineOpacity: 100,
+            lineStyle: 3,
+            lineWidth: 2,
+            lines: 8,
+            rotation: 43,
+            shadow: 0,
+            size: 130,
+            textBorderColor: new Color( 1, 1,1),
+            textBorderWidth: 0,
+            textColor: new Color(1, 1,1),
+            textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+            textSize: 50,
+            textSpread: 0,
+            textYPos: 0,
+            twist: 0,
+            waveAmp: 7,
+            waveFreq: 20,
+            wedge: 8
+        },
+        {
+            name:'Debug',
+            bgColor: new Color(0, 0, 0.6),
+            bgEffect: 0,
+            bgOpacity: 0,
+            bgStyle: 0,
+            brushBlend: 'normal',
+            bulbAmp: 15,
+            bulbFreq: 50,
+            cap: 1,
+            corner: 0,
+            density: 0,
+            drawingBgColor: new Color(1, 1, 1),
+            drawingSize: 9,
+            fade: 0,
+            lineColor: new Color(0, 0, 0.7),
+            lineOpacity: 100,
+            lineStyle: 1,
+            lineWidth: 1,
+            lines: 2,
+            rotation: 0,
+            shadow: 0,
+            size: 50,
+            spikeAmp: 0,
+            spikeFreq: 0,
+            textBorderColor: new Color(1, 1, 1),
+            textBorderWidth: 2,
+            textColor: new Color(0.78039, 0, 0.11765),
+            textContent: "That’s one small step for man, one giant leap for mankind.",
+            textSize: 37,
+            textSpread: 8,
+            textYPos: 21,
+            textBump: 5,
+            twist: 0,
+            waveAmp: 7,
+            waveFreq: 20,
+            wedge: 50        
+        }
+    ];
+    presets = origPresets;
+}
+
+//Load saved presets from a file
+// Populate variable
+if (localStorage.getItem("presets") !== null) {  // if localstorage item exists
+    presets = JSON.parse(localStorage.getItem('presets'));
+
+    // Convert saved hex colors to RGB
+    for (i = 0; i < presets.length; i++) {    
+        for (key in presets[i]) {
+            var val = presets[i][key];   
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                presets[i][key] = hex2rgb(val);
+            }
+        };
+    }
+}
+// If localstorage is clear, get the hard coded presets
+else {
+    setOrigPresets(); 
+}
+
+populatePresetMenu();
+
+// Populate UI menu for selecting a preset     
+function populatePresetMenu() {
+    // console.log(presets.length);
+    for (i = 0; i < presets.length; i++) {    
+        addPresetMenuItem(presets[i]['name'], i);           
+    }
+} 
+
+// Add one option to presets menu
+function addPresetMenuItem(presetName, i) {
+    $('#preset').append(new Option(presetName, i));
+}
+
+
+// Save the new preset and give it a name according to the user input
+$('#savePresets').click(function(){
+    var presetName = $('#presetName').val();
+    p.name = presetName;
+    presets.push(p);
+
+    // var newP = Object.assign({}, p);
+    var newP = presets;
+
+    // Loop through all presets and convert colors to hex values
+    for (i = 0; i < newP.length; i++) {
+        for (key in newP[i]) {
+            var val = newP[i][key];   
+
+            if (typeof val === 'object') {
+                if ('red' in val) {
+                    newP[i][key] = rgb2hex2(val);
+                }
+            }
+        }
     }
 
-];
+    var js = JSON.parse(JSON.stringify(newP));
+
+    // write JSON string to a localStorage file
+    localStorage.setItem('presets', JSON.stringify(js));
+    // Add new item to the presets menu
+    addPresetMenuItem(presetName, presets.length-1);
+    // Set newly added item as selected
+    $('#preset').val(presets.length-1);
+});
+
+
 // Initialize main variables
 var runAnimation = false
 
@@ -1343,12 +1387,7 @@ function drawPath(sprite, path) {
             }
         }
     }
-
-    
-    
 }
-
-
 
 // Update all params given in function parameters 
 function updateParams() {  
@@ -1359,6 +1398,8 @@ function updateParams() {
         for (key in arg) {    
             var val = arg[key];
             var uiel = document.getElementById(key);
+            // console.log(val);
+            // console.log(uiel);
             
             if (typeof val == 'string') {
                 eval("p." + key + " = '" + val + "'");
@@ -1372,7 +1413,7 @@ function updateParams() {
                 uiel.value = rgb2hex(val);
             }
 
-            else {                    
+            else {                   
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
                     k.innerHTML = Math.round(val * 100) / 100;
@@ -1400,8 +1441,10 @@ function updateFromUI(val) {
     showProgress();
 
     setTimeout(function(){ 
-        delete val.name;
-        updateParams(val);
+        var pp = Object.assign({}, val);
+        delete pp.name;
+        // console.log(pp);
+        updateParams(pp);
         hideProgress();
      }, 50);
 }
@@ -1514,6 +1557,11 @@ function rgb2hex(rgb){
     return "#" + hex;
 }
 
+function rgb2hex2 (rgb){
+    var hex = componentToHex(rgb['red']) + componentToHex(rgb['green']) + componentToHex(rgb['blue'])
+    return "#" + hex;
+}
+
 function componentToHex(c) {
     var hex = parseInt(c*255).toString(16);
     var padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
@@ -1560,12 +1608,12 @@ $('#export-button').click(function() {
 
 $('#log-params').click(function() {
     console.log(p);
+    console.log(presets);
 });
 
 
 $('#debug').click(function() {
     debugMode = !debugMode;
-    // console.log(debugMode);
     if (debugMode) {
         words.visible = true;
         words.selected = true;
@@ -1574,7 +1622,6 @@ $('#debug').click(function() {
         words.visible = false;
         words.selected = false;
     }
-    // updateParams(p);
 });
 
 $('#lineStyle').change(function() {
@@ -1641,5 +1688,10 @@ $('.tab').click(function(){
     $(this).addClass('active');
 });
 
-$('#effect, #brush, #lines-section, #text, #stitch, #anim').hide();
+$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise').hide();
 
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};

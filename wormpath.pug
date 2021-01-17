@@ -27,6 +27,8 @@ html
     button#export-button Export SVGx
     button#log-params Log params
     button#debug Debug
+    button#savePresets Save to presets
+    input#presetName(type='text')
 
     #ui-tabs
         .tab(data-target="general").active   General
@@ -48,21 +50,8 @@ html
             //-     span General
             div.ui-control        
                 label Preset:
-                select#preset
-                    option(value='0') Default
-                    option(value='1') Big white
-                    option(value='2') Golden wave
-                    option(value='3') Blue ocean
-                    option(value='4') Green lantern
-                    option(value='5') Orange twist
-                    option(value='6') Green revolt
-                    option(value='7') Rainbow text
-                    option(value='8') Cream
-                    option(value='9') NASA
-                    option(value='10') Snö
-                    option(value='11') Gradient worm
-                    option(value='12') Wavee
-                    option(value='13') *Debug*
+                select#preset 
+                //- Select is populated programmatically from the presets.json 
             +input('color', 'Bg color', 'drawingBgColor')
             +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
