@@ -61,7 +61,8 @@ html
                     option(value='9') NASA
                     option(value='10') Snö
                     option(value='11') Gradient worm
-                    option(value='12') *Debug*
+                    option(value='12') Wavee
+                    option(value='13') *Debug*
             +input('color', 'Bg color', 'drawingBgColor')
             +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
@@ -96,7 +97,7 @@ html
                     +input('range', 'Cross Width:', 'brushCrossWidth')
                 div.collapseui#brushbubblesizecollapsible(style='display:none')
                     +input('range', 'Bubble size:', 'brushBubbleSize', 0, 100)
-                    +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 20)
+                    +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 50)
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
 
@@ -176,8 +177,10 @@ html
 
                 div.collapseui#wavecollapsible(style='display:none')
                     +input('range', 'Wave amp:', 'waveAmp', 0, 50)
-                    +input('range', 'Wave freq:', 'waveFreq', 0, 100)                                    
-
+                    +input('range', 'Wave freq:', 'waveFreq', 0, 100)     
+                    +input('checkbox', 'Noise', 'waveNoiseOn',0 , 0, 0)
+                    +input('range', 'Noise offset', 'waveNoiseOffset', 0, 100)
+                    +input('range', 'Wave phase', 'wavePhase', 0, 100)
                 div.collapseui#spikecollapsible(style='display:none')
                     +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
                     +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
@@ -236,9 +239,9 @@ html
             //- label Wave amp:
             //- input#aWaveAmp(type='number' min='0' max='100' value='0')
             .anim-control
-                label Brush size variation:
+                label#brushSizeReset Brush size variation:
                 input#aBrushSizeMin(type='number' min='0' max='1000' value='')
-                input#aBrushSizeMax(type='number' min='0' max='1000' value='')
+                input#aBrushSizeMax(type='number' min='0' max='1000' value='')                
             .anim-control
                 label Twist variation
                 input#aTwistMin(type='number' min='0' max='500' value='')
@@ -250,12 +253,22 @@ html
             .anim-control
                 label Bulb freq variation
                 input#aBulbFreqMin(type='number' min='0' max='100' value='')
-                input#aBulbFreqMax(type='number' min='0' max='100' value='')     
+                input#aBulbFreqMax(type='number' min='0' max='100' value='')  
+            .anim-control
+                label Noise phase
+                input#aNoisePhaseMin(type='number' min='0' max='100' value='')
+                input#aNoisePhaseMax(type='number' min='0' max='100' value='')     
+            .anim-control
+                label Wave phase 
+                input#aWaveNoiseOffsetMin(type='number' min='0' max='100' value='')
+                input#aWaveNoiseOffsetMax(type='number' min='0' max='100' value='')     
             .anim-control
                 label Animation format
                 select#aFormat
                     option(value='webm') WEBM
                     option(value='png') PNG
+                    option(value='jpg') JPG
+                    option(value='gif') GIF
             .anim-actions
                 button#step-animation(type='button') Step forward
                 button#start-animation(type='button') Start animation

@@ -391,6 +391,74 @@ var presets = [
     },
 
     {
+        name: 'Wavee',
+        bgColor: (0, 0, 0),
+        bgEffect: 0,
+        bgOpacity: 100,
+        bgStyle: 0,
+        bgType: 0,
+        brushBlend: "normal",
+        brushBubbleAmount: 4,
+        brushBubbleSize: 10,
+        brushCrossWidth: 10,
+        brushGradientBalance: 50,
+        brushGradientColor: (0, 0, 1),
+        brushGradientTransparency: 0,
+        brushGradientType: true,
+        brushStrokeColor: (0, 0, 0),
+        brushStrokeOpacity: 100,
+        brushStrokeWidth: 0,
+        bulbAmp: 0,
+        bulbFreq: 0,
+        cap: 1,
+        corner: 0,
+        density: 96,
+        drawingBgColor: (1, 1, 1),
+        drawingSize: 8,
+        fade: 0,
+        inCircleBlendmode: "normal",
+        inCircleColor: (0, 1, 0),
+        inCircleOpacity: 100,
+        inCircleSize: 30,
+        lineColor: (1, 1, 1),
+        lineOpacity: 100,
+        lineStyle: "6",
+        lineWidth: 12,
+        lines: 3,
+        noiseAmp: 28,
+        noiseFreq: 10,
+        noiseOn: "1",
+        noisePhase: 1.087762994515314,
+        rotation: 0,
+        shadow: 20,
+        size: 150,
+        spikeAmp: 10,
+        spikeFreq: 10,
+        stitchColor1: (0.78039, 0, 0.11765),
+        stitchColor1Opacity: 100,
+        stitchColor2: (1, 1, 1),
+        stitchColor2Opacity: 100,
+        stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
+        stitchFreq: 5,
+        stitchOn: 0,
+        textBorderColor: (1, 1, 1),
+        textBorderWidth: 0,
+        textBump: 0,
+        textColor: (1, 1, 1),
+        textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
+        textOn: 0,
+        textSize: 50,
+        textSpread: 0,
+        textYPos: 0,
+        twist: 0,
+        waveAmp: 4,
+        waveFreq: 4,
+        waveNoiseOffset: 31,
+        waveNoiseOn: "1",
+        wedge: 50
+    },
+
+    {
         name:'Debug',
         bgColor: new Color(0, 0, 0.6),
         bgEffect: 0,
@@ -449,6 +517,10 @@ var animP = {
     aBulbAmpMax: 0,
     aBulbFreqMin: 0,
     aBulbFreqMax: 0,
+    aNoisePhaseMin: 0,
+    aNoisePhaseMax: 0,
+    aWaveNoiseOffsetMin: 0,
+    aWaveNoiseOffsetMax: 0,
     aFormat: 'webm'
 }
 
@@ -556,7 +628,9 @@ function render() {
             twist: sinAnim(animP.aTwistMin, animP.aTwistMax),
             bulbAmp: sinAnim(animP.aBulbAmpMin, animP.aBulbAmpMax),
             bulbFreq: sinAnim(animP.aBulbFreqMin, animP.aBulbFreqMax),
-            size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax)
+            size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax),
+            noisePhase: sinAnim(animP.aNoisePhaseMin, animP.aNoisePhaseMax),
+            waveNoiseOffset: sinAnim(animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax)
         });
         animFrame++;
     
@@ -604,6 +678,9 @@ var p = {
     lineStyle: 3,
     waveAmp: 7,
     waveFreq: 20,
+    waveNoiseOn: 0,
+    waveNoiseOffset:0,
+    wavePhase: 10,
     shadow: 20,
     cap: 1,
     twist: 0,
@@ -657,6 +734,8 @@ var scale = 1;
 var debugMode = false;
 var xin = p.noisePhase / 10;
 var yin = p.noisePhase;
+var xinW = p.wavePhase / 10;
+var yinW = p.wavePhase;
 
 
 // Load SVG from a file
@@ -1023,6 +1102,8 @@ function drawPath(sprite, path) {
     var stitchFreq = p.stitchFreq * steps/path.length;
     xin = p.noisePhase / 10;
     yin = p.noisePhase;
+    xinW = p.wavePhase / 10;
+    yinW = p.wavePhase;
   
 
     var points = [];
@@ -1169,18 +1250,32 @@ function drawPath(sprite, path) {
         
         //Wavy line effect
         if (p.lineStyle == 6) {
+            var noiseScale;
+            
             
             var thisLines = sCopy.children['lines 1'].children;
             for (i=0; i<thisLines.length; i++) {
                 if (thisLines[i].data.direction == 'vert') {
-                    thisLines[i].scale(1, sinBetween(1, p.waveAmp, wavePhase));
+                    thisLines[i].scale(1, getNoiseScale(i));
                 }
                 if (thisLines[i].data.direction == 'horiz') {
-                    thisLines[i].scale(sinBetween(1, p.waveAmp, wavePhase), 1);
+                    thisLines[i].scale(getNoiseScale(i), 1);
                 }
             }
-            wavePhase += waveadd/70;     
+            wavePhase += waveadd/70; 
         }
+
+        function getNoiseScale(lineNro) {
+            if (p.waveNoiseOn) {
+                xinW += p.waveFreq/1000 * path.length/steps / 2;
+                yinW += p.waveFreq/1000 * path.length/steps / 2;                
+                return 1 + perlin.get(xinW + p.waveNoiseOffset, yinW + p.waveNoiseOffset * lineNro) * p.waveAmp;
+            }
+            else {
+                return sinBetween(1, p.waveAmp, wavePhase);
+            }
+        };
+
         // Wedge effect
         if (p.wedge != 50) {
             if (p.wedge <= 50) {
@@ -1253,6 +1348,8 @@ function drawPath(sprite, path) {
     
 }
 
+
+
 // Update all params given in function parameters 
 function updateParams() {  
     
@@ -1274,8 +1371,8 @@ function updateParams() {
             if(val.components) {
                 uiel.value = rgb2hex(val);
             }
-            else {    
-                
+
+            else {                    
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
                     k.innerHTML = Math.round(val * 100) / 100;
@@ -1330,6 +1427,12 @@ function buildUIparam(param) {
     paramUIElement.onchange = function() {
         var update = {};
 
+        if (paramUIElement.type == "checkbox") {
+            this.value = this.checked ? 1 : 0;
+            update[param] = this.value;
+            updateFromUI(update);
+        } 
+
         // If element is color, convert to RGB value for paper.js
         if (paramUIElement.type == "color") {  
             var d = hex2rgb(this.value);
@@ -1343,7 +1446,7 @@ function buildUIparam(param) {
             updateFromUI(update);
         } 
     
-        if (paramUIElement.type != "range" && paramUIElement.type != "color") {
+        if (paramUIElement.type == "text" || paramUIElement.nodeName == "SELECT") {
             update[param] = this.value;
         
             if (paramUIElement.id == 'preset') {
@@ -1351,6 +1454,7 @@ function buildUIparam(param) {
             }
 
             updateFromUI(update);
+            
         }
     };
 
@@ -1520,6 +1624,15 @@ $('#wedgeVal').click(function(){
     updateFromUI({wedge:50});
 });
 
+$('#brushSizeReset').click(function(){
+    animP.aBrushSizeMin = p.size;
+    animP.aBrushSizeMax = p.size;
+    $('#aBrushSizeMin').val(p.size);
+    $('#aBrushSizeMax').val(p.size);
+});
+
+
+
 $('.tab').click(function(){
     $('.ui-section').hide();
     var act = $(this).data('target');
@@ -1529,3 +1642,4 @@ $('.tab').click(function(){
 });
 
 $('#effect, #brush, #lines-section, #text, #stitch, #anim').hide();
+
