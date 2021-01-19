@@ -770,7 +770,8 @@ var p = {
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
-    noisePhase: 10
+    noisePhase: 10,
+    noisePathOffset: 0
 }
 
 var hue = 0;
@@ -1096,21 +1097,21 @@ function drawWord() {
     words.scale(myScale); 
     scale = p.drawingSize; 
 
-    //Generate new drawing sprite
-    // generateSprite();
-
+    var orderNo = 0;
+    
     //Run Draw path function for every path in the text
     
     for (h = 0; h < words.children.length; h++) {
         var thisEl = words.children[h];
         if (!thisEl.hasChildren()) {
-            drawPath(first.children['sprite'], thisEl);
+            drawPath(first.children['sprite'], thisEl, orderNo);
         }
         else {
             for (n = 0; n < thisEl.children.length; n++) {
-                drawPath(first.children['sprite'], thisEl.children[n]); 
+                drawPath(first.children['sprite'], thisEl.children[n], orderNo); 
             }
         }
+        orderNo++;
     }
 
     //Update background color
@@ -1121,7 +1122,7 @@ function drawWord() {
 var factorPhase = 0;
 
 // Draw sprite along a path
-function drawPath(sprite, path) {
+function drawPath(sprite, path, orderNo) {
     drawing.activate();
     var steps = path.length / ((101 - p.density)) * 2;
     
@@ -1144,8 +1145,8 @@ function drawPath(sprite, path) {
     var stitchCounter = 0;
     var stitchFreqCounter = 0;
     var stitchFreq = p.stitchFreq * steps/path.length;
-    xin = p.noisePhase / 10;
-    yin = p.noisePhase;
+    xin = (p.noisePhase / 10) + p.noisePathOffset/10 * orderNo;
+    yin = (p.noisePhase) +  p.noisePathOffset/10 * orderNo;
     xinW = p.wavePhase / 10;
     yinW = p.wavePhase;
   
