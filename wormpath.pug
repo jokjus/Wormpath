@@ -27,8 +27,7 @@ html
     button#export-button Export SVGx
     button#log-params Log params
     button#debug Debug
-    button#savePresets Save preset
-    input#presetName(type='text' placeholder='Preset name')
+    
 
     #ui-tabs
         .tab(data-target="general").active   General
@@ -38,6 +37,7 @@ html
         .tab(data-target="text") Text
         .tab(data-target="stitch") Stitch
         .tab(data-target="noise") Noise
+        .tab(data-target="zigzag") Zigzag
         .tab(data-target="anim") Animation
 
         .brand Wormpath 2021 by 
@@ -48,13 +48,21 @@ html
         div.ui-section#general
             //- .ui-section-label.section 
             //-     span General
-            div.ui-control        
-                label Preset:
-                select#preset 
+             
                 //- Select is populated programmatically from the presets.json 
             +input('color', 'Bg color', 'drawingBgColor')
             +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
+            +section("Presets")
+            div.ui-control        
+                label Preset:
+                select#preset
+            div.ui-generic
+                input#presetName(type='text' placeholder='Preset name')
+                button#savePresets Save preset
+            
+
+
         div.ui-section#brush
 
             div.ui-control
@@ -181,6 +189,9 @@ html
             +input('range', 'Twist:', 'twist', 0, 500)
             +input('range', 'Roundness:', 'corner', 0, 200)
             +input('range', 'Wedge:', 'wedge', 0, 100)
+            +input('range', 'Last point wiggle:', 'lastPointWiggle', 0, 100)
+            +input('range', 'Path completeness:', 'pathCompleteness', 0, 100)
+            
 
         div.ui-section#text
             div.ui-control
@@ -219,6 +230,10 @@ html
             +input('range', 'Noise Amp:', 'noiseAmp') 
             +input('range', 'Noise Phase:', 'noisePhase', 0, 100)
             +input('range', 'Paths offset:', 'noisePathOffset', 0, 100) 
+        div.ui-section#zigzag
+            +input('checkbox', 'Zigzag:', 'pathZigZagOn', 0, 0, 0)
+            +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
+            +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)    
 
         
         .ui-section#anim
@@ -251,7 +266,11 @@ html
             .anim-control
                 label Wave phase 
                 input#aWaveNoiseOffsetMin(type='number' min='0' max='100' value='')
-                input#aWaveNoiseOffsetMax(type='number' min='0' max='100' value='')     
+                input#aWaveNoiseOffsetMax(type='number' min='0' max='100' value='')  
+            .anim-control
+                label Path completeness 
+                input#aPathCompletenessMin(type='number' min='0' max='100' value='')
+                input#aPathCompletenessMax(type='number' min='0' max='100' value='')     
             .anim-control
                 label Animation format
                 select#aFormat

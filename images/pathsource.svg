@@ -5,10 +5,15 @@
 	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200 200"
 	 style="enable-background:new 0 0 200 200;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:none;stroke:#000000;stroke-width:1.5656;stroke-linecap:round;stroke-miterlimit:3.1311;}
+	.st0{fill:none;stroke:#000000;stroke-width:1.4885;stroke-linecap:round;stroke-miterlimit:2.9771;}
 </style>
-<path vector-effect="non-scaling-stroke" class="st0" d="M35.7,19.6l10.5,30.1l9.3-30.2l9.3,30.2l10.5-30.1"/>
-<path class="st0" d="M85.1,49.9c0-0.2,12.1-29.5,12.1-29.5l12.1,29.5"/>
-<path vector-effect="non-scaling-stroke" class="st0" d="M44.6,62.8l12.4,30.3l12.4-30.3"/>
-<polyline class="st0" points="106,62.5 85.9,62.5 85.9,92.8 106.7,92.8 "/>
+<path vector-effect="non-scaling-stroke" class="st0" d="M20,46.8c0.3,1.7,1,3.2,2.1,4.3c1.1,1.1,2.4,2,4,2.5
+	c1.6,0.5,3.5,0.8,5.4,0.8c2,0,3.8-0.3,5.4-1c1.6-0.6,2.8-1.5,3.6-2.7c0.9-1.2,1.3-2.5,1.3-4c0-1.8-0.6-3.2-1.8-4.2
+	c-1.2-1-3.1-2.2-6-2.4l-5.3-0.4c-1.9-0.1-3.4-0.9-4.6-1.5c-1.2-0.6-2-1.4-2.5-2.3c-0.5-0.9-0.8-2-0.8-3.2c0-1.4,0.4-2.6,1.2-3.8
+	c0.8-1.2,2-2.1,3.5-2.9c1.5-0.7,3.3-1.1,5.4-1.1c2.7,0,5,0.5,6.7,1.6c1.8,1,3,2.7,3.7,5"/>
+<path vector-effect="non-scaling-stroke" class="st0" d="M54.5,54V25.4L75.9,54V25.4"/>
+<path vector-effect="non-scaling-stroke" class="st0" d="M101.6,25c4.2-0.1,8.5,1.9,10.7,5.5c2.5,4,2.8,9.1,1.9,13.6
+	c-0.8,4.1-3.5,7.9-7.6,9.4c-3.8,1.3-8.2,1.2-11.7-0.8c-3.7-2.1-5.8-6.4-6.2-10.6c-0.4-4.6,0.2-9.8,3.5-13.3
+	C94.6,26.2,98.1,25,101.6,25L101.6,25"/>
+<path vector-effect="non-scaling-stroke" class="st0" d="M123.4,25.4l9.9,28.4l8.8-28.4l8.7,28.4l9.9-28.4"/>
 </svg>

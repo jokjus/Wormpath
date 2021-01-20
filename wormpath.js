@@ -1,349 +1,5 @@
-// Set default parameters
-// var presets = [
-//     {
-//         name: 'Default',
-//         drawingBgColor: new Color(1,1,1),
-//         drawingSize: 9,
-//         size: 100,
-//         lines: 3,
-//         lineWidth: 3,
-//         density: 90,
-//         bgColor: new Color(0.2,0.2,0.2),
-//         bgOpacity: 100,
-//         lineStyle: 3,
-//         waveAmp: 7,
-//         waveFreq: 20,
-//         shadow: 20,
-//         cap: 2,
-//         twist: 0,
-//         lineColor: new Color(1,1,1),
-//         lineOpacity: 100,
-//         bgStyle: 0,
-//         fade: 50,
-//         corner: 0,
-//         rotation: 20,
-//         bgEffect: 0,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         textSize: 50,
-//         textColor: new Color(1,1,1),
-//         textContent: 'Wovon man nicht sprechen kann, darüber muß man schweigen.',
-//         textSpread: 0,
-//         textYPos: 0  
-//     },
-//     {
-//         name: 'Black white',
-//         bgColor: hex2rgb("#ffffff"),
-//         bgEffect: 0,
-//         bgStyle: 0,
-//         cap: 2,
-//         corner: 20,
-//         density: 96,
-//         fade: 0,
-//         lineColor: hex2rgb("#000000"),
-//         lineOpacity: 100,
-//         lineStyle: 3,
-//         lineWidth: 3,
-//         lines: 16,
-//         rotation: 20,
-//         shadow: 20,
-//         size: 228,
-//         twist: 0,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         drawingBgColor: hex2rgb("#ffffff"),
-//         bgOpacity: 100
-//     },
-//     {
-//         name: 'Golden wave',
-//         bgColor: hex2rgb("#482205"),     
-//         bgEffect: 0,
-//         bgStyle: 0,
-//         cap: 2,
-//         corner: 43,
-//         density: 99,
-//         fade: 72,
-//         lineColor: hex2rgb("#ff9500"),
-//         lineStyle: 6,
-//         lineWidth: 2,
-//         lines: 6,
-//         rotation: 20,
-//         shadow: 41,
-//         size: 183,
-//         twist: 7,
-//         waveAmp: 7,
-//         waveFreq: 20,
-//         waveAmp: 9,
-//         waveFreq: 9,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         drawingBgColor: new Color(0.89804,0.82745, 0.76078),
-//         bgOpacity: 100
-//     },
-//     {
-//         name: 'Blue ocean',
-//         bgColor: hex2rgb("#9ef0ff"),
-//         bgEffect: 0,
-//         bgStyle: 0,
-//         cap: 2,
-//         drawingBgColor: hex2rgb("#A8F5FF"),
-//         corner: 48,
-//         density: 99,
-//         fade: 100,
-//         lineColor: hex2rgb("#004B4D"),
-//         lineOpacity: 100,
-//         lineStyle: 6,
-//         lineWidth: 6,
-//         lines: 9,
-//         rotation: 20,
-//         shadow: 20,
-//         size: 125,
-//         twist: 1,
-//         waveAmp: 3,
-//         waveFreq: 9,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         bgOpacity: 100
-//     },
-
-//     {
-//         name: 'Green lantern',
-//         bgColor: new Color(0, 0.21961, 0.01569),
-//         bgEffect: 1,
-//         bgStyle: 0,
-//         cap: 2,
-//         corner: 22,
-//         density: 90,
-//         drawingBgColor: new Color(1,1,1),
-//         drawingSize: 8,
-//         fade: 49,
-//         lineColor:  new Color(0.06667, 1, 0),
-//         lineOpacity: 100,
-//         lineStyle: 3,
-//         lineWidth: 12,
-//         lines: 3,
-//         rotation: 279,
-//         shadow: 35,
-//         size: 67,
-//         twist: 0,
-//         waveAmp: 3,
-//         waveFreq: 9,
-//         bulbAmp: 11,
-//         bulbFreq: 77,
-//         bgOpacity: 100
-//     },
-
-//     {
-//         name: 'Orange twist',
-//         bgColor: new Color(0.01961, 0.00392, 0.91373),
-//         bgEffect: 1,
-//         bgStyle: 0,
-//         bulbAmp: 10,
-//         bulbFreq: 34,
-//         cap: 2,
-//         corner: 0,
-//         density: 96,
-//         drawingBgColor: new Color(0.96078, 0.38431, 0),
-//         drawingSize: 7,
-//         fade: 76,
-//         lineColor: new Color(1,1,1),
-//         lineOpacity: 100,
-//         lineStyle: 6,
-//         lineWidth: 3,
-//         lines: 3,
-//         rotation: 0,
-//         shadow: 2,
-//         size: 100,
-//         twist: 0,
-//         waveAmp: 7,
-//         waveFreq: 20,
-//         bgOpacity: 100
-//     },
-//     {
-//         name: 'Green Revolt',
-//         bgColor: new Color(0.31765, 1, 0),
-//         bgEffect: 2,
-//         bgStyle: 0,
-//         bulbAmp: 50,
-//         bulbFreq: 34,
-//         cap: 2,
-//         corner: 0,
-//         density: 90,
-//         drawingBgColor: new Color(0.05882, 0.0549, 0.06275),
-//         drawingSize: 6,
-//         fade: 82,
-//         lineColor: new Color(1, 1, 1),
-//         lineOpacity: 100,
-//         lineStyle: 2,
-//         lineWidth: 9,
-//         lines: 9,
-//         rotation: 104,
-//         shadow: 61,
-//         size: 73,
-//         twist: 431,
-//         waveAmp: 3,
-//         waveFreq: 10,
-//         bgOpacity: 100
-//     },
-//     {
-//         name: 'Rainbow text',
-//         bgColor: new Color(0, 0.8, 1),
-//         bgEffect: 2,
-//         bgOpacity: 12,
-//         bgStyle: 1,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         cap: 2,
-//         corner: 0,
-//         density: 96,
-//         drawingBgColor: new Color(0, 0.21569, 1),
-//         drawingSize: 7,
-//         fade: 50,
-//         lineColor: new Color(1, 1, 1),
-//         lineOpacity: 37,
-//         lineStyle: 7,
-//         lineWidth: 3,
-//         lines: 3,
-//         rotation: 20,
-//         shadow: 0,
-//         size: 177,
-//         textColor: new Color(1, 1, 1),
-//         textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-//         textSize: 35,
-//         textSpread: 0,
-//         textYPos: 0,
-//         twist: 53,
-//         waveAmp: 7,
-//         waveFreq: 20
-//     },
-//     {
-//         name: 'Cream',
-//         bgColor: new Color(0.95294, 0.5098, 0.78824),
-//         bgEffect: 0,
-//         bgOpacity: 7,
-//         bgStyle: 0,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         cap: 2,
-//         corner: 111,
-//         density: 97,
-//         drawingBgColor: new Color( 1, 0.94118, 0.97647),
-//         drawingSize: 6,
-//         fade: 78,
-//         lineColor: new Color(1, 0.94118, 0.98039),
-//         lineOpacity: 100,
-//         lineStyle: 3,
-//         lineWidth: 2,
-//         lines: 8,
-//         rotation: 43,
-//         shadow: 0,
-//         size: 130,
-//         textBorderColor: new Color( 1, 1,1),
-//         textBorderWidth: 0,
-//         textColor: new Color(1, 1,1),
-//         textContent: "Wovon man nicht sprechen kann, darüber muß man schweigen.",
-//         textSize: 50,
-//         textSpread: 0,
-//         textYPos: 0,
-//         twist: 0,
-//         waveAmp: 7,
-//         waveFreq: 20,
-//         wedge: 8
-//     },
-//     {
-//         name:'Nasa',
-//         bgColor: new Color(0.78039, 0, 0.11765),
-//         bgEffect: 0,
-//         bgOpacity: 100,
-//         bgStyle: 0,
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         cap: 2,
-//         corner: 27,
-//         density: 98,
-//         drawingBgColor: new Color(0.02745, 0.16471, 0.57255),
-//         drawingSize: 9,
-//         fade: 50,
-//         lineColor: new Color(1, 1, 1),
-//         lineOpacity: 48,
-//         lineStyle: 7,
-//         lineWidth: 3,
-//         lines: 11,
-//         rotation: 461,
-//         shadow: 38,
-//         size: 100,
-//         spikeAmp: 10,
-//         spikeFreq: 10,
-//         textBorderColor: new Color(1, 1, 1),
-//         textBorderWidth: 2,
-//         textColor: new Color(0.78039, 0, 0.11765),
-//         textContent: "That’s one small step for man, one giant leap for mankind.",
-//         textSize: 37,
-//         textSpread: 8,
-//         textYPos: 21,
-//         textBump: 5,
-//         twist: 0,
-//         waveAmp: 7,
-//         waveFreq: 20,
-//         wedge: 50,
-//     },
-//     {
-//         name: 'Snö',
-//         bgColor: new Color( 0,0,0),
-//         bgEffect: 0,
-//         bgOpacity: 100,
-//         bgStyle: 0,
-//         bgType: 0,
-//         brushBlend: "normal",
-//         bulbAmp: 15,
-//         bulbFreq: 50,
-//         cap: 1,
-//         corner: "17",
-//         density: "98",
-//         drawingBgColor: new Color( 0, 0, 0),
-//         drawingSize: "11",
-//         fade: "0",
-//         inCircleBlendmode: "normal",
-//         inCircleColor: new Color( 0, 1, 0),
-//         inCircleOpacity: 100,
-//         inCircleSize: 30,
-//         lineColor: new Color( 1, 1, 1),
-//         lineOpacity: "100",
-//         lineStyle: "6",
-//         lineWidth: "2",
-//         lines: "4",
-//         rotation: 20,
-//         shadow: 20,
-//         size: "138",
-//         spikeAmp: 10,
-//         spikeFreq: 10,
-//         stitchColor1: new Color(0.01961, 0.01961, 0.01961),
-//         stitchColor2: new Color(1, 1, 1),
-//         stitchContent: "[[1,0,1,1,0,1,1,0,1], [0,1,0,1,1,1,0,1,0], [0,0,1,0,1,0,1,0,0], [0,0,0,1,0,1,0,0,0], [0,0,0,0,1,0,0,0,0],[0,0,0,1,0,1,0,0,0],[0,0,1,0,1,0,1,0,0],[0,1,0,1,1,1,0,1,0]]",
-//         stitchFreq: 5,
-//         stitchOn: "1",
-//         textBorderColor: new Color( 1, 1, 1),
-//         textBorderWidth: 0,
-//         textBump: 0,
-//         textColor: new Color( 1, 1, 1),
-//         textContent: "SNOW SNOW SNOW SNOW",
-//         textSize: "24",
-//         textSpread: 0,
-//         textYPos: "8",
-//         twist: "48",
-//         waveAmp: "12",
-//         waveFreq: "7",
-//         wedge: "58"
-//     },
-
-//     
-
-//     
-
-//     
-
-// ];
-// localStorage.clear();
+// Use with caution!
+// localStorage.clear(); 
 var presets;
 var origPresets;
 
@@ -595,13 +251,13 @@ function updateAnimP() {
             }
             var uiel = document.getElementById(key);
             uiel.value = val;
-            
         }
     }
 }
 
 updateAnimP(animP);
 
+//Step animation one frame forward
 var animStep = document.getElementById('step-animation');
 
 animStep.onclick = function() {
@@ -666,6 +322,7 @@ function animate() {
 function render() {
 
         var rotStep = parseFloat(p.rotation + animP.aRotationInc);
+        wiggleT += 0.02;
         //TODO: more features for selecting animation speed and easing, looping
         updateAnim({
             rotation: sinAnim(animP.aRotationMin, animP.aRotationMax),
@@ -674,7 +331,8 @@ function render() {
             bulbFreq: sinAnim(animP.aBulbFreqMin, animP.aBulbFreqMax),
             size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax),
             noisePhase: sinAnim(animP.aNoisePhaseMin, animP.aNoisePhaseMax),
-            waveNoiseOffset: sinAnim(animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax)
+            waveNoiseOffset: sinAnim(animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax),
+            pathCompleteness: sinAnim(animP.aPathCompletenessMin, animP.aPathCompletenessMax)
         });
         animFrame++;
     
@@ -771,7 +429,12 @@ var p = {
     noiseFreq: 10,
     noiseAmp: 50,
     noisePhase: 10,
-    noisePathOffset: 0
+    noisePathOffset: 0,
+    lastPointWiggle: 0,
+    pathCompleteness: 100,
+    pathZigZagOn: 0,
+    pathZigzagAmp: 15,
+    pathZigzagFreq: 10
 }
 
 var hue = 0;
@@ -781,6 +444,7 @@ var xin = p.noisePhase / 10;
 var yin = p.noisePhase;
 var xinW = p.wavePhase / 10;
 var yinW = p.wavePhase;
+var wiggleT = 0;
 
 
 // Load SVG from a file
@@ -801,8 +465,8 @@ pathContainer.activate();
 project.importSVG(url, function(item) {
     words = item;
     words.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
+    words.visible = true;
 
-    words.visible = false;
     pathContainer.position = view.center;
     // centerLayers();
     updateParams(p);
@@ -1092,17 +756,69 @@ function drawWord() {
     //Delete all previosly drawn worms
     drawing.removeChildren();
 
+    var myWords = words.clone();    
+
     //Scale SVG
     var myScale = p.drawingSize / scale;
-    words.scale(myScale); 
-    scale = p.drawingSize; 
+    myWords.scale(p.drawingSize); 
+    // scale = p.drawingSize; 
 
-    var orderNo = 0;
-    
+    //Effect: Last point wiggle
+    for (var i = 0; i < myWords.children.length; i++) {
+        var ls = myWords.children[i].lastSegment;
+        var xChange = perlin.get(wiggleT+i, wiggleT+i) * p.lastPointWiggle /10;
+        ls.point.x += xChange;
+    }
+
+    //Effect: Zigzag
+    if (p.pathZigZagOn == 1) {
+        var amount = 100 - p.pathZigzagFreq;
+        var amplitude = p.pathZigzagAmp;
+        
+
+        for (var path of myWords.children) {
+            thisPathCount = Math.floor(path.length / amount);
+            // console.log(path.length + '–len_amount; ' + amount);
+            var length = path.length;
+            var newPoints = [];
+
+            // Add points to a path defined by amount -variable
+            for (i=0; i<thisPathCount; i++) {
+                var offset = i / thisPathCount * length;
+                var point = path.getPointAt(offset);                   
+                newPoints.push(point);
+            }
+
+            path.removeSegments();
+            
+            for (i=0; i<thisPathCount; i++) {
+                path.insert(i, newPoints[i]);
+            }
+            
+            // Move points in zigzag
+            for (i=1; i<thisPathCount; i++) {
+                var normal = path.getNormalAt(path.segments[i].location) * amplitude;
+                if (isEven(i)) {
+                    path.segments[i].point += normal;
+                }
+                else {
+                    path.segments[i].point -= normal;
+                }
+            }
+            
+            path.smooth();
+        }
+
+        
+    }
+
+    // variable for keeping track of paths drawn
+    var orderNo = 0;    
+
     //Run Draw path function for every path in the text
     
-    for (h = 0; h < words.children.length; h++) {
-        var thisEl = words.children[h];
+    for (h = 0; h < myWords.children.length; h++) {
+        var thisEl = myWords.children[h];
         if (!thisEl.hasChildren()) {
             drawPath(first.children['sprite'], thisEl, orderNo);
         }
@@ -1116,7 +832,7 @@ function drawWord() {
 
     //Update background color
     drawingBg.fillColor = p.drawingBgColor;
-    
+    myWords.remove();
 }
 
 var factorPhase = 0;
@@ -1152,7 +868,7 @@ function drawPath(sprite, path, orderNo) {
   
 
     var points = [];
-    for (k=0; k<steps; k++) {
+    for (k=0; k<steps*p.pathCompleteness/100; k++) {
         points.push(path.getPointAt(path.length - (k*(path.length/steps))));
     }
 
@@ -1471,6 +1187,7 @@ function buildUIparam(param) {
     paramUIElement.onchange = function() {
         var update = {};
 
+        // If element is checkbox, toggle checked property
         if (paramUIElement.type == "checkbox") {
             this.value = this.checked ? 1 : 0;
             update[param] = this.value;
@@ -1689,7 +1406,7 @@ $('.tab').click(function(){
     $(this).addClass('active');
 });
 
-$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise').hide();
+$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise, #zigzag').hide();
 
 if (!Array.prototype.last){
     Array.prototype.last = function(){

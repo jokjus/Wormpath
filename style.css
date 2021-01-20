@@ -13,7 +13,7 @@ canvas[resize] {
     height: 100vh;
 }
 
-#export-button, #switch, #log-params, #debug, #savePresets, #presetName {
+#export-button, #switch, #log-params, #debug {
 	position:fixed;
 	bottom:0;
 	right:0;
@@ -35,11 +35,11 @@ canvas[resize] {
 }
 
 #savePresets {
-	right: 280px;
 }
 
 #presetName {
-	right: 390px;
+	min-width: 100px;
+	margin-right: 10px;
 }
 
 
@@ -194,4 +194,11 @@ canvas[resize] {
 
 input[type='color'] {
 	height: 20px;
+}
+
+.ui-generic {
+	padding: 15px 7px;
+	flex-grow: 1;
+	border-right: 1px solid #ddd;
+	position: relative;
 }
