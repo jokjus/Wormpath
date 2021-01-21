@@ -8,6 +8,19 @@ mixin section(label)
     .ui-section-label.section 
         span=label
 
+
+
+mixin select(label, name, options)
+    div(class='ui-control')&attributes(attributes)
+        label=label
+        select(id=name)
+            each myOption in options
+                if myOption.selected
+                    option(value=myOption.value selected)=myOption.label
+                else
+                    option(value=myOption.value)=myOption.label
+
+
 doctype html
 html
   head
@@ -64,37 +77,39 @@ html
 
 
         div.ui-section#brush
+            +select('Brush type:', 'bgType', [
+                        {label: 'Square', value: 0},
+                        {label: 'Circle', value: 1},
+                        {label: 'Double diamond', value: 2},
+                        {label: 'Cross', value: 3},
+                        {label: 'Pyramid', value: 4},
+                        {label: 'Bubble', value: 5}
+                    ])  
+            div.collapseui#brushtypecollapsible(style='display:none')
+                +input('range', 'Innercircle size', 'inCircleSize')
+                +input('color', 'Innercircle color', 'inCircleColor')
+                +input('range', 'Innercircle opacity', 'inCircleOpacity')
+                +select('Brush color style:', 'inCircleBlendmode', [
+                        {label: 'Normal', value: 'normal'},
+                        {label: 'Add', value: 'add'},
+                        {label: 'Screen', value: 'screen'},
+                        {label: 'Multiply', value: 'multiply'},
+                        {label: 'Color-dodge', value: 'color-dodge'},
+                        {label: 'Darken', value: 'darker'},
+                        {label: 'Overlay', value: 'overlay'},
+                        {label: 'Soft light', value: 'soft-light'},
+                        {label: 'Hard light', value: 'hard-light'}
+                    ])
+            div.collapseui#brushcrosscollapsible(style='display:none')
+                +input('range', 'Cross Width:', 'brushCrossWidth')
+            div.collapseui#brushbubblesizecollapsible(style='display:none')
+                +input('range', 'Bubble size:', 'brushBubbleSize', 0, 100)
+                +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 50)
+                +select('Brush type:', 'brushBubbleType', [
+                        { label: 'Circle', value: 0 }, 
+                        { label: 'Rectangle', value: 1 }
+                    ])
 
-            div.ui-control
-                label Brush type:
-                select#bgType
-                    option(value='0' selected='') Square
-                    option(value='1') Circle
-                    option(value='2') Double diamond
-                    option(value='3') Cross
-                    option(value='4') Pyramid
-                    option(value='5') Bubble
-                div.collapseui#brushtypecollapsible(style='display:none')
-                    +input('range', 'Innercircle size', 'inCircleSize')
-                    +input('color', 'Innercircle color', 'inCircleColor')
-                    +input('range', 'Innercircle opacity', 'inCircleOpacity')
-                    div.ui-control
-                        label Brush color style:
-                        select#inCircleBlendmode
-                            option(value='normal' selected='') Normal
-                            option(value='add') Add
-                            option(value='screen') Screen
-                            option(value='multiply') Multiply
-                            option(value='color-dodge') Color-dodge
-                            option(value='darker') Darken
-                            option(value='overlay') Overlay
-                            option(value='soft-light') Soft-light
-                            option(value='hard-light') Hard-light
-                div.collapseui#brushcrosscollapsible(style='display:none')
-                    +input('range', 'Cross Width:', 'brushCrossWidth')
-                div.collapseui#brushbubblesizecollapsible(style='display:none')
-                    +input('range', 'Bubble size:', 'brushBubbleSize', 0, 100)
-                    +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 50)
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
 
@@ -130,31 +145,28 @@ html
                 div.collapseui#brushgradientcollapsible(style='display:none')
                     +input('color', 'Gradient color', 'brushGradientColor')
                     +input('range', 'Transparency:', 'brushGradientTransparency', 0, 100)
-                    div.ui-control
-                        label Gradient type:
-                        select#brushGradientType
-                            option(value=false selected='') Radial
-                            option(value=true) Linear
+                    +select('Gradient type:', 'brushGradientType', [
+                        {label: 'Radial', value: 1},
+                        {label: 'Linear', value: 0}
+                    ])           
                     +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
-            
-            div.ui-control
-                label Cap:
-                select#cap 
-                    option(value='0') Filled
-                    option(value='1') Open
-                    option(value='2' selected='') Horizontal
-                    option(value='3') Vertical
-                    option(value='4') Dome
-        
-            div.ui-control
-                label Brush effect:
-                select#bgEffect
-                    option(value='0' selected='') None
-                    option(value='1') Bulp    
-                    option(value='2') Hollow
-                div.collapseui#bulbcollapsible(style='display:none')
-                    +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
-                    +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
+
+            +select('Cap:', 'cap', [
+                    {label: 'Filled', value: 0},
+                    {label: 'Open', value: 1},
+                    {label: 'Horizontal', value: 2},
+                    {label: 'Vertical', value: 3},
+                    {label: 'Dome', value: 4}
+                ])                    
+   
+            +select('Brush effect:', 'bgEffect', [
+                    {label: 'None', value: 0},
+                    {label: 'Bulp', value: 1},
+                    {label: 'Hollow', value: 2}
+                ])
+            div.collapseui#bulbcollapsible(style='display:none')
+                +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
+                +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
         
         div.ui-section#lines-section
             +input('range', 'Lines:', 'lines', 0, 30)
@@ -191,14 +203,9 @@ html
             +input('range', 'Wedge:', 'wedge', 0, 100)
             +input('range', 'Last point wiggle:', 'lastPointWiggle', 0, 100)
             +input('range', 'Path completeness:', 'pathCompleteness', 0, 100)
-            
 
         div.ui-section#text
-            div.ui-control
-                    label Text:
-                    select#textOn
-                        option(value='0' selected) Off
-                        option(value='1') Text On
+            +input('checkbox', 'Text', 'textOn', 0, 0, 0)
             +input('text', 'Text', 'textContent')
             +input('color', 'Text color', 'textColor')
             +input('color', 'Border color', 'textBorderColor')
@@ -209,27 +216,21 @@ html
             +input('range', 'Text bump:', 'textBump', 0, 100)
 
         div.ui-section#stitch
-            div.ui-control
-                label Stitch:
-                select#stitchOn
-                    option(value='0' selected) Off
-                    option(value='1') Stitch On
+            +input('checkbox', 'Stitch', 'stitchOn', 0, 0, 0)
             +input('text', 'Stitch content', 'stitchContent')
             +input('color', 'Stitch color1', 'stitchColor1')
             +input('range', 'Color1 opacity:', 'stitchColor1Opacity', 0, 100)
             +input('color', 'Stitch color2', 'stitchColor2')
             +input('range', 'Color2 opacity:', 'stitchColor2Opacity', 0, 100)
             +input('range', 'Stitch freq:', 'stitchFreq', 0, 100)        
+
         div.ui-section#noise
-            div.ui-control
-                label Noise:
-                select#noiseOn
-                    option(value='0' selected) Off
-                    option(value='1') Noise On
+            +input('checkbox', 'Noise', 'noiseOn', 0, 0, 0)
             +input('range', 'Noise freq:', 'noiseFreq')    
             +input('range', 'Noise Amp:', 'noiseAmp') 
             +input('range', 'Noise Phase:', 'noisePhase', 0, 100)
-            +input('range', 'Paths offset:', 'noisePathOffset', 0, 100) 
+            +input('range', 'Paths offset:', 'noisePathOffset', 0, 100)
+
         div.ui-section#zigzag
             +input('checkbox', 'Zigzag:', 'pathZigZagOn', 0, 0, 0)
             +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
@@ -237,6 +238,9 @@ html
 
         
         .ui-section#anim
+            div
+                label Animation speed
+                input#aSpeed(type='number' value=20)
             .anim-control
                 label Rotation variation
                 input#aRotationMin(type='number' min='0' max='1000' value='')
@@ -270,7 +274,11 @@ html
             .anim-control
                 label Path completeness 
                 input#aPathCompletenessMin(type='number' min='0' max='100' value='')
-                input#aPathCompletenessMax(type='number' min='0' max='100' value='')     
+                input#aPathCompletenessMax(type='number' min='0' max='100' value='') 
+            .anim-control
+                label Zigzag amplitude 
+                input#aZigzagAmpMin(type='number' min='0' max='100' value='')
+                input#aZigzagAmpMax(type='number' min='0' max='100' value='')         
             .anim-control
                 label Animation format
                 select#aFormat

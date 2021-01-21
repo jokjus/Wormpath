@@ -207,8 +207,8 @@ var animFrame = 0;
 // Animation parameters
 var animP = {
     // aRotationInc: 1,
-    aRotationMin: 0,
-    aRotationMax: 0,
+    aRotationMin: 20,
+    aRotationMax: 20,
     aBrushSizeMin: 80,
     aBrushSizeMax: 80,
     aTwistMin: 0,
@@ -221,6 +221,10 @@ var animP = {
     aNoisePhaseMax: 0,
     aWaveNoiseOffsetMin: 0,
     aWaveNoiseOffsetMax: 0,
+    aPathCompletenessMin: 100,
+    aPathCompletenessMax: 100,
+    aZigzagAmpMin: 0,
+    aZigzagAmpMax: 0,
     aFormat: 'webm'
 }
 
@@ -323,6 +327,7 @@ function render() {
 
         var rotStep = parseFloat(p.rotation + animP.aRotationInc);
         wiggleT += 0.02;
+        // wiggleT += document.getElementById('aSpeed').value / 1000;
         //TODO: more features for selecting animation speed and easing, looping
         updateAnim({
             rotation: sinAnim(animP.aRotationMin, animP.aRotationMax),
@@ -332,7 +337,8 @@ function render() {
             size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax),
             noisePhase: sinAnim(animP.aNoisePhaseMin, animP.aNoisePhaseMax),
             waveNoiseOffset: sinAnim(animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax),
-            pathCompleteness: sinAnim(animP.aPathCompletenessMin, animP.aPathCompletenessMax)
+            pathCompleteness: sinAnim(animP.aPathCompletenessMin, animP.aPathCompletenessMax),
+            pathZigzagAmp: sinAnim(animP.aZigzagAmpMin, animP.aZigzagAmpMax)
         });
         animFrame++;
     
@@ -342,6 +348,7 @@ function render() {
 }
 
 function sinAnim(min, max, phase=animFrame/50) {
+    phase = animFrame / document.getElementById('aSpeed').value;
     var f = sinBetween(parseInt(min), parseInt(max), phase); 
     return f;
 }
@@ -384,7 +391,7 @@ var p = {
     waveNoiseOffset:0,
     wavePhase: 10,
     shadow: 20,
-    cap: 1,
+    cap: 2,
     twist: 0,
     lineColor: new Color(1,1,1),
     lineOpacity: 100,
@@ -420,11 +427,12 @@ var p = {
     inCircleBlendmode: 'normal',
     brushGradientColor: new Color(0,0,1),
     brushGradientTransparency: 0,
-    brushGradientType: true,
+    brushGradientType: 1,
     brushGradientBalance: 50,
     brushCrossWidth: 10,
     brushBubbleSize: 10,
     brushBubbleAmount: 4,
+    brushBubbleType: 0,
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
@@ -509,7 +517,6 @@ function generateSprite() {
          recB.opacity = p.shadow/100;
     }
 
-
     // Circle brush type
     if (p.bgType == 1) {
         // Outer circle
@@ -532,7 +539,6 @@ function generateSprite() {
             blendMode: p.inCircleBlendmode
         });
     }
-
 
     //Double diamond brush
     if (p.bgType == 2) {
@@ -612,10 +618,18 @@ function generateSprite() {
 
         for (b = 0; b < p.brushBubbleAmount; b++) {
             var bcenter = e.getPointAt(e.length / p.brushBubbleAmount * b);
-            var c = new Path.Circle({
-                center: bcenter,
-                radius: rad,
-            });
+            if (p.brushBubbleType == 0) {
+                var c = new Path.Circle({
+                    center: bcenter,
+                    radius: rad,
+                });
+            }   
+            if (p.brushBubbleType == 1) {
+                var c = new Path.Rectangle({
+                    point: bcenter - new Point(rad, rad),
+                    size: [rad*2, rad*2],
+                });
+            }
 
             brush = brush.unite(c);
         }       
@@ -633,7 +647,7 @@ function generateSprite() {
         var endCol = p.brushGradientColor;
         endCol.alpha = (100 - p.brushGradientTransparency) /100;    
         var orig = [p.size/2,p.size/2];
-        if (!p.brushGradientType) {
+        if (p.brushGradientType == 0) {
             var orig = brush.bounds.leftCenter;
         }
 
@@ -641,11 +655,10 @@ function generateSprite() {
         if (p.brushGradientBalance <= 50) start = 0;
         var end = (p.brushGradientBalance)/100*2;
         if (p.brushGradientBalance >= 50) end = 1;
-        
         brush.fillColor = {
             gradient: {
                 stops: [[p.bgColor, start], [endCol, end]],
-                radial: p.brushGradientType
+                radial: Boolean(parseInt(p.brushGradientType))
             },
             origin: orig,
             destination: brush.bounds.rightCenter
