@@ -1,3 +1,5 @@
+// PRESETS ===============================================================================
+// =======================================================================================
 // Use with caution!
 // localStorage.clear(); 
 var presets;
@@ -164,7 +166,6 @@ function addPresetMenuItem(presetName, i) {
     $('#preset').append(new Option(presetName, i));
 }
 
-
 // Save the new preset and give it a name according to the user input
 $('#savePresets').click(function(){
     var presetName = $('#presetName').val();
@@ -197,30 +198,24 @@ $('#savePresets').click(function(){
     $('#preset').val(presets.length-1);
 });
 
+// ANIMATION =============================================================================
+// =======================================================================================
 
-// Initialize main variables
-var runAnimation = false
+// Initialize main vanimatio and capturer variables
+var runAnimation = false // are we running?
+var animFrame = 0;  // animation frame
+var animDir = 1;    // animation direction
+var capturer;       // capture object
 
-// Variable for strogin animation frame
-var animFrame = 0;
-var animDir = 1;
-
-
-//Step animation one frame forward
-var animStep = document.getElementById('step-animation');
-
-animStep.onclick = function() {
-    render();
-}
-
-
-var capturer;
 
 var startCaptureBtn = document.getElementById( 'start-capture' ),
     stopCaptureBtn = document.getElementById( 'stop-capture' ),
     startAnimationBtn = document.getElementById( 'start-animation' ),
     stopAnimationBtn = document.getElementById( 'stop-animation' )
 
+initializeAnimAndCapture();
+
+function initializeAnimAndCapture() {
     stopAnimationBtn.style.display = 'none';
     startCaptureBtn.style.display = 'none';
     stopCaptureBtn.style.display = 'none';
@@ -241,26 +236,27 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
         startAnimationBtn.style.display = 'inline-block';
     }, false );
 
-startCaptureBtn.addEventListener( 'click', function( e ) {
-    // Create a capturer that exports a WebM video
-    capturer = new CCapture( { 
-        format: document.getElementById('aFormat').value,
-        framerate: 60,
-        quality: 100,
-        verbose: true } );  
+    startCaptureBtn.addEventListener( 'click', function( e ) {
+        // Create a capturer that exports a WebM video
+        capturer = new CCapture( { 
+            format: document.getElementById('aFormat').value,
+            framerate: 60,
+            quality: 100,
+            verbose: true } );  
 
-    capturer.start();
-    this.style.display = 'none';
-    stopCaptureBtn.style.display = 'inline-block';
-    e.preventDefault();
-}, false );
+        capturer.start();
+        this.style.display = 'none';
+        stopCaptureBtn.style.display = 'inline-block';
+        e.preventDefault();
+    }, false );
 
-stopCaptureBtn.addEventListener( 'click', function( e ) {
-    capturer.stop();
-    this.style.display = 'none';
-    capturer.save();
-    animFrame = 0;
-}, false );
+    stopCaptureBtn.addEventListener( 'click', function( e ) {
+        capturer.stop();
+        this.style.display = 'none';
+        capturer.save();
+        animFrame = 0;
+    }, false );
+}
 
 function animate() {
     if (runAnimation) {
@@ -320,14 +316,15 @@ function easingAnims(min, max, easing='easeInOutElasticAnim', phase=animFrame/50
     return parseInt(min) + parseFloat(animValue * range);
 }
 
-
 function sinAnim(min, max, phase=animFrame/50) {
     phase = animFrame / document.getElementById('aSpeed').value;
     var f = sinBetween(parseInt(min), parseInt(max), phase);     
     return f;
 }
 
-// window.onload = function() {
+// DRAWING ===============================================================================
+// =======================================================================================
+
 project.activeLayer.position = view.center;
 
 var pathContainer = new Layer({position: view.center});
@@ -456,7 +453,6 @@ var wiggleT = 0;
 // Load SVG from a file
 var canvas = document.getElementById('canvas');
 var scope = paper.setup(canvas);
-
 var url = 'images/pathsource.svg';
 var words;
 
@@ -770,7 +766,6 @@ function generateSprite() {
 
     group.visible = false;
 }
-
 
 // Loop through all paths and pathgroups
 function drawWord() {    
@@ -1177,7 +1172,7 @@ function updateFromUI(val) {
 
 function update(val) {
     var pp = Object.assign({}, val);
-    delete pp.name;
+    delete pp.name; // because name is not a UI field
     updateParams(pp);
     generateSprite();
     drawWord();
@@ -1243,9 +1238,6 @@ function buildUIparam(param) {
             valel.innerHTML = this.value;
         }
     }
-}
-
-function onFrame() {
 }
 
 function centerLayers() {
@@ -1424,6 +1416,11 @@ $('.tab').click(function(){
     $('.tab').removeClass('active');
     $(this).addClass('active');
 });
+
+//Step animation one frame forward
+document.getElementById('step-animation').onclick = function() {
+    render();
+};
 
 $('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise, #zigzag, #hollow').hide();
 
