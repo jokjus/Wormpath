@@ -252,9 +252,12 @@ html
             div.anim-basic-control
                 label Anim easing
                 select#aEasing
-                    option(value=0) Sine
-                    option(value=1) easeInOutCirc
-                    option(value=2) easeInOutElastic
+                    option(value='sine') Sine
+                    option(value='easeInOutCirc') easeInOutCirc
+                    option(value='easeInOutElastic') easeInOutElastic
+                    option(value='easeOutElastic') easeOutElastic
+                    option(value='easeOutBounce') easeOutBounce
+                    option(value='easeInOutExpo') easeInOutExpo
             .anim-control
                 label Rotation variation
                 input#aRotationMin(type='number' min='0' max='1000' value='')

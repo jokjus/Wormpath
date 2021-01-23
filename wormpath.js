@@ -223,7 +223,7 @@ var animP = {
     aWaveNoiseOffsetMin: 0,
     aWaveNoiseOffsetMax: 0,
     aNoiseAmpMin: 0,
-    aNoiseAmpMin: 0,
+    aNoiseAmpMax: 0,
     aPathCompletenessMin: 100,
     aPathCompletenessMax: 100,
     aZigzagAmpMin: 0,
@@ -354,7 +354,6 @@ function render() {
             animFrame--
         }
         
-        
     
     if( typeof capturer !== 'undefined') {
         if( capturer) capturer.capture( canvas );
@@ -362,38 +361,23 @@ function render() {
 }
 
 function getAnimValue(animType, min, max) {
-    if (animType == 0) {
+    if (animType == 'sine') {
         return sinAnim(min, max);
     }
-    if (animType == 1) {
-        return easeInOutCircAnim(min, max);
+    if (animType != 'sine') {
+        return easingAnims(min, max, animType);
     }
-    if (animType == 2) {
-        return easeInOutElasticAnim(min, max);
-    }
-
-    
 }
 
-function easeInOutElasticAnim(min, max, phase=animFrame/50) {
+function easingAnims(min, max, easing='easeInOutElasticAnim', phase=animFrame/50) {
     phase = animFrame / document.getElementById('aSpeed').value;
-    var animValue = easeInOutElastic(phase);
+    var animValue = eval(easing + '(phase)');
     var range = max-min;
     if (phase >= 1) {animDir = 0}
     if (phase <= 0) {animDir = 1};
-    console.log(phase);
     return parseInt(min) + parseFloat(animValue * range);
-} 
+}
 
-function easeInOutCircAnim(min, max, phase=animFrame/50) {
-    phase = animFrame / document.getElementById('aSpeed').value;
-    var animValue = easeInOutCirc(phase);
-    var range = max-min;
-    if (phase >= 1) {animDir = 0};
-    if (phase <= 0) {animDir = 1};
-    console.log(phase);
-    return parseInt(min) + parseFloat(animValue * range);
-} 
 
 function sinAnim(min, max, phase=animFrame/50) {
     phase = animFrame / document.getElementById('aSpeed').value;
@@ -1512,4 +1496,39 @@ function easeInOutElastic(x) {
             : x < 0.5
                 ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
                 : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
+}
+
+function easeOutElastic(x) {
+    var c4 = (2 * Math.PI) / 3;
+    return x === 0
+        ? 0
+        : x === 1
+            ? 1
+            : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+}
+
+function easeOutBounce(x) {
+    var n1 = 7.5625;
+    var d1 = 2.75;
+    if (x < 1 / d1) {
+        return n1 * x * x;
+    }
+    else if (x < 2 / d1) {
+        return n1 * (x -= 1.5 / d1) * x + 0.75;
+    }
+    else if (x < 2.5 / d1) {
+        return n1 * (x -= 2.25 / d1) * x + 0.9375;
+    }
+    else {
+        return n1 * (x -= 2.625 / d1) * x + 0.984375;
+    }
+}
+
+function easeInOutExpo(x) {
+    return x === 0
+        ? 0
+        : x === 1
+            ? 1
+            : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2
+                : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
