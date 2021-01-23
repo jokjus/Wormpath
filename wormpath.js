@@ -203,6 +203,7 @@ var runAnimation = false
 
 // Variable for strogin animation frame
 var animFrame = 0;
+var animDir = 1;
 
 // Animation parameters
 var animP = {
@@ -346,7 +347,13 @@ function render() {
             pathCompleteness: getAnimValue(easing, animP.aPathCompletenessMin, animP.aPathCompletenessMax),
             pathZigzagAmp: getAnimValue(easing, animP.aZigzagAmpMin, animP.aZigzagAmpMax)
         });
-        animFrame++;
+        if (animDir == 1) {
+            animFrame++;
+        }
+        else {
+            animFrame--
+        }
+        
         
     
     if( typeof capturer !== 'undefined') {
@@ -369,22 +376,28 @@ function getAnimValue(animType, min, max) {
 }
 
 function easeInOutElasticAnim(min, max, phase=animFrame/50) {
-    phase = animFrame / document.getElementById('aSpeed').value/5;
+    phase = animFrame / document.getElementById('aSpeed').value;
     var animValue = easeInOutElastic(phase);
     var range = max-min;
+    if (phase >= 1) {animDir = 0}
+    if (phase <= 0) {animDir = 1};
+    console.log(phase);
     return parseInt(min) + parseFloat(animValue * range);
 } 
 
 function easeInOutCircAnim(min, max, phase=animFrame/50) {
-    phase = animFrame / document.getElementById('aSpeed').value/5;
+    phase = animFrame / document.getElementById('aSpeed').value;
     var animValue = easeInOutCirc(phase);
     var range = max-min;
+    if (phase >= 1) {animDir = 0};
+    if (phase <= 0) {animDir = 1};
+    console.log(phase);
     return parseInt(min) + parseFloat(animValue * range);
 } 
 
 function sinAnim(min, max, phase=animFrame/50) {
     phase = animFrame / document.getElementById('aSpeed').value;
-    var f = sinBetween(parseInt(min), parseInt(max), phase); 
+    var f = sinBetween(parseInt(min), parseInt(max), phase);     
     return f;
 }
 
