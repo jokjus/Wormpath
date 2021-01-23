@@ -53,7 +53,6 @@ canvas[resize] {
 	width: 100vw;
 	border-bottom: 1px solid #ddd;
 	border-top: 1px solid #ddd;
-	height: 60px;
 }
 
 .ui-section {
