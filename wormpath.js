@@ -205,64 +205,6 @@ var runAnimation = false
 var animFrame = 0;
 var animDir = 1;
 
-// Animation parameters
-var animP = {
-    // aRotationInc: 1,
-    aRotationMin: 20,
-    aRotationMax: 20,
-    aBrushSizeMin: 50,
-    aBrushSizeMax: 50,
-    aTwistMin: 0,
-    aTwistMax: 0,
-    aBulbAmpMin: 0,
-    aBulbAmpMax: 0,
-    aBulbFreqMin: 0,
-    aBulbFreqMax: 0,
-    aNoisePhaseMin: 0,
-    aNoisePhaseMax: 0,
-    aWaveNoiseOffsetMin: 0,
-    aWaveNoiseOffsetMax: 0,
-    aNoiseAmpMin: 0,
-    aNoiseAmpMax: 0,
-    aPathCompletenessMin: 100,
-    aPathCompletenessMax: 100,
-    aZigzagAmpMin: 0,
-    aZigzagAmpMax: 0,
-    aFormat: 'webm'
-}
-
-// Get parameters from UI and update animation parameters
-$('.anim-control input, .anim-control select').change(function() {
-    var id = $(this).attr('id');
-    var val = $(this).val();
-    if (typeof val == 'string') {
-        var d = JSON.parse('{"' + id + '": "' + val + '"}');    
-    }
-    else{
-        var d = JSON.parse('{"' + id + '": ' + val + '}');
-    }
-    updateAnimP(d);
-});
-
-// Update animation parameters
-function updateAnimP() {
-    for(key in arguments) {
-        var arg = arguments[key];
-        for (key in arg) {    
-            var val = arg[key];
-            if (typeof val == 'string') {
-                eval("animP." + key + " = '" + val + "'");
-            }
-            else {
-                eval("animP." + key + " = " + val);        
-            }
-            var uiel = document.getElementById(key);
-            uiel.value = val;
-        }
-    }
-}
-
-updateAnimP(animP);
 
 //Step animation one frame forward
 var animStep = document.getElementById('step-animation');
@@ -329,23 +271,23 @@ function animate() {
 
 function render() {
 
-        var rotStep = parseFloat(p.rotation + animP.aRotationInc);
+        var rotStep = parseFloat(p.rotation + p.aRotationInc);
         wiggleT += 0.02;
         // wiggleT += document.getElementById('aSpeed').value / 1000;
 
         var easing = document.getElementById('aEasing').value;
         //TODO: more features for selecting animation speed and easing, looping
-        updateAnim({
-            rotation: getAnimValue(easing, animP.aRotationMin, animP.aRotationMax),
-            twist: getAnimValue(easing, animP.aTwistMin, animP.aTwistMax),
-            bulbAmp: getAnimValue(easing, animP.aBulbAmpMin, animP.aBulbAmpMax),
-            bulbFreq: getAnimValue(easing, animP.aBulbFreqMin, animP.aBulbFreqMax),
-            size: getAnimValue(easing, animP.aBrushSizeMin, animP.aBrushSizeMax),
-            noisePhase: getAnimValue(easing, animP.aNoisePhaseMin, animP.aNoisePhaseMax),
-            noiseAmp: getAnimValue(easing, animP.aNoiseAmpMin, animP.aNoiseAmpMax),
-            waveNoiseOffset: getAnimValue(easing, animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax),
-            pathCompleteness: getAnimValue(easing, animP.aPathCompletenessMin, animP.aPathCompletenessMax),
-            pathZigzagAmp: getAnimValue(easing, animP.aZigzagAmpMin, animP.aZigzagAmpMax)
+        update({
+            rotation: getAnimValue(easing, p.aRotationMin, p.aRotationMax),
+            twist: getAnimValue(easing, p.aTwistMin, p.aTwistMax),
+            bulbAmp: getAnimValue(easing, p.aBulbAmpMin, p.aBulbAmpMax),
+            bulbFreq: getAnimValue(easing, p.aBulbFreqMin, p.aBulbFreqMax),
+            size: getAnimValue(easing, p.aBrushSizeMin, p.aBrushSizeMax),
+            noisePhase: getAnimValue(easing, p.aNoisePhaseMin, p.aNoisePhaseMax),
+            noiseAmp: getAnimValue(easing, p.aNoiseAmpMin, p.aNoiseAmpMax),
+            waveNoiseOffset: getAnimValue(easing, p.aWaveNoiseOffsetMin, p.aWaveNoiseOffsetMax),
+            pathCompleteness: getAnimValue(easing, p.aPathCompletenessMin, p.aPathCompletenessMax),
+            pathZigzagAmp: getAnimValue(easing, p.aZigzagAmpMin, p.aZigzagAmpMax)
         });
         if (animDir == 1) {
             animFrame++;
@@ -477,7 +419,28 @@ var p = {
     pathZigzagFreq: 10,
     hollowOn: 0,
     hollowSize: 50,
-    hollowType: 0
+    hollowType: 0,
+    aRotationMin: 20,
+    aRotationMax: 20,
+    aBrushSizeMin: 50,
+    aBrushSizeMax: 50,
+    aTwistMin: 0,
+    aTwistMax: 0,
+    aBulbAmpMin: 0,
+    aBulbAmpMax: 0,
+    aBulbFreqMin: 0,
+    aBulbFreqMax: 0,
+    aNoisePhaseMin: 0,
+    aNoisePhaseMax: 0,
+    aWaveNoiseOffsetMin: 0,
+    aWaveNoiseOffsetMax: 0,
+    aNoiseAmpMin: 0,
+    aNoiseAmpMax: 0,
+    aPathCompletenessMin: 100,
+    aPathCompletenessMax: 100,
+    aZigzagAmpMin: 0,
+    aZigzagAmpMax: 0,
+    aFormat: 'webm'
 }
 
 var hue = 0;
@@ -513,6 +476,8 @@ project.importSVG(url, function(item) {
     pathContainer.position = view.center;
     // centerLayers();
     updateParams(p);
+    generateSprite();
+    drawWord();
     buildUI();
     
 })
@@ -520,6 +485,7 @@ project.importSVG(url, function(item) {
 
 // Make the sprite ------------------------------
 function generateSprite() {
+    first.removeChildren();
     first.activate();
     
     var bc = p.brushStrokeColor;
@@ -1184,8 +1150,6 @@ function updateParams() {
                 eval("p." + key + " = " + val);
             }    
             
-            
-            // console.log(key);
             if(val.components) {
                 uiel.value = rgb2hex(val);
             }
@@ -1198,37 +1162,26 @@ function updateParams() {
                 
                 uiel.value = val;
             }
-
-            
-
         }
     }
-    //Clear previous sprite
-    first.removeChildren();
-    generateSprite();
-    drawWord();
-}
-
-function updateAnim(val) {
-
-    setTimeout(function(){ 
-        delete val.name;
-        updateParams(val);
-     }, 50);
 }
 
 function updateFromUI(val) {
     showProgress();
 
     setTimeout(function(){ 
-        var pp = Object.assign({}, val);
-        delete pp.name;
-        // console.log(pp);
-        updateParams(pp);
+        update(val);
         hideProgress();
-     }, 50);
+    }, 50);
 }
 
+function update(val) {
+    var pp = Object.assign({}, val);
+    delete pp.name;
+    updateParams(pp);
+    generateSprite();
+    drawWord();
+}
 
 
 // UI for manipulating the effect. Initialize all properties defined in the main properties variable p 
@@ -1265,7 +1218,7 @@ function buildUIparam(param) {
         }
 
         // Make sure we're sending numerical values from range inputs
-        if (paramUIElement.type == "range") {
+        if (paramUIElement.type == "range" || paramUIElement.type == "number") {
             update[param] = parseInt(this.value);
             updateFromUI(update);
         } 
@@ -1285,8 +1238,8 @@ function buildUIparam(param) {
 
     // Bind the input to update in real time next to input label
     paramUIElement.oninput = function() {
-        var valel = document.getElementById(param + 'Val');
-        if (paramUIElement.type != "color" && paramUIElement.nodeName != "SELECT" && paramUIElement.type != "text") {
+        if (paramUIElement.type == "range") {
+            var valel = document.getElementById(param + 'Val');
             valel.innerHTML = this.value;
         }
     }
@@ -1456,8 +1409,8 @@ $('#wedgeVal').click(function(){
 });
 
 $('#brushSizeReset').click(function(){
-    animP.aBrushSizeMin = p.size;
-    animP.aBrushSizeMax = p.size;
+    p.aBrushSizeMin = p.size;
+    p.aBrushSizeMax = p.size;
     $('#aBrushSizeMin').val(p.size);
     $('#aBrushSizeMax').val(p.size);
 });
