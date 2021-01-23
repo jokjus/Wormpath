@@ -179,7 +179,7 @@ $('#savePresets').click(function(){
         for (key in newP[i]) {
             var val = newP[i][key];   
 
-            if (typeof val === 'object') {
+            if (typeof val === 'object' && val != null) {                
                 if ('red' in val) {
                     newP[i][key] = rgb2hex2(val);
                 }
@@ -209,8 +209,8 @@ var animP = {
     // aRotationInc: 1,
     aRotationMin: 20,
     aRotationMax: 20,
-    aBrushSizeMin: 80,
-    aBrushSizeMax: 80,
+    aBrushSizeMin: 50,
+    aBrushSizeMax: 50,
     aTwistMin: 0,
     aTwistMax: 0,
     aBulbAmpMin: 0,
@@ -221,6 +221,8 @@ var animP = {
     aNoisePhaseMax: 0,
     aWaveNoiseOffsetMin: 0,
     aWaveNoiseOffsetMax: 0,
+    aNoiseAmpMin: 0,
+    aNoiseAmpMin: 0,
     aPathCompletenessMin: 100,
     aPathCompletenessMax: 100,
     aZigzagAmpMin: 0,
@@ -282,6 +284,7 @@ var startCaptureBtn = document.getElementById( 'start-capture' ),
 
     startAnimationBtn.addEventListener( 'click', function( e ) {
         runAnimation = true;
+        animFrame = 0;
         this.style.display = 'none';
         stopAnimationBtn.style.display = 'inline-block';
         startCaptureBtn.style.display = 'inline-block';
@@ -328,24 +331,56 @@ function render() {
         var rotStep = parseFloat(p.rotation + animP.aRotationInc);
         wiggleT += 0.02;
         // wiggleT += document.getElementById('aSpeed').value / 1000;
+
+        var easing = document.getElementById('aEasing').value;
         //TODO: more features for selecting animation speed and easing, looping
         updateAnim({
-            rotation: sinAnim(animP.aRotationMin, animP.aRotationMax),
-            twist: sinAnim(animP.aTwistMin, animP.aTwistMax),
-            bulbAmp: sinAnim(animP.aBulbAmpMin, animP.aBulbAmpMax),
-            bulbFreq: sinAnim(animP.aBulbFreqMin, animP.aBulbFreqMax),
-            size: sinAnim(animP.aBrushSizeMin, animP.aBrushSizeMax),
-            noisePhase: sinAnim(animP.aNoisePhaseMin, animP.aNoisePhaseMax),
-            waveNoiseOffset: sinAnim(animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax),
-            pathCompleteness: sinAnim(animP.aPathCompletenessMin, animP.aPathCompletenessMax),
-            pathZigzagAmp: sinAnim(animP.aZigzagAmpMin, animP.aZigzagAmpMax)
+            rotation: getAnimValue(easing, animP.aRotationMin, animP.aRotationMax),
+            twist: getAnimValue(easing, animP.aTwistMin, animP.aTwistMax),
+            bulbAmp: getAnimValue(easing, animP.aBulbAmpMin, animP.aBulbAmpMax),
+            bulbFreq: getAnimValue(easing, animP.aBulbFreqMin, animP.aBulbFreqMax),
+            size: getAnimValue(easing, animP.aBrushSizeMin, animP.aBrushSizeMax),
+            noisePhase: getAnimValue(easing, animP.aNoisePhaseMin, animP.aNoisePhaseMax),
+            noiseAmp: getAnimValue(easing, animP.aNoiseAmpMin, animP.aNoiseAmpMax),
+            waveNoiseOffset: getAnimValue(easing, animP.aWaveNoiseOffsetMin, animP.aWaveNoiseOffsetMax),
+            pathCompleteness: getAnimValue(easing, animP.aPathCompletenessMin, animP.aPathCompletenessMax),
+            pathZigzagAmp: getAnimValue(easing, animP.aZigzagAmpMin, animP.aZigzagAmpMax)
         });
         animFrame++;
+        
     
     if( typeof capturer !== 'undefined') {
         if( capturer) capturer.capture( canvas );
     }    
 }
+
+function getAnimValue(animType, min, max) {
+    if (animType == 0) {
+        return sinAnim(min, max);
+    }
+    if (animType == 1) {
+        return easeInOutCircAnim(min, max);
+    }
+    if (animType == 2) {
+        return easeInOutElasticAnim(min, max);
+    }
+
+    
+}
+
+function easeInOutElasticAnim(min, max, phase=animFrame/50) {
+    phase = animFrame / document.getElementById('aSpeed').value/5;
+    var animValue = easeInOutElastic(phase);
+    var range = max-min;
+    return parseInt(min) + parseFloat(animValue * range);
+} 
+
+function easeInOutCircAnim(min, max, phase=animFrame/50) {
+    phase = animFrame / document.getElementById('aSpeed').value/5;
+    var animValue = easeInOutCirc(phase);
+    var range = max-min;
+    return parseInt(min) + parseFloat(animValue * range);
+} 
 
 function sinAnim(min, max, phase=animFrame/50) {
     phase = animFrame / document.getElementById('aSpeed').value;
@@ -442,7 +477,10 @@ var p = {
     pathCompleteness: 100,
     pathZigZagOn: 0,
     pathZigzagAmp: 15,
-    pathZigzagFreq: 10
+    pathZigzagFreq: 10,
+    hollowOn: 0,
+    hollowSize: 50,
+    hollowType: 0
 }
 
 var hue = 0;
@@ -506,15 +544,16 @@ function generateSprite() {
             strokeColor: bc
         });
        
+        if (p.shadow > 0) {
+            //Bottom rectangle that creates shadow
+            var recB = new Shape.Rectangle({
+                point: [0, p.size-5],
+                size: [p.size, 5],
+                fillColor: 'black'
+            })
 
-        //Bottom rectangle that creates shadow
-        var recB = new Shape.Rectangle({
-            point: [0, p.size-5],
-            size: [p.size, 5],
-            fillColor: 'black'
-        })
-
-         recB.opacity = p.shadow/100;
+            recB.opacity = p.shadow/100;
+        }
     }
 
     // Circle brush type
@@ -750,10 +789,18 @@ function generateSprite() {
     }
 
     // Hollow effect
-    if (p.bgEffect == 2) {
-        var rectangleOut = new Path.Rectangle(new Point(0, 0), new Size(p.size, p.size));
-        var rectangleIn = new Path.Rectangle(new Point(5, -5), new Size(p.size-10, p.size+10));
-        var mask = rectangleOut['subtract'](rectangleIn);
+    if (p.hollowOn == 1) {
+        var hSize = p.size/2 * (100-p.hollowSize) / 100;
+        if (p.hollowType == 0) {
+            var hollowOut = new Path.Rectangle(new Point(0, 0), new Size(p.size, p.size));
+            var hollowIn = new Path.Rectangle(new Point(hSize, hSize), new Size(p.size-2*hSize, p.size-2*hSize));
+        }
+        if (p.hollowType == 1) {
+            var hollowOut = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2);
+            var hollowIn = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2 - hSize);
+            console.log(hollowIn);
+        }
+        var mask = hollowOut['subtract'](hollowIn);
         group.addChild(mask);
         mask.clipMask = true;
     }
@@ -765,16 +812,22 @@ function generateSprite() {
 // Loop through all paths and pathgroups
 function drawWord() {    
 
-
+    // variable for keeping track of paths drawn
+    var orderNo = 0;    
     //Delete all previosly drawn worms
     drawing.removeChildren();
 
-    var myWords = words.clone();    
+    var myWords = words.clone();  
+      
 
     //Scale SVG
     var myScale = p.drawingSize / scale;
     myWords.scale(p.drawingSize); 
-    // scale = p.drawingSize; 
+
+    if (debugMode == true) {
+        myWords.selected = true;
+        myWords.visible = true
+    };
 
     //Effect: Last point wiggle
     for (var i = 0; i < myWords.children.length; i++) {
@@ -786,18 +839,20 @@ function drawWord() {
     //Effect: Zigzag
     if (p.pathZigZagOn == 1) {
         var amount = 100 - p.pathZigzagFreq;
-        var amplitude = p.pathZigzagAmp;
+        var amplitude = p.pathZigzagAmp + orderNo;
         
 
         for (var path of myWords.children) {
-            thisPathCount = Math.floor(path.length / amount);
-            // console.log(path.length + '–len_amount; ' + amount);
+            // thisPathCount = Math.floor(path.length / amount);
+            thisPathCount = path.length / amount;
+            // console.log('stepit: ' + thisPathCount);
             var length = path.length;
             var newPoints = [];
 
             // Add points to a path defined by amount -variable
             for (i=0; i<thisPathCount; i++) {
                 var offset = i / thisPathCount * length;
+                // var offset = length / (thisPathCount-1) * i;
                 var point = path.getPointAt(offset);                   
                 newPoints.push(point);
             }
@@ -825,8 +880,7 @@ function drawWord() {
         
     }
 
-    // variable for keeping track of paths drawn
-    var orderNo = 0;    
+    
 
     //Run Draw path function for every path in the text
     
@@ -854,6 +908,7 @@ var factorPhase = 0;
 function drawPath(sprite, path, orderNo) {
     drawing.activate();
     var steps = path.length / ((101 - p.density)) * 2;
+    // console.log(steps);
     
     var capHeight = p.size;
     var capSteps = capHeight / ((101 - p.density));
@@ -885,13 +940,6 @@ function drawPath(sprite, path, orderNo) {
         points.push(path.getPointAt(path.length - (k*(path.length/steps))));
     }
 
-    // debug only
-    if (debugMode) {
-        var debugpos = points[k];
-        var g = new Path.Circle(debugpos, 1);
-        g.fillColor = 'green';
-        g.selected = true;
-    }
     
     for (k=0; k<steps; k++) {
         
@@ -1137,8 +1185,10 @@ function updateParams() {
 
             else {
                 eval("p." + key + " = " + val);
-            }                    
+            }    
             
+            
+            // console.log(key);
             if(val.components) {
                 uiel.value = rgb2hex(val);
             }
@@ -1151,6 +1201,9 @@ function updateParams() {
                 
                 uiel.value = val;
             }
+
+            
+
         }
     }
     //Clear previous sprite
@@ -1187,7 +1240,7 @@ function buildUI() {
     for (i = 0; i< Object.keys(p).length; i++) {
         buildUIparam(Object.keys(p)[i]);
     }    
-    // Preset selector is an exection (does it need to be?)
+    // Preset selector is an exeption (does it need to be?)
     buildUIparam('preset');
 }
 
@@ -1224,6 +1277,7 @@ function buildUIparam(param) {
             update[param] = this.value;
         
             if (paramUIElement.id == 'preset') {
+                // console.log(this.value);
                 update = presets[this.value]
             }
 
@@ -1264,7 +1318,9 @@ function hideProgress() {
 
 //Reposition the paths whenever the window is resized:
 function onResize(event) {
-    centerLayers();
+    // centerLayers();
+    // updateParams(p);
+
 }
 
 function downloadDataUri(options) {
@@ -1419,10 +1475,28 @@ $('.tab').click(function(){
     $(this).addClass('active');
 });
 
-$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise, #zigzag').hide();
+$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise, #zigzag, #hollow').hide();
 
 if (!Array.prototype.last){
     Array.prototype.last = function(){
         return this[this.length - 1];
     };
 };
+
+
+function easeInOutCirc(x) {
+    return x < 0.5
+        ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
+        : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
+}
+
+function easeInOutElastic(x) {
+    var c5 = (2 * Math.PI) / 4.5;
+    return x === 0
+        ? 0
+        : x === 1
+            ? 1
+            : x < 0.5
+                ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
+                : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
+}

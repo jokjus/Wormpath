@@ -51,6 +51,7 @@ html
         .tab(data-target="stitch") Stitch
         .tab(data-target="noise") Noise
         .tab(data-target="zigzag") Zigzag
+        .tab(data-target="hollow") Hollow
         .tab(data-target="anim") Animation
 
         .brand Wormpath 2021 by 
@@ -79,7 +80,7 @@ html
         div.ui-section#brush
             +select('Brush type:', 'bgType', [
                         {label: 'Square', value: 0},
-                        {label: 'Circle', value: 1},
+                        {label: 'Double circle', value: 1},
                         {label: 'Double diamond', value: 2},
                         {label: 'Cross', value: 3},
                         {label: 'Pyramid', value: 4},
@@ -161,8 +162,7 @@ html
    
             +select('Brush effect:', 'bgEffect', [
                     {label: 'None', value: 0},
-                    {label: 'Bulp', value: 1},
-                    {label: 'Hollow', value: 2}
+                    {label: 'Bulp', value: 1}                    
                 ])
             div.collapseui#bulbcollapsible(style='display:none')
                 +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
@@ -214,6 +214,14 @@ html
             +input('range', 'Text spread:', 'textSpread', 0, 100)
             +input('range', 'Text pos:', 'textYPos', 0, 100)
             +input('range', 'Text bump:', 'textBump', 0, 100)
+        
+        div.ui-section#hollow
+            +input('checkbox', 'Hollow', 'hollowOn', 0, 0, 0)
+            +input('range', 'Hollow size', 'hollowSize', 0, 100)
+            +select('Hollow type:', 'hollowType', [
+                        {label: 'Rectangle', value: 0},
+                        {label: 'Circle', value: 1}
+                    ])   
 
         div.ui-section#stitch
             +input('checkbox', 'Stitch', 'stitchOn', 0, 0, 0)
@@ -238,9 +246,15 @@ html
 
         
         .ui-section#anim
-            div
-                label Animation speed
+            div.anim-basic-control
+                label Anim speed
                 input#aSpeed(type='number' value=20)
+            div.anim-basic-control
+                label Anim easing
+                select#aEasing
+                    option(value=0) Sine
+                    option(value=1) easeInOutCirc
+                    option(value=2) easeInOutElastic
             .anim-control
                 label Rotation variation
                 input#aRotationMin(type='number' min='0' max='1000' value='')
@@ -266,7 +280,11 @@ html
             .anim-control
                 label Noise phase
                 input#aNoisePhaseMin(type='number' min='0' max='100' value='')
-                input#aNoisePhaseMax(type='number' min='0' max='100' value='')     
+                input#aNoisePhaseMax(type='number' min='0' max='100' value='') 
+            .anim-control
+                label Noise amp
+                input#aNoiseAmpMin(type='number' min='0' max='100' value='')
+                input#aNoiseAmpMax(type='number' min='0' max='100' value='')     
             .anim-control
                 label Wave phase 
                 input#aWaveNoiseOffsetMin(type='number' min='0' max='100' value='')

@@ -83,7 +83,7 @@ canvas[resize] {
 	
 }
 
-#ui-row > .ui-control, .anim-control {
+#ui-row > .ui-control, .anim-control, .anim-basic-control {
 	max-width: 80px;
 	padding: 10px 7px;
 	flex-grow: 1;
@@ -142,7 +142,7 @@ canvas[resize] {
 	padding-right: 10px;
 }
 
-.anim-control label {
+.anim-control label, .anim-basic-control label {
 	display: block;
 }
 
