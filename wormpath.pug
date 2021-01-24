@@ -10,10 +10,10 @@ mixin section(label)
 
 
 
-mixin select(label, name, options)
-    div(class='ui-control')&attributes(attributes)
+mixin select(label, name, options=[], myclass='', mymainclass='ui-control')
+    div(class=mymainclass)&attributes(attributes)
         label=label
-        select(id=name)
+        select(id=name, class=myclass)
             each myOption in options
                 if myOption.selected
                     option(value=myOption.value selected)=myOption.label
@@ -53,13 +53,14 @@ html
         .tab(data-target="zigzag") Zigzag
         .tab(data-target="hollow") Hollow
         .tab(data-target="anim") Animation
+        .tab(data-target="assign") Assign
 
         .brand Wormpath 2021 by 
             a(href='https://www.instagram.com/jussijokinen/') Jussi Jokinen 
             | – 
             a(href='https://github.com/jokjus/Wormpath') Fork on Github
     #ui-row
-        div.ui-section#general
+        div.ui-section#general.active
             //- .ui-section-label.section 
             //-     span General
              
@@ -70,7 +71,7 @@ html
             +section("Presets")
             div.ui-control        
                 label Preset:
-                select#preset
+                select.presetSelector#preset
             div.ui-generic
                 input#presetName(type='text' placeholder='Preset name')
                 button#savePresets Save preset
@@ -239,11 +240,14 @@ html
             +input('range', 'Noise Phase:', 'noisePhase', 0, 100)
             +input('range', 'Paths offset:', 'noisePathOffset', 0, 100)
 
-        div.ui-section#zigzag
+        .ui-section#zigzag
             +input('checkbox', 'Zigzag:', 'pathZigZagOn', 0, 0, 0)
             +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
             +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)    
 
+        .ui-section#assign
+            +select('Red', 'assignRed', [{label: 'Default', value:999}], 'presetSelector', 'ui-generic')
+            +select('Blue', 'assignBlue', [{label: 'Default', value:999}], 'presetSelector', 'ui-generic')
         
         .ui-section#anim
             div.anim-basic-control

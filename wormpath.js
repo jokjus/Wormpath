@@ -163,7 +163,7 @@ function populatePresetMenu() {
 
 // Add one option to presets menu
 function addPresetMenuItem(presetName, i) {
-    $('#preset').append(new Option(presetName, i));
+    $('.presetSelector').append(new Option(presetName, i));
 }
 
 // Save the new preset and give it a name according to the user input
@@ -339,6 +339,7 @@ bg.name = 'bg';
 var drawing = new Layer({position: view.center});
 drawing.name = 'drawing';
 
+pathContainer.bringToFront();
 
 // Set default parameters
 var p = {
@@ -455,6 +456,7 @@ var canvas = document.getElementById('canvas');
 var scope = paper.setup(canvas);
 var url = 'images/pathsource.svg';
 var words;
+var myWords;
 
 var drawingBg = new Path.Rectangle({
     point: [0, 0],
@@ -468,9 +470,25 @@ project.importSVG(url, function(item) {
     words = item;
     words.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
     words.visible = true;
+    words.opacity = 0;
+    words.strokeWidth = 5;
 
+    // console.log(words);
+    // for (i=0; i<words.children.length; i++) {
+    //     // console.log(words.children[i]);
+    //     var me = words.children[i];
+        
+    //     me.onMouseMove = function(event) {
+    //         console.log('xxx');
+            
+    //     };
+    //     console.log(me);
+    // }
+
+
+    myWords = words.clone();
     pathContainer.position = view.center;
-    // centerLayers();
+
     updateParams(p);
     generateSprite();
     drawWord();
@@ -743,7 +761,7 @@ function generateSprite() {
         var rectangle = new Rectangle(new Point(0, 0), new Size(p.size, p.size));
         var cornerSize = new Size(p.corner,p.corner);
         var mask = new Path.Rectangle(rectangle, cornerSize);
-        group.addChild(mask);
+        group.insertChild(1, mask);
         mask.clipMask = true;
     }
 
@@ -757,14 +775,15 @@ function generateSprite() {
         if (p.hollowType == 1) {
             var hollowOut = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2);
             var hollowIn = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2 - hSize);
-            console.log(hollowIn);
         }
         var mask = hollowOut['subtract'](hollowIn);
-        group.addChild(mask);
+        group.insertChild(1, mask);
         mask.clipMask = true;
     }
 
     group.visible = false;
+
+    return group;
 }
 
 // Loop through all paths and pathgroups
@@ -774,18 +793,14 @@ function drawWord() {
     var orderNo = 0;    
     //Delete all previosly drawn worms
     drawing.removeChildren();
+    myWords.remove();
 
-    var myWords = words.clone();  
-      
+
+    myWords = words.clone();  
 
     //Scale SVG
-    var myScale = p.drawingSize / scale;
-    myWords.scale(p.drawingSize); 
-
-    if (debugMode == true) {
-        myWords.selected = true;
-        myWords.visible = true
-    };
+    // var myScale = p.drawingSize / scale;
+    myWords.scale(p.drawingSize);
 
     //Effect: Last point wiggle
     for (var i = 0; i < myWords.children.length; i++) {
@@ -838,14 +853,31 @@ function drawWord() {
         
     }
 
-    
-
     //Run Draw path function for every path in the text
     
     for (h = 0; h < myWords.children.length; h++) {
         var thisEl = myWords.children[h];
+
+        var origP = p;
+
         if (!thisEl.hasChildren()) {
-            drawPath(first.children['sprite'], thisEl, orderNo);
+            var redSelect = document.getElementById('assignRed').value;
+            if (thisEl.strokeColor.red == 1 && redSelect != 999) {
+                p = presets[redSelect];
+                var testSprite = generateSprite();
+                drawPath(testSprite, thisEl, orderNo);
+                p = origP;
+            }
+            var blueSelect = document.getElementById('assignBlue').value;
+            if (thisEl.strokeColor.blue == 1 && blueSelect != 999) {
+                p = presets[blueSelect];
+                var testSprite2 = generateSprite();
+                drawPath(testSprite2, thisEl, orderNo);
+                p = origP;
+            }
+            if (thisEl.strokeColor.gray == 0) {
+                drawPath(first.children['sprite'], thisEl, orderNo);
+            }
         }
         else {
             for (n = 0; n < thisEl.children.length; n++) {
@@ -857,7 +889,11 @@ function drawWord() {
 
     //Update background color
     drawingBg.fillColor = p.drawingBgColor;
-    myWords.remove();
+
+    if (debugMode == true) {
+        myWords.visible = true
+        myWords.selected = true;
+    };
 }
 
 var factorPhase = 0;
@@ -891,7 +927,7 @@ function drawPath(sprite, path, orderNo) {
     yin = (p.noisePhase) +  p.noisePathOffset/10 * orderNo;
     xinW = p.wavePhase / 10;
     yinW = p.wavePhase;
-  
+    var lineGroup;
 
     var points = [];
     for (k=0; k<steps*p.pathCompleteness/100; k++) {
@@ -905,13 +941,13 @@ function drawPath(sprite, path, orderNo) {
         var sCopy = sprite.clone();    
         drawing.addChild(sCopy);
         sCopy.visible = true;
-        
+        lineGroup = sCopy.lastChild;
         
         // Spike effect 
         if (p.lineStyle == 8) {
             if (spikeCounter < p.spikeFreq * path.length/steps) {
                 
-                var thisLines = sCopy.children['lines 1'].children;
+                var thisLines = lineGroup.children;
                 
                 for (i=0; i<thisLines.length; i++) {
                     if (thisLines[i].data.direction == 'vert') {
@@ -1011,7 +1047,7 @@ function drawPath(sprite, path, orderNo) {
         
         //Unicorn Line style
         if (p.lineStyle == 0) {
-            var thisLines = sCopy.children['lines 1'].children;        
+            var thisLines = lineGroup.children;        
             for (i=0; i<thisLines.length; i++) {
                 thisLines[i].fillColor.hue += hue;
             }     
@@ -1033,7 +1069,7 @@ function drawPath(sprite, path, orderNo) {
             var noiseScale;
             
             
-            var thisLines = sCopy.children['lines 1'].children;
+            var thisLines = lineGroup.children;
             for (i=0; i<thisLines.length; i++) {
                 if (thisLines[i].data.direction == 'vert') {
                     thisLines[i].scale(1, getNoiseScale(i));
@@ -1104,22 +1140,20 @@ function drawPath(sprite, path, orderNo) {
 
     //Vertical lines only
     if (p.cap == 2) {
-        var myLines = sCopy.children['lines 1'];
-        var l = myLines.children.length;
+        var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {            
-            if (myLines.children[i].data.direction == 'horiz') {
-                myLines.children[i].remove();
+            if (lineGroup.children[i].data.direction == 'horiz') {
+                lineGroup.children[i].remove();
             }
         }
     }
 
     //Horizontal lines only
     if (p.cap == 3) {
-        var myLines = sCopy.children['lines 1'];
-        var l = myLines.children.length;
+        var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {
-            if (myLines.children[i].data.direction == 'vert') {
-                myLines.children[i].remove();
+            if (lineGroup.children[i].data.direction == 'vert') {
+                lineGroup.children[i].remove();
             }
         }
     }
@@ -1193,49 +1227,50 @@ function buildUI() {
 function buildUIparam(param) {
     // get the input element that is responsible for a given parameter
     var paramUIElement = document.getElementById(param);
-
     // when the value is changed, update value to drawing and p -variable
-    paramUIElement.onchange = function() {
-        var update = {};
+    if (paramUIElement != null) {
+        paramUIElement.onchange = function() {
+            var update = {};
 
-        // If element is checkbox, toggle checked property
-        if (paramUIElement.type == "checkbox") {
-            this.value = this.checked ? 1 : 0;
-            update[param] = this.value;
-            updateFromUI(update);
-        } 
+            // If element is checkbox, toggle checked property
+            if (paramUIElement.type == "checkbox") {
+                this.value = this.checked ? 1 : 0;
+                update[param] = this.value;
+                updateFromUI(update);
+            } 
 
-        // If element is color, convert to RGB value for paper.js
-        if (paramUIElement.type == "color") {  
-            var d = hex2rgb(this.value);
-            update[param] = d;
-            updateFromUI(eval(update));
-        }
-
-        // Make sure we're sending numerical values from range inputs
-        if (paramUIElement.type == "range" || paramUIElement.type == "number") {
-            update[param] = parseInt(this.value);
-            updateFromUI(update);
-        } 
-    
-        if (paramUIElement.type == "text" || paramUIElement.nodeName == "SELECT") {
-            update[param] = this.value;
-        
-            if (paramUIElement.id == 'preset') {
-                // console.log(this.value);
-                update = presets[this.value]
+            // If element is color, convert to RGB value for paper.js
+            if (paramUIElement.type == "color") {  
+                var d = hex2rgb(this.value);
+                update[param] = d;
+                updateFromUI(eval(update));
             }
 
-            updateFromUI(update);
+            // Make sure we're sending numerical values from range inputs
+            if (paramUIElement.type == "range" || paramUIElement.type == "number") {
+                update[param] = parseInt(this.value);
+                updateFromUI(update);
+            } 
+        
+            if (paramUIElement.type == "text" || paramUIElement.nodeName == "SELECT") {
+                update[param] = this.value;
             
-        }
-    };
+                if (paramUIElement.id == 'preset') {
+                    // console.log(this.value);
+                    update = presets[this.value]
+                }
 
-    // Bind the input to update in real time next to input label
-    paramUIElement.oninput = function() {
-        if (paramUIElement.type == "range") {
-            var valel = document.getElementById(param + 'Val');
-            valel.innerHTML = this.value;
+                updateFromUI(update);
+                
+            }
+        };
+
+        // Bind the input to update in real time next to input label
+        paramUIElement.oninput = function() {
+            if (paramUIElement.type == "range") {
+                var valel = document.getElementById(param + 'Val');
+                valel.innerHTML = this.value;
+            }
         }
     }
 }
@@ -1344,12 +1379,12 @@ $('#log-params').click(function() {
 $('#debug').click(function() {
     debugMode = !debugMode;
     if (debugMode) {
-        words.visible = true;
-        words.selected = true;
+        myWords.visible = true;
+        myWords.selected = true;
     }
     else {
-        words.visible = false;
-        words.selected = false;
+        myWords.visible = false;
+        myWords.selected = false;
     }
 });
 
@@ -1407,6 +1442,10 @@ $('#brushSizeReset').click(function(){
     $('#aBrushSizeMax').val(p.size);
 });
 
+$('#assign select').change(function(){
+    update();
+});
+
 
 
 $('.tab').click(function(){
@@ -1422,7 +1461,7 @@ document.getElementById('step-animation').onclick = function() {
     render();
 };
 
-$('#effects, #brush, #lines-section, #text, #stitch, #anim, #noise, #zigzag, #hollow').hide();
+$('.ui-section:not(.active)').hide();
 
 if (!Array.prototype.last){
     Array.prototype.last = function(){
@@ -1481,4 +1520,13 @@ function easeInOutExpo(x) {
             ? 1
             : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2
                 : (2 - Math.pow(2, -20 * x + 10)) / 2;
+}
+
+function onMouseMove(event) {
+	pathContainer.selected = false;
+    if (event.item) {
+        if (event.item.layer.name == 'pathContainer') {
+            event.item.selected = true;
+        }
+    }           
 }
