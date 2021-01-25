@@ -33,6 +33,7 @@ html
     script(src='CCapture.all.min.js')
     script(src='http://joeiddon.github.io/perlin/perlin.js')
     script(type='text/paperscript' canvas='canvas' src='wormpath.js')
+    script(src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js" integrity="sha256-ur/YlHMU96MxHEsy3fHGszZHas7NzH4RQlD4tDVvFhw=" crossorigin="anonymous")
   body
     canvas#canvas(resize='' hidpi="off")
 
@@ -53,14 +54,13 @@ html
         .tab(data-target="zigzag") Zigzag
         .tab(data-target="hollow") Hollow
         .tab(data-target="anim") Animation
-        .tab(data-target="assign") Assign
 
         .brand Wormpath 2021 by 
             a(href='https://www.instagram.com/jussijokinen/') Jussi Jokinen 
             | – 
             a(href='https://github.com/jokjus/Wormpath') Fork on Github
     #ui-row
-        div.ui-section#general.active
+        .ui-section#general.active
             //- .ui-section-label.section 
             //-     span General
              
@@ -69,12 +69,14 @@ html
             +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
             +section("Presets")
-            div.ui-control        
+            .ui-control        
                 label Preset:
                 select.presetSelector#preset
-            div.ui-generic
+            .ui-generic
                 input#presetName(type='text' placeholder='Preset name')
                 button#savePresets Save preset
+            .ui-generic
+                button#reversePath Reverse path
             
 
 
@@ -245,10 +247,6 @@ html
             +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
             +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)    
 
-        .ui-section#assign
-            +select('Red', 'assignRed', [{label: 'Default', value:999}], 'presetSelector', 'ui-generic')
-            +select('Blue', 'assignBlue', [{label: 'Default', value:999}], 'presetSelector', 'ui-generic')
-        
         .ui-section#anim
             div.anim-basic-control
                 label Anim speed

@@ -327,8 +327,8 @@ function sinAnim(min, max, phase=animFrame/50) {
 
 project.activeLayer.position = view.center;
 
-var pathContainer = new Layer({position: view.center});
-pathContainer.name = 'pathContainer';
+var words = new Layer({position: view.center});
+words.name = 'words';
 
 var first = new Layer({position: view.center});
 first.name = 'first';
@@ -339,7 +339,7 @@ bg.name = 'bg';
 var drawing = new Layer({position: view.center});
 drawing.name = 'drawing';
 
-pathContainer.bringToFront();
+words.bringToFront();
 
 // Set default parameters
 var p = {
@@ -455,8 +455,9 @@ var wiggleT = 0;
 var canvas = document.getElementById('canvas');
 var scope = paper.setup(canvas);
 var url = 'images/pathsource.svg';
-var words;
 var myWords;
+var master = [];
+var selectedPaths = [];
 
 var drawingBg = new Path.Rectangle({
     point: [0, 0],
@@ -465,36 +466,40 @@ var drawingBg = new Path.Rectangle({
 bg.addChild(drawingBg);
 
 //Import SVG to canvas and refresh art
-pathContainer.activate();
+words.activate();
+// console.log(pathContainer);
 project.importSVG(url, function(item) {
-    words = item;
-    words.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
-    words.visible = true;
-    words.opacity = 0;
-    words.strokeWidth = 5;
-
-    // console.log(words);
-    // for (i=0; i<words.children.length; i++) {
-    //     // console.log(words.children[i]);
-    //     var me = words.children[i];
-        
-    //     me.onMouseMove = function(event) {
-    //         console.log('xxx');
-            
-    //     };
-    //     console.log(me);
-    // }
+    wordsImport = item;
+    wordsImport.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
+    wordsImport.visible = true;
+    wordsImport.opacity = 1;
+    wordsImport.strokeWidth = 15;
+    
+    //let's ungroup imported SVG for easier access. Now paths are bare at words layer.
+    wordsImport.parent.insertChildren(wordsImport.index,  wordsImport.removeChildren());
+    wordsImport.remove();
 
 
-    myWords = words.clone();
-    pathContainer.position = view.center;
+    // Create an array where there's one set of all properties for every path in scene
+    // This will be the main source of properties. There are alternative deep cloning methods commented.
+    for (i=0; i<words.children.length; i++) {
+        master.push(Object.assign({}, p));
+        // master.push(JSON.parse(JSON.stringify(p)));
+        // master.push(_.cloneDeep(p));
+    }
+    words.position = view.center;
+    words.opacity = 0; // set words opacity to zero so it's not visible but remain selectable
+
+    myWords = words.clone(); //Let's keep words as a master for paths and take a clone
+    myWords.name = 'myWords';
 
     updateParams(p);
-    generateSprite();
     drawWord();
     buildUI();
     
 })
+
+
 
 
 // Make the sprite ------------------------------
@@ -795,10 +800,11 @@ function drawWord() {
     drawing.removeChildren();
     myWords.remove();
 
-
+    // Lets take a fresh clone of original paths so that modifiers such as Zigzag has a clean slate.
     myWords = words.clone();  
+    myWords.name = 'myWords';
 
-    //Scale SVG
+     //Scale SVG
     // var myScale = p.drawingSize / scale;
     myWords.scale(p.drawingSize);
 
@@ -857,27 +863,17 @@ function drawWord() {
     
     for (h = 0; h < myWords.children.length; h++) {
         var thisEl = myWords.children[h];
+        var origP = p; // store original default properties
 
-        var origP = p;
+        var myIndex = thisEl.index;
+        if (selectedPaths.includes(myIndex)) {thisEl.selected = true} 
 
         if (!thisEl.hasChildren()) {
-            var redSelect = document.getElementById('assignRed').value;
-            if (thisEl.strokeColor.red == 1 && redSelect != 999) {
-                p = presets[redSelect];
-                var testSprite = generateSprite();
-                drawPath(testSprite, thisEl, orderNo);
-                p = origP;
-            }
-            var blueSelect = document.getElementById('assignBlue').value;
-            if (thisEl.strokeColor.blue == 1 && blueSelect != 999) {
-                p = presets[blueSelect];
-                var testSprite2 = generateSprite();
-                drawPath(testSprite2, thisEl, orderNo);
-                p = origP;
-            }
-            if (thisEl.strokeColor.gray == 0) {
-                drawPath(first.children['sprite'], thisEl, orderNo);
-            }
+            p = master[h]; // get the properties for this particular path
+            var mySprite = generateSprite(); // generate sprite for this path (maybe passing properties as variable is a good idea…)
+            drawPath(mySprite, thisEl, orderNo); // draw the path
+            p = origP; // Restore original properties
+            // drawPath(first.children['sprite'], thisEl, orderNo);
         }
         else {
             for (n = 0; n < thisEl.children.length; n++) {
@@ -1161,37 +1157,49 @@ function drawPath(sprite, path, orderNo) {
 
 // Update all params given in function parameters 
 function updateParams() {  
-    
-    for(key in arguments) {
-        var arg = arguments[key];
+    if (selectedPaths.length == 0) {
+        var noSelection = true;
+        for (i = 0; i<words.children.length; i++) {
+            selectedPaths.push(i);
+        }
+    }
 
-        for (key in arg) {    
-            var val = arg[key];
-            var uiel = document.getElementById(key);
-            // console.log(val);
-            // console.log(uiel);
-            
-            if (typeof val == 'string') {
-                eval("p." + key + " = '" + val + "'");
-            }
+    // Loop through every paths properties in master variable
+    for (i = 0; i<selectedPaths.length; i++) {
+        // Loop through every key in passed properties object, eg. {noiseAmp: 10}
+        for(key in arguments) {
+            var arg = arguments[key];
 
-            else {
-                eval("p." + key + " = " + val);
-            }    
-            
-            if(val.components) {
-                uiel.value = rgb2hex(val);
-            }
+            for (key in arg) {    
+                var val = arg[key];
+                var uiel = document.getElementById(key);
+                
+                var pi = selectedPaths[i]; // selected path index number                
+                master[pi][key] = val; // set selected paths property
+                if (noSelection) p[key] = val;
+              
+                // update value in color UI component
+                if(val.components) {
+                    uiel.value = rgb2hex(val);
+                }
 
-            else {                   
+                // Update value in other types of UI components
+                else {                   
+                    // Update the sliders value into numerical indicator 
+                    uiel.value = val;
+                }
+                //Slider components have span element for showing numerical representation of the value.
                 if (uiel.type == "range") {
                     var k = document.getElementById(key + 'Val');
                     k.innerHTML = Math.round(val * 100) / 100;
                 }
-                
-                uiel.value = val;
             }
         }
+    }
+
+    if (noSelection) {
+         selectedPaths = [];
+         noSelection = false;
     }
 }
 
@@ -1243,7 +1251,8 @@ function buildUIparam(param) {
             if (paramUIElement.type == "color") {  
                 var d = hex2rgb(this.value);
                 update[param] = d;
-                updateFromUI(eval(update));
+                // updateFromUI(eval(update));
+                updateFromUI(update);
             }
 
             // Make sure we're sending numerical values from range inputs
@@ -1373,6 +1382,8 @@ $('#export-button').click(function() {
 $('#log-params').click(function() {
     console.log(p);
     console.log(presets);
+    console.log('master:');
+    console.log(master);
 });
 
 
@@ -1522,11 +1533,28 @@ function easeInOutExpo(x) {
                 : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
-function onMouseMove(event) {
-	pathContainer.selected = false;
-    if (event.item) {
-        if (event.item.layer.name == 'pathContainer') {
-            event.item.selected = true;
-        }
-    }           
+function onMouseUp(event) {
+    if (event.item.layer.name == 'bg') {
+        myWords.selected = false;
+        selectedPaths = [];
+    }
+    
+    if (event.item.layer.name == 'myWords') {
+        selectedPaths.push(event.item.index);
+        event.item.selected = true;
+        
+        updateParams(master[event.item.index]);
+    }
 }
+
+$("#ui-tabs, #ui-row").click(function(event){
+    console.log('FIRE');
+    event.stopPropagation();
+});
+
+$('#reversePath').click(function(){
+    selectedPaths.forEach(function(item){
+        words.children[item].reverse();
+    });
+    update();
+});
