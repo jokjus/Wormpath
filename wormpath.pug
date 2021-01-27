@@ -75,6 +75,7 @@ html
             .ui-generic
                 input#presetName(type='text' placeholder='Preset name')
                 button#savePresets Save preset
+            +section("Path")    
             .ui-generic
                 button#reversePath Reverse path
             
@@ -260,48 +261,27 @@ html
                     option(value='easeOutElastic') easeOutElastic
                     option(value='easeOutBounce') easeOutBounce
                     option(value='easeInOutExpo') easeInOutExpo
-            .anim-control
-                label Rotation variation
-                input#aRotationMin(type='number' min='0' max='1000' value='')
-                input#aRotationMax(type='number' min='0' max='1000' value='')
-            //- label Wave amp:
-            //- input#aWaveAmp(type='number' min='0' max='100' value='0')
-            .anim-control
-                label#brushSizeReset Brush size variation:
-                input#aBrushSizeMin(type='number' min='0' max='1000' value='')
-                input#aBrushSizeMax(type='number' min='0' max='1000' value='')                
-            .anim-control
-                label Twist variation
-                input#aTwistMin(type='number' min='0' max='500' value='')
-                input#aTwistMax(type='number' min='0' max='500' value='')
-            .anim-control
-                label Bulb amp variation
-                input#aBulbAmpMin(type='number' min='0' max='100' value='')
-                input#aBulbAmpMax(type='number' min='0' max='100' value='')    
-            .anim-control
-                label Bulb freq variation
-                input#aBulbFreqMin(type='number' min='0' max='100' value='')
-                input#aBulbFreqMax(type='number' min='0' max='100' value='')  
-            .anim-control
-                label Noise phase
-                input#aNoisePhaseMin(type='number' min='0' max='100' value='')
-                input#aNoisePhaseMax(type='number' min='0' max='100' value='') 
-            .anim-control
-                label Noise amp
-                input#aNoiseAmpMin(type='number' min='0' max='100' value='')
-                input#aNoiseAmpMax(type='number' min='0' max='100' value='')     
-            .anim-control
-                label Wave phase 
-                input#aWaveNoiseOffsetMin(type='number' min='0' max='100' value='')
-                input#aWaveNoiseOffsetMax(type='number' min='0' max='100' value='')  
-            .anim-control
-                label Path completeness 
-                input#aPathCompletenessMin(type='number' min='0' max='100' value='')
-                input#aPathCompletenessMax(type='number' min='0' max='100' value='') 
-            .anim-control
-                label Zigzag amplitude 
-                input#aZigzagAmpMin(type='number' min='0' max='100' value='')
-                input#aZigzagAmpMax(type='number' min='0' max='100' value='')         
+
+        
+            mixin anim(label, id, min, max, name)
+                .anim-control
+                    label=label
+                    span.override(data-prop=name) OR
+                    span.animated(data-prop=name) AN
+                    input(id=id+'Min', type='number', min=min, max=max value='')
+                    input(id=id+'Max', type='number', min=min, max=max value='')
+
+            +anim('Rotation variation', 'aRotation', 0, 1000, 'rotation')
+            +anim('Brush size variation', 'aBrushSize', 0, 1000, 'size')
+            +anim('Twist variation', 'aTwist', 0, 500, 'twist')
+            +anim('Bulb amp variation', 'aBulbAmp', 0, 100, 'bulbAmp')
+            +anim('Bulb freq variation', 'aBulbFreq', 0, 100, 'bulbFreq')
+            +anim('Noise phase', 'aNoisePhase', 0, 100, 'noisePhase')
+            +anim('Noise amp', 'aNoiseAmp', 0, 100, 'noiseAmp')
+            +anim('Wave phase', 'aWaveNoiseOffset', 0, 100, 'waveNoiseOffset')
+            +anim('Path completeness', 'aPathCompleteness', 0, 100, 'pathCompleteness')
+            +anim('Zigzag amplitude', 'aZigzagAmp', 0, 100, 'pathZigzagAmp')
+                
             .anim-control
                 label Animation format
                 select#aFormat

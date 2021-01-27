@@ -265,32 +265,126 @@ function animate() {
     }
 }
 
+var animatedProperties = [
+    {
+        propName: 'rotation',
+        min: 'aRotationMin',
+        max: 'aRotationMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'twist',
+        min: 'aTwistMin',
+        max: 'aTwistMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'size',
+        min: 'aBrushSizeMin',
+        max: 'aBrushSizeMax',
+        animate: true,
+        override: false  // Overrides general animation values with every paths own values
+    },
+    {
+        propName: 'noisePhase',
+        min: 'aNoisePhaseMin',
+        max: 'aNoisePhaseMax',
+        animate: true,
+        override: false 
+    },
+    {
+        propName: 'noiseAmp',
+        min: 'aNoiseAmpMin',
+        max: 'aNoiseAmpMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'waveNoiseOffset',
+        min: 'aWaveNoiseOffsetMin',
+        max: 'aWaveNoiseOffsetMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'pathCompleteness',
+        min: 'aPathCompletenessMin',
+        max: 'aPathCompletenessMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'pathZigzagAmp',
+        min: 'aZigzagAmpMin',
+        max: 'aZigzagAmpMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'bulbAmp',
+        min: 'aBulbAmpMin',
+        max: 'aBulbAmpMax',
+        animate: true,
+        override: false
+    },
+    {
+        propName: 'bulbFreq',
+        min: 'aBulbFreqMin',
+        max: 'aBulbFreqMax',
+        animate: true,
+        override: false
+    }
+]
+
+
+        //     bulbAmp: getAnimValue(easing, p.aBulbAmpMin, p.aBulbAmpMax),
+        //     bulbFreq: getAnimValue(easing, p.aBulbFreqMin, p.aBulbFreqMax),
+ 
+
 function render() {
 
         var rotStep = parseFloat(p.rotation + p.aRotationInc);
         wiggleT += 0.02;
         // wiggleT += document.getElementById('aSpeed').value / 1000;
-
+        
         var easing = document.getElementById('aEasing').value;
-        //TODO: more features for selecting animation speed and easing, looping
-        update({
-            rotation: getAnimValue(easing, p.aRotationMin, p.aRotationMax),
-            twist: getAnimValue(easing, p.aTwistMin, p.aTwistMax),
-            bulbAmp: getAnimValue(easing, p.aBulbAmpMin, p.aBulbAmpMax),
-            bulbFreq: getAnimValue(easing, p.aBulbFreqMin, p.aBulbFreqMax),
-            size: getAnimValue(easing, p.aBrushSizeMin, p.aBrushSizeMax),
-            noisePhase: getAnimValue(easing, p.aNoisePhaseMin, p.aNoisePhaseMax),
-            noiseAmp: getAnimValue(easing, p.aNoiseAmpMin, p.aNoiseAmpMax),
-            waveNoiseOffset: getAnimValue(easing, p.aWaveNoiseOffsetMin, p.aWaveNoiseOffsetMax),
-            pathCompleteness: getAnimValue(easing, p.aPathCompletenessMin, p.aPathCompletenessMax),
-            pathZigzagAmp: getAnimValue(easing, p.aZigzagAmpMin, p.aZigzagAmpMax)
-        });
-        if (animDir == 1) {
-            animFrame++;
+
+        // Go through all animated properties, if value is special character #, don't animate that property
+        // Or smth. 
+        var animationUpdates = {};
+        var overrides = [];
+
+        for (k=0; k<animatedProperties.length; k++) {
+            var ap = animatedProperties[k];
+            if (ap.animate && !ap.override) animationUpdates[ap.propName] = getAnimValue(easing, p[ap.min], p[ap.max]) 
+            if (ap.animate && ap.override) {
+                overrides.push(ap);
+            }
         }
-        else {
-            animFrame--
+
+        update(animationUpdates);
+
+       
+        if (overrides.length > 0) {
+            for (d = 0; d < overrides.length; d++) {
+                var op = overrides[d];
+                
+                for (f = 0; f < words.children.length; f++) {
+                    var myUpdates = {};
+                    var key = op.propName; //eg. rotation
+                    var myProps = master[f]; 
+                    selectedPaths = [f];
+                    myUpdates[op.propName] = getAnimValue(easing, myProps[op.min], myProps[op.max])     
+                    update(myUpdates);   
+                    selectedPaths = [];    
+                }
+            }
         }
+
+       
+        animDir == 1 ? animFrame++ : animFrame--;
         
     
     if( typeof capturer !== 'undefined') {
@@ -498,8 +592,6 @@ project.importSVG(url, function(item) {
     buildUI();
     
 })
-
-
 
 
 // Make the sprite ------------------------------
@@ -822,21 +914,20 @@ function drawWord() {
         
 
         for (var path of myWords.children) {
-            // thisPathCount = Math.floor(path.length / amount);
-            thisPathCount = path.length / amount;
-            // console.log('stepit: ' + thisPathCount);
+            thisPathCount = Math.floor(path.length / amount) + 1;
+            if (amount > path.length) thisPathCount = 2;
             var length = path.length;
             var newPoints = [];
 
             // Add points to a path defined by amount -variable
             for (i=0; i<thisPathCount; i++) {
-                var offset = i / thisPathCount * length;
+                var offset = i / (thisPathCount-1) * length;
                 // var offset = length / (thisPathCount-1) * i;
                 var point = path.getPointAt(offset);                   
                 newPoints.push(point);
             }
 
-            path.removeSegments();
+            path.removeSegments(); // remove original points
             
             for (i=0; i<thisPathCount; i++) {
                 path.insert(i, newPoints[i]);
@@ -898,7 +989,6 @@ var factorPhase = 0;
 function drawPath(sprite, path, orderNo) {
     drawing.activate();
     var steps = path.length / ((101 - p.density)) * 2;
-    // console.log(steps);
     
     var capHeight = p.size;
     var capSteps = capHeight / ((101 - p.density));
@@ -930,11 +1020,11 @@ function drawPath(sprite, path, orderNo) {
         points.push(path.getPointAt(path.length - (k*(path.length/steps))));
     }
 
-    
+    var sCopy;
     for (k=0; k<steps; k++) {
         
         //First let's take a clone that we can manipulate with effects
-        var sCopy = sprite.clone();    
+        sCopy = sprite.clone();    
         drawing.addChild(sCopy);
         sCopy.visible = true;
         lineGroup = sCopy.lastChild;
@@ -1136,6 +1226,8 @@ function drawPath(sprite, path, orderNo) {
 
     //Vertical lines only
     if (p.cap == 2) {
+        // console.log('sCopy 2');
+        // console.log(sCopy);
         var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {            
             if (lineGroup.children[i].data.direction == 'horiz') {
@@ -1146,6 +1238,8 @@ function drawPath(sprite, path, orderNo) {
 
     //Horizontal lines only
     if (p.cap == 3) {
+        // console.log('sCopy 3');
+        // console.log(sCopy);
         var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {
             if (lineGroup.children[i].data.direction == 'vert') {
@@ -1157,11 +1251,10 @@ function drawPath(sprite, path, orderNo) {
 
 // Update all params given in function parameters 
 function updateParams() {  
+    // If nothing is selected, push change to ALL paths.
     if (selectedPaths.length == 0) {
         var noSelection = true;
-        for (i = 0; i<words.children.length; i++) {
-            selectedPaths.push(i);
-        }
+        selectedPaths = [...Array(words.children.length).keys()] //populate var with number from 0 to number of paths
     }
 
     // Loop through every paths properties in master variable
@@ -1196,14 +1289,15 @@ function updateParams() {
             }
         }
     }
-
+    // Restore selection status
     if (noSelection) {
          selectedPaths = [];
          noSelection = false;
     }
 }
 
-function updateFromUI(val) {
+// When updating from UI let's show progress indicator while working
+function updateWithSpinner(val) {
     showProgress();
 
     setTimeout(function(){ 
@@ -1212,6 +1306,7 @@ function updateFromUI(val) {
     }, 50);
 }
 
+// Basic update function
 function update(val) {
     var pp = Object.assign({}, val);
     delete pp.name; // because name is not a UI field
@@ -1244,21 +1339,21 @@ function buildUIparam(param) {
             if (paramUIElement.type == "checkbox") {
                 this.value = this.checked ? 1 : 0;
                 update[param] = this.value;
-                updateFromUI(update);
+                updateWithSpinner(update);
             } 
 
             // If element is color, convert to RGB value for paper.js
             if (paramUIElement.type == "color") {  
                 var d = hex2rgb(this.value);
                 update[param] = d;
-                // updateFromUI(eval(update));
-                updateFromUI(update);
+                // updateWithSpinner(eval(update));
+                updateWithSpinner(update);
             }
 
             // Make sure we're sending numerical values from range inputs
             if (paramUIElement.type == "range" || paramUIElement.type == "number") {
                 update[param] = parseInt(this.value);
-                updateFromUI(update);
+                updateWithSpinner(update);
             } 
         
             if (paramUIElement.type == "text" || paramUIElement.nodeName == "SELECT") {
@@ -1269,7 +1364,7 @@ function buildUIparam(param) {
                     update = presets[this.value]
                 }
 
-                updateFromUI(update);
+                updateWithSpinner(update);
                 
             }
         };
@@ -1384,6 +1479,8 @@ $('#log-params').click(function() {
     console.log(presets);
     console.log('master:');
     console.log(master);
+    console.log('animatedProperties:');
+    console.log(animatedProperties);
 });
 
 
@@ -1443,7 +1540,7 @@ $('.ui-section-label').click(function(){
 });
 
 $('#wedgeVal').click(function(){
-    updateFromUI({wedge:50});
+    updateWithSpinner({wedge:50});
 });
 
 $('#brushSizeReset').click(function(){
@@ -1533,18 +1630,26 @@ function easeInOutExpo(x) {
                 : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
+var dragging = false;
+
 function onMouseUp(event) {
     if (event.item.layer.name == 'bg') {
         myWords.selected = false;
         selectedPaths = [];
     }
+
     
     if (event.item.layer.name == 'myWords') {
         selectedPaths.push(event.item.index);
         event.item.selected = true;
-        
         updateParams(master[event.item.index]);
     }
+    console.log('BANG');
+    if (dragging) {
+        updateWords();
+        update();        
+    }
+    dragging = false;
 }
 
 $("#ui-tabs, #ui-row").click(function(event){
@@ -1558,3 +1663,83 @@ $('#reversePath').click(function(){
     });
     update();
 });
+
+$('.animated').click(function(){
+    $(this).toggleClass('active');
+    var propName = $(this).data('prop');
+    var found = animatedProperties.find(o => o.propName === propName);
+    found.animate = !found.animate;
+});
+
+
+$('.override').click(function(){
+    $(this).toggleClass('active');
+    var propName = $(this).data('prop');
+    var found = animatedProperties.find(o => o.propName === propName);
+    found.override = !found.override;
+});
+
+
+var hitOptions = {
+	segments: true,
+	stroke: true,
+	fill: true,
+	tolerance: 5
+};
+
+var segment, path;
+var movePath = false;
+function onMouseDown(event) {
+	segment = path = null;
+	var hitResult = project.hitTest(event.point, hitOptions);
+	if (!hitResult)
+		return;
+
+	// if (event.modifiers.shift) {
+	// 	if (hitResult.type == 'segment') {
+	// 		hitResult.segment.remove();
+	// 	};
+	// 	return;
+	// }
+
+	if (hitResult) {
+        path = hitResult.item;
+        console.log(selectedPaths.length);
+		if (hitResult.type == 'segment') {
+			segment = hitResult.segment;
+		} else if (hitResult.type == 'stroke' && selectedPaths.length > 0) {
+			var location = hitResult.location;
+			segment = path.insert(location.index + 1, event.point);
+			path.smooth();
+		}
+	}
+	// movePath = hitResult.type == 'fill';
+	// if (movePath)
+	// 	project.activeLayer.addChild(hitResult.item);
+}
+
+// function onMouseMove(event) {
+// 	project.activeLayer.selected = false;
+// 	if (event.item)
+// 		event.item.selected = true;
+// }
+
+function onMouseDrag(event) {
+    dragging = true;
+	if (segment) {
+		segment.point += event.delta;
+        path.smooth();
+        
+    
+	} else if (path) {
+        path.position += event.delta;        
+        
+	}
+}
+
+function updateWords() {
+    words.removeChildren();
+    words = myWords.clone();
+    words.selected = false;
+    words.scale(1/p.drawingSize);
+}

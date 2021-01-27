@@ -201,3 +201,29 @@ input[type='color'] {
 	border-right: 1px solid #ddd;
 	position: relative;
 }
+
+.override, .animated {
+	position:absolute;
+	top: 0;
+	right:0;
+	background-color: #ccc;
+	padding: 1px;
+}
+
+.animated {
+	top:14px;
+	background-color: #7ce17e;
+}
+
+.animated.active {
+	background-color: #ccc;
+}
+
+.override:hover, .animated:hover {
+	cursor: pointer;
+	background-color: #fefefe;
+}
+
+.override.active {
+	background-color: #eb756c;
+}
