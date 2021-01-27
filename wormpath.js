@@ -270,70 +270,70 @@ var animatedProperties = [
         propName: 'rotation',
         min: 'aRotationMin',
         max: 'aRotationMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'twist',
         min: 'aTwistMin',
         max: 'aTwistMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'size',
         min: 'aBrushSizeMin',
         max: 'aBrushSizeMax',
-        animate: true,
+        animate: false,
         override: false  // Overrides general animation values with every paths own values
     },
     {
         propName: 'noisePhase',
         min: 'aNoisePhaseMin',
         max: 'aNoisePhaseMax',
-        animate: true,
+        animate: false,
         override: false 
     },
     {
         propName: 'noiseAmp',
         min: 'aNoiseAmpMin',
         max: 'aNoiseAmpMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'waveNoiseOffset',
         min: 'aWaveNoiseOffsetMin',
         max: 'aWaveNoiseOffsetMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'pathCompleteness',
         min: 'aPathCompletenessMin',
         max: 'aPathCompletenessMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'pathZigzagAmp',
         min: 'aZigzagAmpMin',
         max: 'aZigzagAmpMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'bulbAmp',
         min: 'aBulbAmpMin',
         max: 'aBulbAmpMax',
-        animate: true,
+        animate: false,
         override: false
     },
     {
         propName: 'bulbFreq',
         min: 'aBulbFreqMin',
         max: 'aBulbFreqMax',
-        animate: true,
+        animate: false,
         override: false
     }
 ]
@@ -1640,11 +1640,19 @@ function onMouseUp(event) {
 
     
     if (event.item.layer.name == 'myWords') {
-        selectedPaths.push(event.item.index);
-        event.item.selected = true;
+        // If path is already selected, unselect it
+        if (selectedPaths.includes(event.item.index) && !event.modifiers.shift) {
+           selectedPaths = selectedPaths.filter(e => e !== event.item.index)
+            event.item.selected = false;
+        }
+        //otherwise add it to selection
+        else {
+            selectedPaths.push(event.item.index);
+            event.item.selected = true;
+        }
         updateParams(master[event.item.index]);
     }
-    console.log('BANG');
+
     if (dragging) {
         updateWords();
         update();        
@@ -1680,6 +1688,13 @@ $('.override').click(function(){
 });
 
 
+function onKeyDown(event) {
+	if(event.key == 'a') {
+        selectedPaths = [...Array(words.children.length).keys()];
+        update();
+    }
+}
+
 var hitOptions = {
 	segments: true,
 	stroke: true,
@@ -1704,18 +1719,19 @@ function onMouseDown(event) {
 
 	if (hitResult) {
         path = hitResult.item;
-        console.log(selectedPaths.length);
+        // console.log(selectedPaths.length);
 		if (hitResult.type == 'segment') {
-			segment = hitResult.segment;
-		} else if (hitResult.type == 'stroke' && selectedPaths.length > 0) {
-			var location = hitResult.location;
-			segment = path.insert(location.index + 1, event.point);
-			path.smooth();
+            segment = hitResult.segment;
+            if (Key.isDown('x')) {
+                segment.remove();
+            }
+		} else if (hitResult.type == 'stroke' && selectedPaths.includes(path.index) && event.modifiers.shift) {
+            var location = hitResult.location;
+            segment = path.insert(location.index + 1, event.point);            
+            path.smooth();
 		}
 	}
-	// movePath = hitResult.type == 'fill';
-	// if (movePath)
-	// 	project.activeLayer.addChild(hitResult.item);
+
 }
 
 // function onMouseMove(event) {
