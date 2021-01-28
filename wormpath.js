@@ -378,7 +378,7 @@ function render() {
                     selectedPaths = [f];
                     myUpdates[op.propName] = getAnimValue(easing, myProps[op.min], myProps[op.max])     
                     update(myUpdates);   
-                    selectedPaths = [];    
+                    selectedPaths.length = 0;    
                 }
             }
         }
@@ -499,6 +499,10 @@ var p = {
     brushBubbleSize: 10,
     brushBubbleAmount: 4,
     brushBubbleType: 0,
+    brushBubbleInnerOn: 0,
+    brushBubbleInnerSize: 10,
+    brushBubbleInnerAmount: 4,
+    brushBubbleInnerType: 0,
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
@@ -509,6 +513,8 @@ var p = {
     pathZigZagOn: 0,
     pathZigzagAmp: 15,
     pathZigzagFreq: 10,
+    pathSpiralOn: 0,
+    pathSpiralAmount: 20,
     hollowOn: 0,
     hollowSize: 50,
     hollowType: 0,
@@ -747,11 +753,44 @@ function generateSprite() {
             brush = brush.unite(c);
         }       
 
-
         brush.strokeColor = bc;
         brush.blendMode = p.brushBlend;
         brush.fillColor = brushFill;
         brush.strokeWidth = p.brushStrokeWidth;
+
+        if (p.brushBubbleInnerOn == 1) {
+            bInnerRad = p.brushBubbleInnerSize
+
+            var e = new Path.Circle({
+                center: new Point(p.size/2, p.size/2),
+                radius: p.size/4-rad
+            });
+            
+            var brush2 = new Path();
+
+            for (d = 0; d < p.brushBubbleInnerAmount; d++) {
+                var bcenter = e.getPointAt(e.length / p.brushBubbleInnerAmount * d);
+                if (p.brushBubbleInnerType == 0) {
+                    var bi = new Path.Circle({
+                        center: bcenter,
+                        radius: bInnerRad,
+                    });
+                }   
+                if (p.brushBubbleInnerType == 1) {
+                    var bi = new Path.Rectangle({
+                        point: bcenter - new Point(bInnerRad, bInnerRad),
+                        size: [bInnerRad*2, bInnerRad*2],
+                    });
+                }
+    
+                brush2 = brush2.unite(bi);
+                brush2.fillColor = 'red';
+                brush2.strokeColor = 'black';
+                brush2.strokeWidth = 1;
+                // brush2.selected = true;
+                // console.log(bInner);
+            }       
+        }
     }
 
 
@@ -910,26 +949,28 @@ function drawWord() {
     //Effect: Zigzag
     if (p.pathZigZagOn == 1) {
         var amount = 100 - p.pathZigzagFreq;
-        var amplitude = p.pathZigzagAmp + orderNo;
+        var amplitude = p.pathZigzagAmp; // + orderNo;
         
 
         for (var path of myWords.children) {
-            thisPathCount = Math.floor(path.length / amount) + 1;
+            thisPathCount = Math.floor(path.length / amount);
             if (amount > path.length) thisPathCount = 2;
             var length = path.length;
             var newPoints = [];
 
             // Add points to a path defined by amount -variable
             for (i=0; i<thisPathCount; i++) {
-                var offset = i / (thisPathCount-1) * length;
+                var offset = i / (thisPathCount) * length;
                 // var offset = length / (thisPathCount-1) * i;
                 var point = path.getPointAt(offset);                   
                 newPoints.push(point);
             }
 
+            newPoints.push(path.lastSegment.point);
+
             path.removeSegments(); // remove original points
             
-            for (i=0; i<thisPathCount; i++) {
+            for (i=0; i<thisPathCount+1; i++) {
                 path.insert(i, newPoints[i]);
             }
             
@@ -950,6 +991,34 @@ function drawWord() {
         
     }
 
+    //Effect: spiral
+    if (p.pathSpiralOn == 1) {
+        var path = myWords.firstChild;
+        var thisPathCount = 20;
+        var count = 0;
+        var amount = p.pathSpiralAmount /2;
+        var position = path.lastSegment.point;
+        var newPoints = [];
+
+        for (i=0; i<thisPathCount; i++) {
+            var vector = new Point({
+                angle: (thisPathCount * amount) - (i * amount),
+                length: (thisPathCount / amount * 50) - (i / amount * 50)
+            });
+            var point = new Point(position + vector);
+            newPoints.push(point);
+            position += vector;
+        }
+
+        path.removeSegments(); // remove original points
+            
+        for (i=0; i<thisPathCount; i++) {
+            path.insert(i, newPoints[i]);
+        }
+
+        path.smooth;
+    }
+
     //Run Draw path function for every path in the text
     
     for (h = 0; h < myWords.children.length; h++) {
@@ -964,13 +1033,13 @@ function drawWord() {
             var mySprite = generateSprite(); // generate sprite for this path (maybe passing properties as variable is a good idea…)
             drawPath(mySprite, thisEl, orderNo); // draw the path
             p = origP; // Restore original properties
-            // drawPath(first.children['sprite'], thisEl, orderNo);
         }
-        else {
-            for (n = 0; n < thisEl.children.length; n++) {
-                drawPath(first.children['sprite'], thisEl.children[n], orderNo); 
-            }
-        }
+        // This was meant for grouped paths
+        // else {
+        //     for (n = 0; n < thisEl.children.length; n++) {
+        //         drawPath(first.children['sprite'], thisEl.children[n], orderNo); 
+        //     }
+        // }
         orderNo++;
     }
 
@@ -1496,6 +1565,8 @@ $('#debug').click(function() {
     }
 });
 
+
+
 $('#lineStyle').change(function() {
     $(this).parent().find('.collapseui').hide();
     if(this.value == 6) {
@@ -1507,42 +1578,23 @@ $('#lineStyle').change(function() {
 
 });
 
-$('#bgEffect').change(function() {
-    $(this).parent().find('.collapseui').hide();
-    if(this.value == 1) {
-        $('#bulbcollapsible').show();
-    }   
-});
 
-$('#bgType').change(function() {
+// Show collapsible UI section
+$('.collapsibleTrigger').change(function(){
     $(this).parent().parent().find('.collapseui').hide();
-    if(this.value == 1) {
-        $('#brushtypecollapsible').show();
-    }  
-    if(this.value == 3) {
-        $('#brushcrosscollapsible').show();
-    }   
+    var c = $(this).children("option:selected").data('col');
+    if (c != null) {
+        console.log(c);
+        $('#' + c + 'Collapsible').show();
+    }
+})
 
-    if(this.value == 5) {
-        $('#brushbubblesizecollapsible').show();
-    }   
-});
-
-$('#bgStyle').change(function() {
-    $(this).parent().find('.collapseui').hide();
-    if(this.value == 3) {
-        $('#brushgradientcollapsible').show();
-    }   
-});
-
-$('.ui-section-label').click(function(){
-    $(this).parent().find('.ui-control').toggle();
-});
-
+// Easily reset wedge to balance
 $('#wedgeVal').click(function(){
     updateWithSpinner({wedge:50});
 });
 
+// Easily set animation brush size to match the one in brush properties
 $('#brushSizeReset').click(function(){
     p.aBrushSizeMin = p.size;
     p.aBrushSizeMax = p.size;
@@ -1550,12 +1602,7 @@ $('#brushSizeReset').click(function(){
     $('#aBrushSizeMax').val(p.size);
 });
 
-$('#assign select').change(function(){
-    update();
-});
-
-
-
+//Open tab
 $('.tab').click(function(){
     $('.ui-section').hide();
     var act = $(this).data('target');
@@ -1633,12 +1680,13 @@ function easeInOutExpo(x) {
 var dragging = false;
 
 function onMouseUp(event) {
+    // If user clicks on the background, clear the selection
     if (event.item.layer.name == 'bg') {
         myWords.selected = false;
-        selectedPaths = [];
+        selectedPaths.length = 0;
     }
-
     
+    // If user clicks on any path of the drawing
     if (event.item.layer.name == 'myWords') {
         // If path is already selected, unselect it
         if (selectedPaths.includes(event.item.index) && !event.modifiers.shift) {
@@ -1661,10 +1709,10 @@ function onMouseUp(event) {
 }
 
 $("#ui-tabs, #ui-row").click(function(event){
-    console.log('FIRE');
     event.stopPropagation();
 });
 
+// Turn paths drawing order to reverse
 $('#reversePath').click(function(){
     selectedPaths.forEach(function(item){
         words.children[item].reverse();
@@ -1672,6 +1720,7 @@ $('#reversePath').click(function(){
     update();
 });
 
+// Toggle animation property's animateability
 $('.animated').click(function(){
     $(this).toggleClass('active');
     var propName = $(this).data('prop');
@@ -1679,7 +1728,7 @@ $('.animated').click(function(){
     found.animate = !found.animate;
 });
 
-
+// Toggle whether or not we should use animation property's overrides per path
 $('.override').click(function(){
     $(this).toggleClass('active');
     var propName = $(this).data('prop');
@@ -1687,7 +1736,7 @@ $('.override').click(function(){
     found.override = !found.override;
 });
 
-
+// Select all paths by pressing A
 function onKeyDown(event) {
 	if(event.key == 'a') {
         selectedPaths = [...Array(words.children.length).keys()];
@@ -1704,42 +1753,33 @@ var hitOptions = {
 
 var segment, path;
 var movePath = false;
+
 function onMouseDown(event) {
 	segment = path = null;
 	var hitResult = project.hitTest(event.point, hitOptions);
 	if (!hitResult)
 		return;
 
-	// if (event.modifiers.shift) {
-	// 	if (hitResult.type == 'segment') {
-	// 		hitResult.segment.remove();
-	// 	};
-	// 	return;
-	// }
-
 	if (hitResult) {
         path = hitResult.item;
-        // console.log(selectedPaths.length);
+        // If clicked on a corner point
 		if (hitResult.type == 'segment') {
             segment = hitResult.segment;
+            // Remove corner point by simultanously pressing x
             if (Key.isDown('x')) {
                 segment.remove();
             }
+         // If clicked a already selected path with shift pressed – add a new control point
 		} else if (hitResult.type == 'stroke' && selectedPaths.includes(path.index) && event.modifiers.shift) {
             var location = hitResult.location;
             segment = path.insert(location.index + 1, event.point);            
             path.smooth();
 		}
 	}
-
 }
 
-// function onMouseMove(event) {
-// 	project.activeLayer.selected = false;
-// 	if (event.item)
-// 		event.item.selected = true;
-// }
 
+// Move path or single point by dragging with mouse
 function onMouseDrag(event) {
     dragging = true;
 	if (segment) {

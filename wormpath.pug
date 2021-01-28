@@ -16,9 +16,9 @@ mixin select(label, name, options=[], myclass='', mymainclass='ui-control')
         select(id=name, class=myclass)
             each myOption in options
                 if myOption.selected
-                    option(value=myOption.value selected)=myOption.label
+                    option(value=myOption.value data-col=myOption.col selected)=myOption.label
                 else
-                    option(value=myOption.value)=myOption.label
+                    option(value=myOption.value data-col=myOption.col)=myOption.label
 
 
 doctype html
@@ -52,6 +52,7 @@ html
         .tab(data-target="stitch") Stitch
         .tab(data-target="noise") Noise
         .tab(data-target="zigzag") Zigzag
+        .tab(data-target="spiral") Spiral
         .tab(data-target="hollow") Hollow
         .tab(data-target="anim") Animation
 
@@ -84,13 +85,13 @@ html
         div.ui-section#brush
             +select('Brush type:', 'bgType', [
                         {label: 'Square', value: 0},
-                        {label: 'Double circle', value: 1},
+                        {label: 'Double circle', value: 1, col: 'brushDoubleCircle'},
                         {label: 'Double diamond', value: 2},
-                        {label: 'Cross', value: 3},
+                        {label: 'Cross', value: 3, col: 'brushCross'},
                         {label: 'Pyramid', value: 4},
-                        {label: 'Bubble', value: 5}
-                    ])  
-            div.collapseui#brushtypecollapsible(style='display:none')
+                        {label: 'Bubble', value: 5, col: 'brushBubbleSize'}                        
+                    ], 'collapsibleTrigger')  
+            div.collapseui#brushDoubleCircleCollapsible(style='display:none')
                 +input('range', 'Innercircle size', 'inCircleSize')
                 +input('color', 'Innercircle color', 'inCircleColor')
                 +input('range', 'Innercircle opacity', 'inCircleOpacity')
@@ -105,15 +106,23 @@ html
                         {label: 'Soft light', value: 'soft-light'},
                         {label: 'Hard light', value: 'hard-light'}
                     ])
-            div.collapseui#brushcrosscollapsible(style='display:none')
+            div.collapseui#brushCrossCollapsible(style='display:none')
                 +input('range', 'Cross Width:', 'brushCrossWidth')
-            div.collapseui#brushbubblesizecollapsible(style='display:none')
+            div.collapseui#brushBubbleSizeCollapsible(style='display:none')
                 +input('range', 'Bubble size:', 'brushBubbleSize', 0, 100)
                 +input('range', 'Bubbles:', 'brushBubbleAmount', 0, 50)
                 +select('Brush type:', 'brushBubbleType', [
                         { label: 'Circle', value: 0 }, 
                         { label: 'Rectangle', value: 1 }
                     ])
+                +input('checkbox', 'Inner', 'brushBubbleInnerOn', 0, 0, 0)
+                +input('range', 'Inner size', 'brushBubbleInnerSize', 0, 100)
+                +input('range', 'Inner bubbles:', 'brushBubbleInnerAmount', 0, 50)
+                +select('Inner brush type:', 'brushBubbleInnerType', [
+                        { label: 'Circle', value: 0 }, 
+                        { label: 'Rectangle', value: 1 }
+                    ])
+
 
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
@@ -140,21 +149,22 @@ html
                     option(value='overlay') Overlay
                     option(value='soft-light') Soft-light
                     option(value='hard-light') Hard-light
-            div.ui-control
-                label Brush color style:
-                select#bgStyle
-                    option(value='0' selected='') Custom
-                    option(value='1') Unicorn
-                    option(value='2') None
-                    option(value='3') Gradient
-                div.collapseui#brushgradientcollapsible(style='display:none')
-                    +input('color', 'Gradient color', 'brushGradientColor')
-                    +input('range', 'Transparency:', 'brushGradientTransparency', 0, 100)
-                    +select('Gradient type:', 'brushGradientType', [
-                        {label: 'Radial', value: 1},
-                        {label: 'Linear', value: 0}
-                    ])           
-                    +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
+   
+            +select('Brush color style:', 'bgStyle', [
+                    {label: 'Default', value: 0},
+                    {label: 'Unicorn', value: 1},
+                    {label: 'None', value: 2},
+                    {label: 'Gradient', value: 3, col: 'brushGradient'}], 
+                    'collapsibleTrigger')
+
+            .collapseui#brushGradientCollapsible(style='display:none')
+                +input('color', 'Gradient color', 'brushGradientColor')
+                +input('range', 'Transparency:', 'brushGradientTransparency', 0, 100)
+                +select('Gradient type:', 'brushGradientType', [
+                    {label: 'Radial', value: 1},
+                    {label: 'Linear', value: 0}
+                ])           
+                +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
 
             +select('Cap:', 'cap', [
                     {label: 'Filled', value: 0},
@@ -166,9 +176,9 @@ html
    
             +select('Brush effect:', 'bgEffect', [
                     {label: 'None', value: 0},
-                    {label: 'Bulp', value: 1}                    
-                ])
-            div.collapseui#bulbcollapsible(style='display:none')
+                    {label: 'Bulp', value: 1, col: 'bulb'}                    
+                ], 'collapsibleTrigger')
+            div.collapseui#bulbCollapsible(style='display:none')
                 +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
                 +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
         
@@ -177,26 +187,25 @@ html
             +input('range', 'Width:', 'lineWidth', 0, 40)
             +input('color', 'Line color', 'lineColor')
             +input('range', 'Line opacity', 'lineOpacity', 0, 100)
-                
-            div.ui-control
-                label Style:
-                select#lineStyle
-                    option(value='3' selected='') Custom
-                    option(value='0') Unicorn
-                    option(value='4') Vertical
-                    option(value='5') Horizontal
-                    option(value='6') Wavy
-                    option(value='8') Spikes
+            +select('Style:', 'lineStyle', [
+                {label: 'Default', value: 3},
+                {label: 'Unicorn', value: 0},
+                {label: 'Vertical', value: 4},
+                {label: 'Horzontal', value: 5},
+                {label: 'Wavy', value: 6, col:'wave'},
+                {label: 'Spikes', value: 8, col:'spike'}],
+                'collapsibleTrigger')
+            
 
-                div.collapseui#wavecollapsible(style='display:none')
-                    +input('range', 'Wave amp:', 'waveAmp', 0, 50)
-                    +input('range', 'Wave freq:', 'waveFreq', 0, 100)     
-                    +input('checkbox', 'Noise', 'waveNoiseOn',0 , 0, 0)
-                    +input('range', 'Noise offset', 'waveNoiseOffset', 0, 100)
-                    +input('range', 'Wave phase', 'wavePhase', 0, 100)
-                div.collapseui#spikecollapsible(style='display:none')
-                    +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
-                    +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
+            div.collapseui#waveCollapsible(style='display:none')
+                +input('range', 'Wave amp:', 'waveAmp', 0, 50)
+                +input('range', 'Wave freq:', 'waveFreq', 0, 100)     
+                +input('checkbox', 'Noise', 'waveNoiseOn',0 , 0, 0)
+                +input('range', 'Noise offset', 'waveNoiseOffset', 0, 100)
+                +input('range', 'Wave phase', 'wavePhase', 0, 100)
+            div.collapseui#spikeCollapsible(style='display:none')
+                +input('range', 'Spike amp:', 'spikeAmp', 0, 100)
+                +input('range', 'Spike freq:', 'spikeFreq', 0, 100)
 
             +input('range', 'Fade:', 'fade', 0, 100)
 
@@ -246,7 +255,11 @@ html
         .ui-section#zigzag
             +input('checkbox', 'Zigzag:', 'pathZigZagOn', 0, 0, 0)
             +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
-            +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)    
+            +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)   
+
+        .ui-section#spiral
+            +input('checkbox', 'Spiral:', 'pathSpiralOn', 0, 0, 0)
+            +input('range', 'Spiral amount:', 'pathSpiralAmount', 0, 100)  
 
         .ui-section#anim
             div.anim-basic-control
