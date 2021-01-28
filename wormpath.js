@@ -1543,6 +1543,7 @@ $('#export-button').click(function() {
     });
 });
 
+// Console log debug information
 $('#log-params').click(function() {
     console.log(p);
     console.log(presets);
@@ -1553,41 +1554,57 @@ $('#log-params').click(function() {
 });
 
 
-$('#debug').click(function() {
-    debugMode = !debugMode;
-    if (debugMode) {
-        myWords.visible = true;
-        myWords.selected = true;
-    }
-    else {
-        myWords.visible = false;
-        myWords.selected = false;
-    }
-});
-
-
-
-$('#lineStyle').change(function() {
-    $(this).parent().find('.collapseui').hide();
-    if(this.value == 6) {
-        $('#wavecollapsible').show();
-    }
-    if(this.value == 8) {
-        $('#spikecollapsible').show();
-    }
-
-});
+// $('#debug').click(function() {
+//     debugMode = !debugMode;
+//     if (debugMode) {
+//         myWords.visible = true;
+//         myWords.selected = true;
+//     }
+//     else {
+//         myWords.visible = false;
+//         myWords.selected = false;
+//     }
+// });
 
 
 // Show collapsible UI section
 $('.collapsibleTrigger').change(function(){
-    $(this).parent().parent().find('.collapseui').hide();
-    var c = $(this).children("option:selected").data('col');
-    if (c != null) {
-        console.log(c);
-        $('#' + c + 'Collapsible').show();
-    }
+    $(this).parent().find('.collapse-button').remove(); //remove other toggles for this selection
+    $('.collapseui').hide(); //hide other collapsibles
+
+    showCollapsible($(this));
 })
+
+function showCollapsible(myEl) {
+    var pos = myEl.offset();    
+    pos.top = $('#ui-row').outerHeight();
+    var c = myEl.children("option:selected").data('col');
+    if (c != null) {
+        myEl.after('<span class="collapse-button" data-col="' + c + 'Collapsible">Options</span>');
+        var col =  $('#' + c + 'Collapsible');
+        col.show().addClass('active').css(pos);
+        if (col.offset().left + col.width() > $(window).width()) {
+            col.css('right', 0);
+            col.css('left', '');
+        }
+    }
+}
+
+function showAllCollapsibles() {
+    $('.collapseui').hide();
+    $('.collapse-button').remove();
+    $('.collapsibleTrigger').each(function(){
+        showCollapsible($(this));
+    })
+}
+
+// Hide and show collapsible properties
+$('#ui-row').on('click', 'span.collapse-button', function(){
+    var colName = $(this).data('col');
+    $('#' + colName).toggle();
+});
+
+
 
 // Easily reset wedge to balance
 $('#wedgeVal').click(function(){
@@ -1609,6 +1626,7 @@ $('.tab').click(function(){
     $('#' + act).show();
     $('.tab').removeClass('active');
     $(this).addClass('active');
+    showAllCollapsibles();
 });
 
 //Step animation one frame forward

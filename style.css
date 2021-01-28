@@ -151,7 +151,7 @@ canvas[resize] {
 
 .collapseui {	
 	position: absolute;
-	top:60px;
+	top:0;
 	display: flex;
 	background-color: #eee;
 }
@@ -161,6 +161,18 @@ canvas[resize] {
 	border-right: 1px solid #ddd;
 }
 
+.collapse-button {
+	padding: 2px;
+	margin-top:4px;
+	text-align: center;
+	background-color: #ccc;
+	position: relative;
+	display: block;
+}
+
+.collapse-button:hover {
+	cursor: pointer;
+}
 
 [data-type="color"] {
 	display: none;

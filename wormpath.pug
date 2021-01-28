@@ -40,7 +40,7 @@ html
     #progress
     button#export-button Export SVGx
     button#log-params Log params
-    button#debug Debug
+    //- button#debug Debug
     
 
     #ui-tabs
@@ -91,6 +91,7 @@ html
                         {label: 'Pyramid', value: 4},
                         {label: 'Bubble', value: 5, col: 'brushBubbleSize'}                        
                     ], 'collapsibleTrigger')  
+            
             div.collapseui#brushDoubleCircleCollapsible(style='display:none')
                 +input('range', 'Innercircle size', 'inCircleSize')
                 +input('color', 'Innercircle color', 'inCircleColor')
