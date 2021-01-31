@@ -55,11 +55,40 @@ canvas[resize] {
 	border-top: 1px solid #ddd;
 }
 
+
+#ui-row.inactive {
+	
+
+}
+
+#ui-row.inactive .ui-section > * {
+	opacity: .2;
+	pointer-events: none;
+}
+
+#ui-row.inactive #anim, #ui-row.inactive #anim > * {
+	pointer-events: all;
+	opacity: 1;
+}
+
+#ui-row.inactive .drawingProperties {
+	pointer-events: all;
+	opacity: 1;
+}
+
+.drawingProperties {
+	display: flex;
+}
+
+#ui-row.inactive .drawingProperties > * {
+	opacity: 1;
+}
+
 .ui-section {
 	display: flex;
 }
 
-.ui-section > .ui-control {
+.ui-section .ui-control {
 	padding: 10px 7px;
 	flex-grow: 1;
 	border-right: 1px solid #ddd;

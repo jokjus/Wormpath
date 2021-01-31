@@ -13,6 +13,7 @@ mixin section(label)
 mixin select(label, name, options=[], myclass='', mymainclass='ui-control')
     div(class=mymainclass)&attributes(attributes)
         label=label
+            span(id=name + 'Val')
         select(id=name, class=myclass)
             each myOption in options
                 if myOption.selected
@@ -40,7 +41,7 @@ html
     #progress
     button#export-button Export SVGx
     button#log-params Log params
-    //- button#debug Debug
+    button#debug Debug
     
 
     #ui-tabs
@@ -60,14 +61,15 @@ html
             a(href='https://www.instagram.com/jussijokinen/') Jussi Jokinen 
             | – 
             a(href='https://github.com/jokjus/Wormpath') Fork on Github
-    #ui-row
+    #ui-row.inactive
         .ui-section#general.active
             //- .ui-section-label.section 
             //-     span General
              
                 //- Select is populated programmatically from the presets.json 
-            +input('color', 'Bg color', 'drawingBgColor')
-            +input('range', 'Scale:', 'drawingSize', 0, 20)
+            .drawingProperties
+                +input('color', 'Bg color', 'drawingBgColor')
+                +input('range', 'Scale:', 'drawingSize', 0, 20)
             +input('range', 'Density:', 'density', 0, 100)
             +section("Presets")
             .ui-control        
@@ -261,12 +263,14 @@ html
         .ui-section#spiral
             +input('checkbox', 'Spiral:', 'pathSpiralOn', 0, 0, 0)
             +input('range', 'Spiral amount:', 'pathSpiralAmount', 0, 100)  
+            +input('checkbox', 'Direction:', 'pathSpiralDirection', 0, 0, 0)  
+            +input('checkbox', 'Drawing direction:', 'pathSpiralDrawingDirection', 0, 0, 0)  
 
         .ui-section#anim
             div.anim-basic-control
                 label Anim speed
                 input#aSpeed(type='number' value=20)
-            div.anim-basic-control
+            div.anim-control
                 label Anim easing
                 select#aEasing
                     option(value='sine') Sine
@@ -280,10 +284,13 @@ html
             mixin anim(label, id, min, max, name)
                 .anim-control
                     label=label
-                    span.override(data-prop=name) OR
+                        
+                    //- span.override(data-prop=name) OR
                     span.animated(data-prop=name class='active') AN
                     input(id=id+'Min', type='number', min=min, max=max value='')
+                    span(id=id + 'MinVal')
                     input(id=id+'Max', type='number', min=min, max=max value='')
+                    span(id=id + 'MaxVal')
 
             +anim('Rotation variation', 'aRotation', 0, 1000, 'rotation')
             +anim('Brush size variation', 'aBrushSize', 0, 1000, 'size')
@@ -295,8 +302,9 @@ html
             +anim('Wave phase', 'aWaveNoiseOffset', 0, 100, 'waveNoiseOffset')
             +anim('Path completeness', 'aPathCompleteness', 0, 100, 'pathCompleteness')
             +anim('Zigzag amplitude', 'aZigzagAmp', 0, 100, 'pathZigzagAmp')
+            +anim('Spiral amount', 'aPathSpiralAmount', 0, 100, 'pathSpiralAmount')
                 
-            .anim-control
+            .anim-basic-control
                 label Animation format
                 select#aFormat
                     option(value='webm') WEBM

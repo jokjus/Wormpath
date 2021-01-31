@@ -155,7 +155,6 @@ populatePresetMenu();
 
 // Populate UI menu for selecting a preset     
 function populatePresetMenu() {
-    // console.log(presets.length);
     for (i = 0; i < presets.length; i++) {    
         addPresetMenuItem(presets[i]['name'], i);           
     }
@@ -169,8 +168,9 @@ function addPresetMenuItem(presetName, i) {
 // Save the new preset and give it a name according to the user input
 $('#savePresets').click(function(){
     var presetName = $('#presetName').val();
-    p.name = presetName;
-    presets.push(p);
+    var tempP = Object.assign({}, master[selectedPaths[0]]);
+    tempP.name = presetName;
+    presets.push(tempP);
 
     // var newP = Object.assign({}, p);
     var newP = presets;
@@ -335,6 +335,13 @@ var animatedProperties = [
         max: 'aBulbFreqMax',
         animate: false,
         override: false
+    },
+    {
+        propName: 'pathSpiralAmount',
+        min: 'aPathSpiralAmountMin',
+        max: 'aPathSpiralAmountMax',
+        animate: false,
+        override: false
     }
 ]
 
@@ -345,48 +352,27 @@ var animatedProperties = [
 
 function render() {
 
-        var rotStep = parseFloat(p.rotation + p.aRotationInc);
-        wiggleT += 0.02;
-        // wiggleT += document.getElementById('aSpeed').value / 1000;
+        wiggleT += 0.02; // hmm.. get rid of this
         
-        var easing = document.getElementById('aEasing').value;
-
-        // Go through all animated properties, if value is special character #, don't animate that property
-        // Or smth. 
-        var animationUpdates = {};
-        var overrides = [];
-
-        for (k=0; k<animatedProperties.length; k++) {
-            var ap = animatedProperties[k];
-            if (ap.animate && !ap.override) animationUpdates[ap.propName] = getAnimValue(easing, p[ap.min], p[ap.max]) 
-            if (ap.animate && ap.override) {
-                overrides.push(ap);
-            }
-        }
-
-        update(animationUpdates);
-
-       
-        if (overrides.length > 0) {
-            for (d = 0; d < overrides.length; d++) {
-                var op = overrides[d];
-                
-                for (f = 0; f < words.children.length; f++) {
-                    var myUpdates = {};
-                    var key = op.propName; //eg. rotation
-                    var myProps = master[f]; 
-                    selectedPaths = [f];
-                    myUpdates[op.propName] = getAnimValue(easing, myProps[op.min], myProps[op.max])     
-                    update(myUpdates);   
-                    selectedPaths.length = 0;    
+        // Go through all animated properties and if its animatable, update every paths properties
+        for (animP of animatedProperties) { //for each anim property
+            if (animP.animate) {            // check if animatable flag is up
+                for (path of words.children) {  // then for every path
+                    var myUpdate = {};          
+                    var myProps = master[path.index]; // get paths properties
+                    // get new value for this animation property
+                    myUpdate[animP.propName] = getAnimValue(myProps.aEasing, myProps[animP.min], myProps[animP.max])
+                    //update property and ui
+                    updateOneParam(path.index, myUpdate);
                 }
             }
         }
+        
+        // After properties are updated, render screen
+        renderAllPaths();
 
-       
         animDir == 1 ? animFrame++ : animFrame--;
         
-    
     if( typeof capturer !== 'undefined') {
         if( capturer) capturer.capture( canvas );
     }    
@@ -515,6 +501,8 @@ var p = {
     pathZigzagFreq: 10,
     pathSpiralOn: 0,
     pathSpiralAmount: 20,
+    pathSpiralDirection: 0,
+    pathSpiralDrawingDirection: 0,
     hollowOn: 0,
     hollowSize: 50,
     hollowType: 0,
@@ -538,7 +526,9 @@ var p = {
     aPathCompletenessMax: 100,
     aZigzagAmpMin: 0,
     aZigzagAmpMax: 0,
-    aFormat: 'webm'
+    aPathSpiralAmountMin: 0,
+    aPathSpiralAmountMax: 0,
+    aEasing: 'sine'
 }
 
 var hue = 0;
@@ -567,7 +557,6 @@ bg.addChild(drawingBg);
 
 //Import SVG to canvas and refresh art
 words.activate();
-// console.log(pathContainer);
 project.importSVG(url, function(item) {
     wordsImport = item;
     wordsImport.children[0].remove(); //import creates unwanted rectangle object we need to get rid of
@@ -593,123 +582,123 @@ project.importSVG(url, function(item) {
     myWords = words.clone(); //Let's keep words as a master for paths and take a clone
     myWords.name = 'myWords';
 
-    updateParams(p);
-    drawWord();
+    renderAllPaths();
     buildUI();
+    updateUI();
     
 })
 
 
 // Make the sprite ------------------------------
-function generateSprite() {
+function generateSprite(myP) {
     first.removeChildren();
     first.activate();
     
-    var bc = p.brushStrokeColor;
-    bc.alpha = p.brushStrokeOpacity / 100;
+    var bc = myP.brushStrokeColor;
+    bc.alpha = myP.brushStrokeOpacity / 100;
 
-    var brushFill = p.bgColor;
-    brushFill.alpha = p.bgOpacity / 100;
+    var brushFill = myP.bgColor;
+    brushFill.alpha = myP.bgOpacity / 100;
 
     // Rectangle type brush
-    if (p.bgType == 0) {
+    if (myP.bgType == 0) {
         
 
         var brush = new Path.Rectangle({
             point: [0, 0],
-            size: [p.size, p.size],
+            size: [myP.size, myP.size],
             fillColor: brushFill,
-            blendMode: p.brushBlend,
-            strokeWidth: p.brushStrokeWidth,
+            blendMode: myP.brushBlend,
+            strokeWidth: myP.brushStrokeWidth,
             strokeColor: bc
         });
        
-        if (p.shadow > 0) {
+        if (myP.shadow > 0) {
             //Bottom rectangle that creates shadow
             var recB = new Shape.Rectangle({
-                point: [0, p.size-5],
-                size: [p.size, 5],
+                point: [0, myP.size-5],
+                size: [myP.size, 5],
                 fillColor: 'black'
             })
 
-            recB.opacity = p.shadow/100;
+            recB.opacity = myP.shadow/100;
         }
     }
 
     // Circle brush type
-    if (p.bgType == 1) {
+    if (myP.bgType == 1) {
         // Outer circle
 
         var brush = new Path.Circle({
-            center: [p.size/2,p.size/2],
-            radius: p.size/2,
+            center: [myP.size/2,myP.size/2],
+            radius: myP.size/2,
             strokeColor: bc,
-            strokeWidth: p.brushStrokeWidth,
-            blendMode: p.brushBlend
+            strokeWidth: myP.brushStrokeWidth,
+            blendMode: myP.brushBlend
         });
 
         // Inner circle
         var brush2 = new Path.Circle({
-            center: [p.size/2,p.size/2],
-            radius: p.inCircleSize,
-            strokeColor: p.inCircleColor,
-            opacity: p.inCircleOpacity/100,
+            center: [myP.size/2,myP.size/2],
+            radius: myP.inCircleSize,
+            strokeColor: myP.inCircleColor,
+            opacity: myP.inCircleOpacity/100,
             strokeWidth: 5,
-            blendMode: p.inCircleBlendmode
+            blendMode: myP.inCircleBlendmode
         });
     }
 
     //Double diamond brush
-    if (p.bgType == 2) {
+    if (myP.bgType == 2) {
         var rec1 = new Path.Rectangle({
             point: [0, 0],
-            size: [p.size/2, p.size/2],
+            size: [myP.size/2, myP.size/2],
         });
 
         var rec2 = new Path.Rectangle({
-            point: [p.size/2, p.size/2],
-            size: [p.size/2, p.size/2],
+            point: [myP.size/2, myP.size/2],
+            size: [myP.size/2, myP.size/2],
         });
         var brush = rec1.unite(rec2);
 
-        var strC = p.brushStrokeColor;
-        strC.alpha = p.lineOpacity/100;
+        var strC = myP.brushStrokeColor;
+        strC.alpha = myP.lineOpacity/100;
         brush.strokeColor = bc;
-        brush.blendMode = p.brushBlend;
+        brush.blendMode = myP.brushBlend;
         brush.fillColor = brushFill;
-        brush.strokeWidth = p.brushStrokeWidth;
+        brush.strokeWidth = myP.brushStrokeWidth;
 
     }
 
     // Cross type brush
-    if (p.bgType == 3) {
-        var crossWidth = p.brushCrossWidth;
-        var cp = (p.size-crossWidth) /2;
+    if (myP.bgType == 3) {
+        var crossWidth = myP.brushCrossWidth;
+        var cp = (myP.size-crossWidth) /2;
 
         var rec1 = new Path.Rectangle({
             point: [cp, 0],
-            size: [crossWidth, p.size],
+            size: [crossWidth, myP.size],
         });
         var rec2 = new Path.Rectangle({
             point: [0, cp],
-            size: [p.size, crossWidth],
+            size: [myP.size, crossWidth],
  
         });
 
         var brush = rec1.unite(rec2);
                 
         brush.strokeColor = bc;
-        brush.blendMode = p.brushBlend;
+        brush.blendMode = myP.brushBlend;
         brush.fillColor = brushFill;
-        brush.strokeWidth = p.brushStrokeWidth;
+        brush.strokeWidth = myP.brushStrokeWidth;
     }
 
     // Pyramid brush type
-    if (p.bgType == 4) {
+    if (myP.bgType == 4) {
         var tri1 = new Path.RegularPolygon({
-            center: new Point(p.size/2, p.size*3/4),
+            center: new Point(myP.size/2, myP.size*3/4),
             sides: 3,
-            radius: p.size/2
+            radius: myP.size/2
         });
         var tri2 = tri1.clone();
         tri2.pivot = tri2.bounds.topCenter;
@@ -719,31 +708,31 @@ function generateSprite() {
         var brush = tri1.unite(tri2);
 
         brush.strokeColor = bc;
-        brush.blendMode = p.brushBlend;
+        brush.blendMode = myP.brushBlend;
         brush.fillColor = brushFill;
-        brush.strokeWidth = p.brushStrokeWidth;
+        brush.strokeWidth = myP.brushStrokeWidth;
     }
 
     // Bubbles brush type
-    if (p.bgType == 5) {
-        var rad = p.brushBubbleSize;
+    if (myP.bgType == 5) {
+        var rad = myP.brushBubbleSize;
 
         var e = new Path.Circle({
-            center: new Point(p.size/2, p.size/2),
-            radius: p.size/2-rad
+            center: new Point(myP.size/2, myP.size/2),
+            radius: myP.size/2-rad
         });
 
         var brush = new Path();
 
-        for (b = 0; b < p.brushBubbleAmount; b++) {
-            var bcenter = e.getPointAt(e.length / p.brushBubbleAmount * b);
-            if (p.brushBubbleType == 0) {
+        for (b = 0; b < myP.brushBubbleAmount; b++) {
+            var bcenter = e.getPointAt(e.length / myP.brushBubbleAmount * b);
+            if (myP.brushBubbleType == 0) {
                 var c = new Path.Circle({
                     center: bcenter,
                     radius: rad,
                 });
             }   
-            if (p.brushBubbleType == 1) {
+            if (myP.brushBubbleType == 1) {
                 var c = new Path.Rectangle({
                     point: bcenter - new Point(rad, rad),
                     size: [rad*2, rad*2],
@@ -754,29 +743,29 @@ function generateSprite() {
         }       
 
         brush.strokeColor = bc;
-        brush.blendMode = p.brushBlend;
+        brush.blendMode = myP.brushBlend;
         brush.fillColor = brushFill;
-        brush.strokeWidth = p.brushStrokeWidth;
+        brush.strokeWidth = myP.brushStrokeWidth;
 
-        if (p.brushBubbleInnerOn == 1) {
-            bInnerRad = p.brushBubbleInnerSize
+        if (myP.brushBubbleInnerOn == 1) {
+            bInnerRad = myP.brushBubbleInnerSize
 
             var e = new Path.Circle({
-                center: new Point(p.size/2, p.size/2),
-                radius: p.size/4-rad
+                center: new Point(myP.size/2, myP.size/2),
+                radius: myP.size/4-rad
             });
             
             var brush2 = new Path();
 
-            for (d = 0; d < p.brushBubbleInnerAmount; d++) {
-                var bcenter = e.getPointAt(e.length / p.brushBubbleInnerAmount * d);
-                if (p.brushBubbleInnerType == 0) {
+            for (d = 0; d < myP.brushBubbleInnerAmount; d++) {
+                var bcenter = e.getPointAt(e.length / myP.brushBubbleInnerAmount * d);
+                if (myP.brushBubbleInnerType == 0) {
                     var bi = new Path.Circle({
                         center: bcenter,
                         radius: bInnerRad,
                     });
                 }   
-                if (p.brushBubbleInnerType == 1) {
+                if (myP.brushBubbleInnerType == 1) {
                     var bi = new Path.Rectangle({
                         point: bcenter - new Point(bInnerRad, bInnerRad),
                         size: [bInnerRad*2, bInnerRad*2],
@@ -788,29 +777,28 @@ function generateSprite() {
                 brush2.strokeColor = 'black';
                 brush2.strokeWidth = 1;
                 // brush2.selected = true;
-                // console.log(bInner);
             }       
         }
     }
 
 
     // Gradient
-    if (p.bgStyle == 3) {
-        var endCol = p.brushGradientColor;
-        endCol.alpha = (100 - p.brushGradientTransparency) /100;    
-        var orig = [p.size/2,p.size/2];
-        if (p.brushGradientType == 0) {
+    if (myP.bgStyle == 3) {
+        var endCol = myP.brushGradientColor;
+        endCol.alpha = (100 - myP.brushGradientTransparency) /100;    
+        var orig = [myP.size/2,myP.size/2];
+        if (myP.brushGradientType == 0) {
             var orig = brush.bounds.leftCenter;
         }
 
-        var start = (p.brushGradientBalance-50)/100*2;
-        if (p.brushGradientBalance <= 50) start = 0;
-        var end = (p.brushGradientBalance)/100*2;
-        if (p.brushGradientBalance >= 50) end = 1;
+        var start = (myP.brushGradientBalance-50)/100*2;
+        if (myP.brushGradientBalance <= 50) start = 0;
+        var end = (myP.brushGradientBalance)/100*2;
+        if (myP.brushGradientBalance >= 50) end = 1;
         brush.fillColor = {
             gradient: {
-                stops: [[p.bgColor, start], [endCol, end]],
-                radial: Boolean(parseInt(p.brushGradientType))
+                stops: [[myP.bgColor, start], [endCol, end]],
+                radial: Boolean(parseInt(myP.brushGradientType))
             },
             origin: orig,
             destination: brush.bounds.rightCenter
@@ -818,7 +806,7 @@ function generateSprite() {
     }
 
     // Brush none
-    if (p.bgStyle == 2) {
+    if (myP.bgStyle == 2) {
         brush.opacity = 0;
     }
 
@@ -836,52 +824,52 @@ function generateSprite() {
 
 
     // Step for each line
-    var rStep = p.size / (parseInt(p.lines) + 1);
+    var rStep = myP.size / (parseInt(myP.lines) + 1);
 
     //Build lines
-    for (x = 1; x < parseInt(p.lines) + 1; x++ ) {
+    for (x = 1; x < parseInt(myP.lines) + 1; x++ ) {
 
-        var thisOpacity = 1- ((x * (p.fade / p.lines)) / 100);
+        var thisOpacity = 1- ((x * (myP.fade / myP.lines)) / 100);
 
         //horizontal lines
-        if (p.lineStyle != 5) {
+        if (myP.lineStyle != 5) {
             var l = new Path.Rectangle({
-                point: [rStep*x-p.lineWidth/2, 0],
-                size: [p.lineWidth, p.size],
-                fillColor: p.lineColor
+                point: [rStep*x-myP.lineWidth/2, 0],
+                size: [myP.lineWidth, myP.size],
+                fillColor: myP.lineColor
             })
             
-            l.opacity = thisOpacity - (1-p.lineOpacity/100);  
+            l.opacity = thisOpacity - (1-myP.lineOpacity/100);  
             l.data.direction = 'horiz';
             lines.addChild(l); //add line to main group
         }
 
         //vertical lines
-        if (p.lineStyle != 4) {
+        if (myP.lineStyle != 4) {
             var l2 = new Path.Rectangle({
-                point: [0, rStep*x-p.lineWidth/2],
-                size: [p.size, p.lineWidth],
-                fillColor: p.lineColor,
-                opacity: p.lineOpacity/100
+                point: [0, rStep*x-myP.lineWidth/2],
+                size: [myP.size, myP.lineWidth],
+                fillColor: myP.lineColor,
+                opacity: myP.lineOpacity/100
             });
 
-            l2.opacity = thisOpacity - (1-p.lineOpacity/100);
+            l2.opacity = thisOpacity - (1-myP.lineOpacity/100);
             l2.data.direction = 'vert';
             lines.addChild(l2); //add line to main group 
         }
     }
  
     // Text effect
-    if (p.textOn == 1) {
-        var text = new PointText(new Point(p.size, p.size-20-(p.size/100*p.textYPos)));
-        var textMask = new Path.Rectangle(new Point(p.size-10, 0), new Size(10, p.size));
+    if (myP.textOn == 1) {
+        var text = new PointText(new Point(myP.size, myP.size-20-(myP.size/100*myP.textYPos)));
+        var textMask = new Path.Rectangle(new Point(myP.size-10, 0), new Size(10, myP.size));
         text.content = document.getElementById('textContent').value;
-        text.fillColor = p.textColor;
-        text.fontSize = p.size * p.textSize/50;
+        text.fillColor = myP.textColor;
+        text.fontSize = myP.size * myP.textSize/50;
         text.fontFamily = "Helvetica Neue";
         text.justification = 'right';
-        text.strokeWidth = p.textBorderWidth;
-        text.strokeColor = p.textBorderColor;
+        text.strokeWidth = myP.textBorderWidth;
+        text.strokeColor = myP.textBorderColor;
 
         var textContainer = new Group({
             name: 'textContainer',
@@ -893,24 +881,24 @@ function generateSprite() {
     }
 
     // Corner radius with clipping mask
-    if (p.corner != 0) {
-        var rectangle = new Rectangle(new Point(0, 0), new Size(p.size, p.size));
-        var cornerSize = new Size(p.corner,p.corner);
+    if (myP.corner != 0) {
+        var rectangle = new Rectangle(new Point(0, 0), new Size(myP.size, myP.size));
+        var cornerSize = new Size(myP.corner,myP.corner);
         var mask = new Path.Rectangle(rectangle, cornerSize);
         group.insertChild(1, mask);
         mask.clipMask = true;
     }
 
     // Hollow effect
-    if (p.hollowOn == 1) {
-        var hSize = p.size/2 * (100-p.hollowSize) / 100;
-        if (p.hollowType == 0) {
-            var hollowOut = new Path.Rectangle(new Point(0, 0), new Size(p.size, p.size));
-            var hollowIn = new Path.Rectangle(new Point(hSize, hSize), new Size(p.size-2*hSize, p.size-2*hSize));
+    if (myP.hollowOn == 1) {
+        var hSize = myP.size/2 * (100-myP.hollowSize) / 100;
+        if (myP.hollowType == 0) {
+            var hollowOut = new Path.Rectangle(new Point(0, 0), new Size(myP.size, myP.size));
+            var hollowIn = new Path.Rectangle(new Point(hSize, hSize), new Size(myP.size-2*hSize, myP.size-2*hSize));
         }
-        if (p.hollowType == 1) {
-            var hollowOut = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2);
-            var hollowIn = new Path.Circle(new Point(p.size/2, p.size/2), p.size/2 - hSize);
+        if (myP.hollowType == 1) {
+            var hollowOut = new Path.Circle(new Point(myP.size/2, myP.size/2), myP.size/2);
+            var hollowIn = new Path.Circle(new Point(myP.size/2, myP.size/2), myP.size/2 - hSize);
         }
         var mask = hollowOut['subtract'](hollowIn);
         group.insertChild(1, mask);
@@ -923,10 +911,10 @@ function generateSprite() {
 }
 
 // Loop through all paths and pathgroups
-function drawWord() {    
+function renderAllPaths() {    
 
     // variable for keeping track of paths drawn
-    var orderNo = 0;    
+    // var orderNo = 0;    
     //Delete all previosly drawn worms
     drawing.removeChildren();
     myWords.remove();
@@ -936,8 +924,7 @@ function drawWord() {
     myWords.name = 'myWords';
 
      //Scale SVG
-    // var myScale = p.drawingSize / scale;
-    myWords.scale(p.drawingSize);
+    myWords.scale(master[0].drawingSize);
 
     //Effect: Last point wiggle
     for (var i = 0; i < myWords.children.length; i++) {
@@ -947,120 +934,128 @@ function drawWord() {
     }
 
     //Effect: Zigzag
-    if (p.pathZigZagOn == 1) {
-        var amount = 100 - p.pathZigzagFreq;
-        var amplitude = p.pathZigzagAmp; // + orderNo;
+
+    function zigzag(path) {    
+        var myP = master[path.index];
+        var amount = 100 - myP.pathZigzagFreq;
+        var amplitude = myP.pathZigzagAmp; // + orderNo;
         
+        thisPathCount = Math.floor(path.length / amount);
+        if (amount > path.length) thisPathCount = 2;
+        var length = path.length;
+        var newPoints = [];
 
-        for (var path of myWords.children) {
-            thisPathCount = Math.floor(path.length / amount);
-            if (amount > path.length) thisPathCount = 2;
-            var length = path.length;
-            var newPoints = [];
-
-            // Add points to a path defined by amount -variable
-            for (i=0; i<thisPathCount; i++) {
-                var offset = i / (thisPathCount) * length;
-                // var offset = length / (thisPathCount-1) * i;
-                var point = path.getPointAt(offset);                   
-                newPoints.push(point);
-            }
-
-            newPoints.push(path.lastSegment.point);
-
-            path.removeSegments(); // remove original points
-            
-            for (i=0; i<thisPathCount+1; i++) {
-                path.insert(i, newPoints[i]);
-            }
-            
-            // Move points in zigzag
-            for (i=1; i<thisPathCount; i++) {
-                var normal = path.getNormalAt(path.segments[i].location) * amplitude;
-                if (isEven(i)) {
-                    path.segments[i].point += normal;
-                }
-                else {
-                    path.segments[i].point -= normal;
-                }
-            }
-            
-            path.smooth();
+        // Add points to a path defined by amount -variable
+        for (i=0; i<thisPathCount; i++) {
+            var offset = i / (thisPathCount) * length;
+            // var offset = length / (thisPathCount-1) * i;
+            var point = path.getPointAt(offset);                   
+            newPoints.push(point);
         }
 
+        newPoints.push(path.lastSegment.point);
+
+        path.removeSegments(); // remove original points
+        
+        for (i=0; i<thisPathCount+1; i++) {
+            path.insert(i, newPoints[i]);
+        }
+        
+        // Move points in zigzag
+        for (i=1; i<thisPathCount; i++) {
+            var normal = path.getNormalAt(path.segments[i].location) * amplitude;
+            if (isEven(i)) {
+                path.segments[i].point += normal;
+            }
+            else {
+                path.segments[i].point -= normal;
+            }
+        }
+        
+        path.smooth();
         
     }
 
     //Effect: spiral
-    if (p.pathSpiralOn == 1) {
-        var path = myWords.firstChild;
-        var thisPathCount = 20;
-        var count = 0;
-        var amount = p.pathSpiralAmount /2;
+    function spiral(path) {
+        var myP = master[path.index];
+        var steps = 10;
+        var amount = myP.pathSpiralAmount;
+        var decrease = 6;
         var position = path.lastSegment.point;
-        var newPoints = [];
+        var lastPoint = path.firstSegment.point;
+        
+        var vector = position-lastPoint; //vector from path's end to end
+        
+        var startLength = path.length/5; //could be more exact calculation :9
+        var startAngle = vector.angle; //use vectors angle as initial direction of the spiral
 
-        for (i=0; i<thisPathCount; i++) {
+        if (myP.pathSpiralDirection == 1) {  // switch bending direction
+            amount = -myP.pathSpiralAmount;
+        }
+        var newPoints = [position];  // initialize array for newly created points
+
+        for (i=0; i<steps; i++) {
             var vector = new Point({
-                angle: (thisPathCount * amount) - (i * amount),
-                length: (thisPathCount / amount * 50) - (i / amount * 50)
+                angle: startAngle + i * amount/2,
+                length: startLength - i * decrease
             });
-            var point = new Point(position + vector);
+            var point = new Point(position - vector);
             newPoints.push(point);
-            position += vector;
+            position -= vector;
         }
 
         path.removeSegments(); // remove original points
             
-        for (i=0; i<thisPathCount; i++) {
-            path.insert(i, newPoints[i]);
+        if (myP.pathSpiralDrawingDirection == 1) {
+            for (i=0; i<steps; i++) {
+                console.log(i);
+                path.insert(0, newPoints[i]);
+            }
+        }
+        else {
+            for (i=0; i<steps; i++) {
+                path.insert(i, newPoints[i]);
+            }
         }
 
-        path.smooth;
+        path.smooth();
     }
 
     //Run Draw path function for every path in the text
     
-    for (h = 0; h < myWords.children.length; h++) {
-        var thisEl = myWords.children[h];
-        var origP = p; // store original default properties
+    for (path of myWords.children) {
+        if (master[path.index].pathSpiralOn == 1) {
+            spiral(path);
+        }        
+        if (master[path.index].pathZigZagOn == 1) {
+            zigzag(path);
+        }  
 
-        var myIndex = thisEl.index;
-        if (selectedPaths.includes(myIndex)) {thisEl.selected = true} 
-
-        if (!thisEl.hasChildren()) {
-            p = master[h]; // get the properties for this particular path
-            var mySprite = generateSprite(); // generate sprite for this path (maybe passing properties as variable is a good idea…)
-            drawPath(mySprite, thisEl, orderNo); // draw the path
-            p = origP; // Restore original properties
-        }
-        // This was meant for grouped paths
-        // else {
-        //     for (n = 0; n < thisEl.children.length; n++) {
-        //         drawPath(first.children['sprite'], thisEl.children[n], orderNo); 
-        //     }
-        // }
-        orderNo++;
+        drawPath(generateSprite(master[path.index]), path);
     }
 
     //Update background color
-    drawingBg.fillColor = p.drawingBgColor;
+    drawingBg.fillColor = master[0].drawingBgColor;
 
     if (debugMode == true) {
         myWords.visible = true
         myWords.selected = true;
     };
+
+    showSelections();
 }
 
 var factorPhase = 0;
 
 // Draw sprite along a path
-function drawPath(sprite, path, orderNo) {
+function drawPath(sprite, path) {
+    var myP = master[path.index];
     drawing.activate();
-    var steps = path.length / ((101 - p.density)) * 2;
+    var steps = path.length / ((101 - myP.density)) * 2;
     
-    var capHeight = p.size;
-    var capSteps = capHeight / ((101 - p.density));
+    var capHeight = myP.size;
+    var capSteps = capHeight / ((101 - myP.density));
 
     // Variables for effects
     var wavePhase = 1;
@@ -1068,24 +1063,24 @@ function drawPath(sprite, path, orderNo) {
     var factor = sinBetween(0.3,1.2, factorPhase);
     factorPhase += 0.1;
     var bulbscale = 1;
-    var bulbSizeChange = p.bulbAmp/20 * factor;
-    var bulbadd = p.bulbFreq * path.length/steps ;
-    var twistadd = p.twist * path.length/steps;
-    var waveadd = p.waveFreq * path.length/steps;
-    var textadd = path.length/steps - path.length/steps * (p.textSpread/100)
+    var bulbSizeChange = myP.bulbAmp/20 * factor;
+    var bulbadd = myP.bulbFreq * path.length/steps ;
+    var twistadd = myP.twist * path.length/steps;
+    var waveadd = myP.waveFreq * path.length/steps;
+    var textadd = path.length/steps - path.length/steps * (myP.textSpread/100)
     var textPos = 0;
     var spikeCounter = 0;
     var stitchCounter = 0;
     var stitchFreqCounter = 0;
-    var stitchFreq = p.stitchFreq * steps/path.length;
-    xin = (p.noisePhase / 10) + p.noisePathOffset/10 * orderNo;
-    yin = (p.noisePhase) +  p.noisePathOffset/10 * orderNo;
-    xinW = p.wavePhase / 10;
-    yinW = p.wavePhase;
+    var stitchFreq = myP.stitchFreq * steps/path.length;
+    xin = (myP.noisePhase / 10) + myP.noisePathOffset/10 * path.index;
+    yin = (myP.noisePhase) +  myP.noisePathOffset/10 * path.index;
+    xinW = myP.wavePhase / 10;
+    yinW = myP.wavePhase;
     var lineGroup;
 
     var points = [];
-    for (k=0; k<steps*p.pathCompleteness/100; k++) {
+    for (k=0; k<steps*myP.pathCompleteness/100; k++) {
         points.push(path.getPointAt(path.length - (k*(path.length/steps))));
     }
 
@@ -1099,17 +1094,17 @@ function drawPath(sprite, path, orderNo) {
         lineGroup = sCopy.lastChild;
         
         // Spike effect 
-        if (p.lineStyle == 8) {
-            if (spikeCounter < p.spikeFreq * path.length/steps) {
+        if (myP.lineStyle == 8) {
+            if (spikeCounter < myP.spikeFreq * path.length/steps) {
                 
                 var thisLines = lineGroup.children;
                 
                 for (i=0; i<thisLines.length; i++) {
                     if (thisLines[i].data.direction == 'vert') {
-                        thisLines[i].scale(1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq, 1);
+                        thisLines[i].scale(1+ myP.spikeAmp/10 * spikeCounter/myP.spikeFreq, 1);
                     }
                     if (thisLines[i].data.direction == 'horiz') {
-                        thisLines[i].scale(1, 1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq);
+                        thisLines[i].scale(1, 1+ myP.spikeAmp/10 * spikeCounter/myP.spikeFreq);
                     }
                 }   
                 
@@ -1121,16 +1116,16 @@ function drawPath(sprite, path, orderNo) {
         }
         
         // Stitch effect 
-        if (p.stitchOn == 1) {
-            var stitchContent = eval(p.stitchContent);
+        if (myP.stitchOn == 1) {
+            var stitchContent = eval(myP.stitchContent);
             var sNo = stitchContent[0].length;  // how many squares
             var sPatLength = stitchContent.length; // how long pattern
 
             var stitchColors = [];
-            var c1 = p.stitchColor1;
-            c1.alpha = p.stitchColor1Opacity / 100;
-            var c2 = p.stitchColor2;
-            c2.alpha = p.stitchColor2Opacity / 100;
+            var c1 = myP.stitchColor1;
+            c1.alpha = myP.stitchColor1Opacity / 100;
+            var c2 = myP.stitchColor2;
+            c2.alpha = myP.stitchColor2Opacity / 100;
             stitchColors.push(c1);
             stitchColors.push(c2);
             
@@ -1143,7 +1138,7 @@ function drawPath(sprite, path, orderNo) {
                 
             for (i=0; i<thisLines.length; i++) {
                 // if (thisLines[i].data.direction == 'vert') {
-                //     thisLines[i].scale(1+ p.spikeAmp/10 * spikeCounter/p.spikeFreq, 1);
+                //     thisLines[i].scale(1+ myP.spikeAmp/10 * spikeCounter/myP.spikeFreq, 1);
                 // }
                 if (thisLines[i].data.direction == 'horiz') {
                     var myl = thisLines[i]
@@ -1155,8 +1150,8 @@ function drawPath(sprite, path, orderNo) {
 
             // create individual lines
             for (i=0; i<sNo; i++) {
-                var sRecPoint = new Point(i * (p.size / sNo), 0);
-                var sRecSize = new Size(p.size/ sNo, p.size / sNo);
+                var sRecPoint = new Point(i * (myP.size / sNo), 0);
+                var sRecSize = new Size(myP.size/ sNo, myP.size / sNo);
                 var sRec = new Path.Rectangle(sRecPoint, sRecSize);
                 sRec.fillColor = stitchColors[stitchContent[stitchCounter][i]];
                 
@@ -1175,33 +1170,33 @@ function drawPath(sprite, path, orderNo) {
         }
         
         // Bulb effect
-        if (p.bgEffect == 1) {
+        if (myP.bgEffect == 1) {
             sCopy.scale(sinBetween(1, bulbSizeChange, bulbscale));
             bulbscale += bulbadd/1000;     
         }
 
         // Noise effect
-        if (p.noiseOn == 1) {
-            var noiseScale = 1 + perlin.get(xin, yin) * p.noiseAmp / 50;
+        if (myP.noiseOn == 1) {
+            var noiseScale = 1 + perlin.get(xin, yin) * myP.noiseAmp / 50;
             sCopy.scale(noiseScale);
-            xin += p.noiseFreq/1000 * path.length/steps / 2;
-            yin += p.noiseFreq/1000 * path.length/steps / 2;
+            xin += myP.noiseFreq/1000 * path.length/steps / 2;
+            yin += myP.noiseFreq/1000 * path.length/steps / 2;
         }
         
         
         //Unicorn Background style
-        if (p.bgStyle == 1) {
-            if(p.bgType == 0) {
+        if (myP.bgStyle == 1) {
+            if(myP.bgType == 0) {
                 sCopy.children[0].fillColor.hue += hue;
             }
-            if(p.bgType == 0) {
+            if(myP.bgType == 0) {
                 sCopy.children[0].strokeColor.hue += hue;
             }   
             hue += .1;
         }
         
         //Unicorn Line style
-        if (p.lineStyle == 0) {
+        if (myP.lineStyle == 0) {
             var thisLines = lineGroup.children;        
             for (i=0; i<thisLines.length; i++) {
                 thisLines[i].fillColor.hue += hue;
@@ -1210,17 +1205,17 @@ function drawPath(sprite, path, orderNo) {
         }   
         
         // Text line style
-        if (p.textOn == 1) {
+        if (myP.textOn == 1) {
             var textContainer = sCopy.children['textContainer 1'];
             var text = sCopy.children['textContainer 1'].children[0];
             text.position.x += textPos;
-            textContainer.position.x += p.textBump
+            textContainer.position.x += myP.textBump
             textPos += textadd;
         }
         
         
         //Wavy line effect
-        if (p.lineStyle == 6) {
+        if (myP.lineStyle == 6) {
             var noiseScale;
             
             
@@ -1237,25 +1232,25 @@ function drawPath(sprite, path, orderNo) {
         }
 
         function getNoiseScale(lineNro) {
-            if (p.waveNoiseOn) {
-                xinW += p.waveFreq/1000 * path.length/steps / 2;
-                yinW += p.waveFreq/1000 * path.length/steps / 2;                
-                return 1 + perlin.get(xinW + p.waveNoiseOffset, yinW + p.waveNoiseOffset * lineNro) * p.waveAmp;
+            if (myP.waveNoiseOn) {
+                xinW += myP.waveFreq/1000 * path.length/steps / 2;
+                yinW += myP.waveFreq/1000 * path.length/steps / 2;                
+                return 1 + perlin.get(xinW + myP.waveNoiseOffset, yinW + myP.waveNoiseOffset * lineNro) * myP.waveAmp;
             }
             else {
-                return sinBetween(1, p.waveAmp, wavePhase);
+                return sinBetween(1, myP.waveAmp, wavePhase);
             }
         };
 
         // Wedge effect
-        if (p.wedge != 50) {
-            if (p.wedge <= 50) {
+        if (myP.wedge != 50) {
+            if (myP.wedge <= 50) {
                 var scaleWeight = k / steps;  
-                var wedgeval = (50 - p.wedge) / 50;
+                var wedgeval = (50 - myP.wedge) / 50;
             }
-            if (p.wedge > 50) {
+            if (myP.wedge > 50) {
                 var scaleWeight = 1 - k / steps;  
-                var wedgeval = (p.wedge - 50) / 50;
+                var wedgeval = (myP.wedge - 50) / 50;
             }
             var wedgeScale = 1 - wedgeval * scaleWeight;
            
@@ -1268,11 +1263,11 @@ function drawPath(sprite, path, orderNo) {
         sCopy.position = cPos;
 
         //Rotation + twist
-        var rot = p.rotation + parseInt(k*twistadd/250);
+        var rot = myP.rotation + parseInt(k*twistadd/250);
         sCopy.rotate(rot);
 
         // Cap style dome
-        if (p.cap == 4) {
+        if (myP.cap == 4) {
             if (k > steps - capSteps) {
                 var s = Math.abs((steps-k)- capSteps);
                 sCopy.scale(1 / ((1+0.2) ** s));
@@ -1282,21 +1277,19 @@ function drawPath(sprite, path, orderNo) {
     }
 
     //Cap styles
-    if (p.cap == 0) {
+    if (myP.cap == 0) {
         var cap = new Shape.Rectangle({
-            point: [sCopy.position.x-p.size/2, sCopy.position.y-p.size/2],
-            size: [p.size, p.size],
-            fillColor: p.bgColor
+            point: [sCopy.position.x-myP.size/2, sCopy.position.y-myP.size/2],
+            size: [myP.size, myP.size],
+            fillColor: myP.bgColor
         })
        
-        cap.rotation = p.rotation + k*twistadd/250;
+        cap.rotation = myP.rotation + k*twistadd/250;
         drawing.addChild(cap);
     }
 
     //Vertical lines only
-    if (p.cap == 2) {
-        // console.log('sCopy 2');
-        // console.log(sCopy);
+    if (myP.cap == 2) {
         var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {            
             if (lineGroup.children[i].data.direction == 'horiz') {
@@ -1306,9 +1299,7 @@ function drawPath(sprite, path, orderNo) {
     }
 
     //Horizontal lines only
-    if (p.cap == 3) {
-        // console.log('sCopy 3');
-        // console.log(sCopy);
+    if (myP.cap == 3) {
         var l = lineGroup.children.length;
         for (i = l-1; i>=0; i--) {
             if (lineGroup.children[i].data.direction == 'vert') {
@@ -1318,50 +1309,78 @@ function drawPath(sprite, path, orderNo) {
     }
 }
 
-// Update all params given in function parameters 
-function updateParams() {  
-    // If nothing is selected, push change to ALL paths.
-    if (selectedPaths.length == 0) {
-        var noSelection = true;
-        selectedPaths = [...Array(words.children.length).keys()] //populate var with number from 0 to number of paths
+function updateOneParam(pathIndex, updates) {
+    for (key in updates) {
+        var prop = updates[key];
+        master[pathIndex][key] = prop; // set selected paths property
+        updateUIParam(key, prop);       // update corresponding UI element
+    }
+}
+
+function updateUIParam(key, prop, msg) {
+    var uiel = document.getElementById(key);
+    var visibleValue = '';
+
+    // update value in color UI component
+    if(prop.components) {
+        uiel.value = rgb2hex(prop);
     }
 
-    // Loop through every paths properties in master variable
-    for (i = 0; i<selectedPaths.length; i++) {
-        // Loop through every key in passed properties object, eg. {noiseAmp: 10}
-        for(key in arguments) {
-            var arg = arguments[key];
+    // Update value in other types of UI components
+    else {       
+        // Update the sliders value into numerical indicator 
+        uiel.value = prop;
+    }
+    //Slider components have span element for showing numerical representation of the value.
+    if (uiel.type == "range") {
+        visibleValue = Math.round(prop * 100) / 100;         
+    }
+    
+    if (msg) visibleValue = msg;
+    var k = document.getElementById(key + 'Val');
+    if (k!=null) {
+        k.innerHTML = visibleValue;
+    }
 
-            for (key in arg) {    
-                var val = arg[key];
-                var uiel = document.getElementById(key);
-                
-                var pi = selectedPaths[i]; // selected path index number                
-                master[pi][key] = val; // set selected paths property
-                if (noSelection) p[key] = val;
-              
-                // update value in color UI component
-                if(val.components) {
-                    uiel.value = rgb2hex(val);
-                }
+}
 
-                // Update value in other types of UI components
-                else {                   
-                    // Update the sliders value into numerical indicator 
-                    uiel.value = val;
-                }
-                //Slider components have span element for showing numerical representation of the value.
-                if (uiel.type == "range") {
-                    var k = document.getElementById(key + 'Val');
-                    k.innerHTML = Math.round(val * 100) / 100;
-                }
-            }
+function updateUI() {
+    if (selectedPaths.length == 0) {
+        for (key in p) {        
+            updateUIParam(key, p[key])
         }
     }
-    // Restore selection status
-    if (noSelection) {
-         selectedPaths = [];
-         noSelection = false;
+
+    if (selectedPaths.length == 1) {
+        var myProps = master[selectedPaths[0]]; 
+        for (key in myProps) {        
+            updateUIParam(key, myProps[key])
+        }
+    }
+
+    if (selectedPaths.length > 1) {
+        for (prop in p) {  // eg. prop = rotation
+            var compareProps = [];
+            for (i = 0; i < selectedPaths.length; i++) {  // key = 0,1,...
+                compareProps.push(master[selectedPaths[i]][prop]);  // eg. rotation of path nro 1 
+            }
+
+            allEqual(compareProps) ? updateUIParam(prop, compareProps[0]) : updateUIParam(prop, 0, 'mixed');
+
+        }
+        
+    }
+}
+
+// Update all selected paths with params given in function parameters 
+function updateSelectedPathsParams(updates) {  
+    // Loop through every paths properties in master variable
+    for (i = 0; i<selectedPaths.length; i++) {
+        if (updates == null) {
+            var updates = master[selectedPaths[i]];
+        }
+        updateOneParam(selectedPaths[i], updates)
+        // Loop through every key in passed properties object, eg. {noiseAmp: 10}
     }
 }
 
@@ -1379,11 +1398,17 @@ function updateWithSpinner(val) {
 function update(val) {
     var pp = Object.assign({}, val);
     delete pp.name; // because name is not a UI field
-    updateParams(pp);
-    generateSprite();
-    drawWord();
+    updateSelectedPathsParams(pp);
+    renderAllPaths();
 }
 
+function showSelections() {
+    if (selectedPaths.length > 0) {
+        for (i=0; i<selectedPaths.length; i++) {
+            myWords.children[selectedPaths[i]].selected = true;
+        }
+    }
+}
 
 // UI for manipulating the effect. Initialize all properties defined in the main properties variable p 
 function buildUI() {   
@@ -1535,6 +1560,10 @@ function sinBetween(min, max, t) {
     return ((max - min) * Math.sin(t) + max + min) / 2.
 }
 
+function allEqual(arr) {
+    return new Set(arr).size == 1;
+  }
+
 $('#export-button').click(function() {
     var svg = project.exportSVG({ asString: true });
     downloadDataUri({
@@ -1551,20 +1580,22 @@ $('#log-params').click(function() {
     console.log(master);
     console.log('animatedProperties:');
     console.log(animatedProperties);
+    console.log('selectedPaths:');
+    console.log(selectedPaths);
 });
 
 
-// $('#debug').click(function() {
-//     debugMode = !debugMode;
-//     if (debugMode) {
-//         myWords.visible = true;
-//         myWords.selected = true;
-//     }
-//     else {
-//         myWords.visible = false;
-//         myWords.selected = false;
-//     }
-// });
+$('#debug').click(function() {
+    debugMode = !debugMode;
+    if (debugMode) {
+        myWords.visible = true;
+        myWords.selected = true;
+    }
+    else {
+        myWords.visible = false;
+        myWords.selected = false;
+    }
+});
 
 
 // Show collapsible UI section
@@ -1604,8 +1635,6 @@ $('#ui-row').on('click', 'span.collapse-button', function(){
     $('#' + colName).toggle();
 });
 
-
-
 // Easily reset wedge to balance
 $('#wedgeVal').click(function(){
     updateWithSpinner({wedge:50});
@@ -1641,7 +1670,6 @@ if (!Array.prototype.last){
         return this[this.length - 1];
     };
 };
-
 
 function easeInOutCirc(x) {
     return x < 0.5
@@ -1702,6 +1730,12 @@ function onMouseUp(event) {
     if (event.item.layer.name == 'bg') {
         myWords.selected = false;
         selectedPaths.length = 0;
+        updateUI();
+        // updateSelectedPathsParams();    
+        
+        $('#ui-row').addClass('inactive');
+        $('.collapseui').hide(); //hide other collapsibles
+
     }
     
     // If user clicks on any path of the drawing
@@ -1715,15 +1749,20 @@ function onMouseUp(event) {
         else {
             selectedPaths.push(event.item.index);
             event.item.selected = true;
+            $('#ui-row').removeClass('inactive');
         }
-        updateParams(master[event.item.index]);
+        console.log(event.item.index);
+        showSelections();
+        updateUI();
+        // updateSelectedPathsParams();
     }
 
     if (dragging) {
         updateWords();
-        update();        
+        renderAllPaths();        
     }
     dragging = false;
+    
 }
 
 $("#ui-tabs, #ui-row").click(function(event){
@@ -1746,19 +1785,14 @@ $('.animated').click(function(){
     found.animate = !found.animate;
 });
 
-// Toggle whether or not we should use animation property's overrides per path
-$('.override').click(function(){
-    $(this).toggleClass('active');
-    var propName = $(this).data('prop');
-    var found = animatedProperties.find(o => o.propName === propName);
-    found.override = !found.override;
-});
 
 // Select all paths by pressing A
 function onKeyDown(event) {
 	if(event.key == 'a') {
         selectedPaths = [...Array(words.children.length).keys()];
-        update();
+        updateUI();
+        showSelection()
+        $('#ui-row').removeClass('inactive');
     }
 }
 
@@ -1796,13 +1830,18 @@ function onMouseDown(event) {
 	}
 }
 
+function showSelection() {
+    for (path of myWords.children) {
+        if (selectedPaths.includes(path.index)) {path.selected = true} 
+    }
+}
 
 // Move path or single point by dragging with mouse
 function onMouseDrag(event) {
     dragging = true;
 	if (segment) {
 		segment.point += event.delta;
-        path.smooth();
+        // path.smooth();
         
     
 	} else if (path) {
@@ -1815,5 +1854,6 @@ function updateWords() {
     words.removeChildren();
     words = myWords.clone();
     words.selected = false;
-    words.scale(1/p.drawingSize);
+    words.scale(1/master[0].drawingSize);
 }
+
