@@ -491,6 +491,9 @@ var p = {
     brushBubbleInnerAmount: 4,
     brushBubbleInnerType: 0,
     brushCustomSprite: null,
+    brushLeavesAmount: 6,
+    brushLeavesSize: 10,
+    brushLeavesLength: 30,
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
@@ -800,6 +803,40 @@ function generateSprite(myP) {
             }       
         }
     }
+
+    // Brush Leaves type
+    if (myP.bgType == 7) {
+        rad = myP.brushLeavesSize;
+
+        //Size of the brush
+        var e = new Path.Ellipse({
+            center: new Point(myP.size/2, myP.size/2),
+            radius: myP.size/2-rad
+        });
+
+        var brush = new Group();
+
+        //Create each leaf
+        for (b = 0; b < myP.brushLeavesAmount; b++) {
+            var offset = e.length / myP.brushLeavesAmount * b;
+            var bcenter = e.getPointAt(offset); 
+            var normal = e.getNormalAt(offset);
+            var c = new Path.Circle({
+                center: bcenter,
+                radius: rad,
+            });
+            c.scale(1, 0.3);
+            c.rotate(normal.angle+90);
+
+            brush.addChild(c);
+        }       
+
+        brush.strokeColor = bc;
+        brush.blendMode = myP.brushBlend;
+        brush.fillColor = brushFill;
+        brush.strokeWidth = myP.brushStrokeWidth;
+    }
+
 
 
     // Gradient
@@ -1201,6 +1238,15 @@ function drawPath(sprite, path) {
             yin += myP.noiseFreq/1000 * path.length/steps / 2;
         }
         
+        // Leaves brush type
+        if (myP.bgType == 7) {
+            for (leave of sCopy.children[0].children) {
+                var noiseScale = 1 + perlin.get(xin, yin) * myP.noiseAmp / 50;
+                leave.scale(noiseScale); 
+            }
+            xin += myP.brushLeavesLength/1000;
+            yin += myP.brushLeavesLength/1000;
+        }
         
         //Unicorn Background style
         if (myP.bgStyle == 1) {

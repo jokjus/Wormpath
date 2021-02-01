@@ -96,9 +96,14 @@ html
                         {label: 'Cross', value: 3, col: 'brushCross'},
                         {label: 'Pyramid', value: 4},
                         {label: 'Bubble', value: 5, col: 'brushBubbleSize'},        
-                        {label: 'Custom', value: 6, col: 'brushCustomSprite'}                        
+                        {label: 'Custom', value: 6, col: 'brushCustomSprite'},
+                        {label: 'Leaves', value: 7, col: 'brushLeaves'}                        
                     ], 'collapsibleTrigger')  
-            
+            div.collapseui#brushLeavesCollapsible(style='display:none')
+                +input('range', 'Leaves:', 'brushLeavesAmount', 0, 50)
+                +input('range', 'Size:', 'brushLeavesSize', 0, 100)         
+                +input('range', 'Length:', 'brushLeavesLength', 0, 100)                
+
             div.collapseui#brushCustomSpriteCollapsible(style='display:none')
                 .ui-generic
                     label Custom sprite SVG
