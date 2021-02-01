@@ -81,6 +81,10 @@ html
             +section("Path")    
             .ui-generic
                 button#reversePath Reverse path
+            //- .drawingProperties
+            //-     +section("Sprite")
+            //-     .ui-generic
+            //-         input#uploadInput(type="file" name="myFile")
             
 
 
@@ -91,9 +95,15 @@ html
                         {label: 'Double diamond', value: 2},
                         {label: 'Cross', value: 3, col: 'brushCross'},
                         {label: 'Pyramid', value: 4},
-                        {label: 'Bubble', value: 5, col: 'brushBubbleSize'}                        
+                        {label: 'Bubble', value: 5, col: 'brushBubbleSize'},        
+                        {label: 'Custom', value: 6, col: 'brushCustomSprite'}                        
                     ], 'collapsibleTrigger')  
             
+            div.collapseui#brushCustomSpriteCollapsible(style='display:none')
+                .ui-generic
+                    label Custom sprite SVG
+                    input#uploadInput(type="file" name="myFile")
+
             div.collapseui#brushDoubleCircleCollapsible(style='display:none')
                 +input('range', 'Innercircle size', 'inCircleSize')
                 +input('color', 'Innercircle color', 'inCircleColor')
@@ -119,6 +129,7 @@ html
                         { label: 'Rectangle', value: 1 }
                     ])
                 +input('checkbox', 'Inner', 'brushBubbleInnerOn', 0, 0, 0)
+                +input('color', 'Inner color', 'brushBubbleInnerColor')
                 +input('range', 'Inner size', 'brushBubbleInnerSize', 0, 100)
                 +input('range', 'Inner bubbles:', 'brushBubbleInnerAmount', 0, 50)
                 +select('Inner brush type:', 'brushBubbleInnerType', [

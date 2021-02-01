@@ -428,7 +428,7 @@ var p = {
     bgType: 0,
     brushBlend: 'normal',
     size: 50,
-    lines: 1,
+    lines: 0,
     lineWidth: 3,
     density: 90,
     bgColor: new Color(0.78039, 0, 0.11765),
@@ -486,9 +486,11 @@ var p = {
     brushBubbleAmount: 4,
     brushBubbleType: 0,
     brushBubbleInnerOn: 0,
+    brushBubbleInnerColor: new Color(1,0,0),
     brushBubbleInnerSize: 10,
     brushBubbleInnerAmount: 4,
     brushBubbleInnerType: 0,
+    brushCustomSprite: null,
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
@@ -599,6 +601,24 @@ function generateSprite(myP) {
 
     var brushFill = myP.bgColor;
     brushFill.alpha = myP.bgOpacity / 100;
+
+    // Custom brush type, uploaded from SVG file
+    if (myP.bgType == 6) {
+        if (myP.brushCustomSprite != null) {
+            var brush = myP.brushCustomSprite;
+            brush.fillColor = brushFill;
+            brush.blendMode = myP.brushBlend;
+            brush.strokeWidth =  myP.brushStrokeWidth;
+            brush.strokeColor = bc;
+            var bounds = new Path.Rectangle({
+                point: [0, 0],
+                size: [myP.size, myP.size],
+            });
+
+            brush.fitBounds(bounds.bounds);
+        }
+    }
+
 
     // Rectangle type brush
     if (myP.bgType == 0) {
@@ -773,7 +793,7 @@ function generateSprite(myP) {
                 }
     
                 brush2 = brush2.unite(bi);
-                brush2.fillColor = 'red';
+                brush2.fillColor = myP.brushBubbleInnerColor;
                 brush2.strokeColor = 'black';
                 brush2.strokeWidth = 1;
                 // brush2.selected = true;
@@ -1009,7 +1029,6 @@ function renderAllPaths() {
             
         if (myP.pathSpiralDrawingDirection == 1) {
             for (i=0; i<steps; i++) {
-                console.log(i);
                 path.insert(0, newPoints[i]);
             }
         }
@@ -1031,7 +1050,6 @@ function renderAllPaths() {
         if (master[path.index].pathZigZagOn == 1) {
             zigzag(path);
         }  
-
         drawPath(generateSprite(master[path.index]), path);
     }
 
@@ -1189,9 +1207,12 @@ function drawPath(sprite, path) {
             if(myP.bgType == 0) {
                 sCopy.children[0].fillColor.hue += hue;
             }
-            if(myP.bgType == 0) {
-                sCopy.children[0].strokeColor.hue += hue;
-            }   
+            // if(myP.bgType == 0) {
+            //     sCopy.children[0].strokeColor.hue += hue;
+            // }   
+            if(myP.bgType == 6) {
+                sCopy.children[0].fillColor.hue += hue;
+            }
             hue += .1;
         }
         
@@ -1320,6 +1341,9 @@ function updateOneParam(pathIndex, updates) {
 function updateUIParam(key, prop, msg) {
     var uiel = document.getElementById(key);
     var visibleValue = '';
+    if (key == 'brushCustomSprite') {
+        return
+    }
 
     // update value in color UI component
     if(prop.components) {
@@ -1454,7 +1478,6 @@ function buildUIparam(param) {
                 update[param] = this.value;
             
                 if (paramUIElement.id == 'preset') {
-                    // console.log(this.value);
                     update = presets[this.value]
                 }
 
@@ -1751,10 +1774,8 @@ function onMouseUp(event) {
             event.item.selected = true;
             $('#ui-row').removeClass('inactive');
         }
-        console.log(event.item.index);
         showSelections();
         updateUI();
-        // updateSelectedPathsParams();
     }
 
     if (dragging) {
@@ -1857,3 +1878,19 @@ function updateWords() {
     words.scale(1/master[0].drawingSize);
 }
 
+// CUSTOM SPRITE UPLOAD
+document.getElementById("uploadInput").addEventListener("change", handleFile, false);
+
+var myCustomSprite;
+
+function handleFile() {
+    const fileList = this.files;
+    project.importSVG(fileList[0], function(item) {
+        selectedPaths.forEach(pathNro => 
+            master[pathNro].brushCustomSprite = item.children[1]);
+        
+        // myCustomSprite = item.children[1];
+        // generateSprite(master[0]);
+        renderAllPaths();
+    });
+}
