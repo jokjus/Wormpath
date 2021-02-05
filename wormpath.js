@@ -1,6 +1,7 @@
 // PRESETS ===============================================================================
 // =======================================================================================
 // Use with caution!
+
 // localStorage.clear(); 
 var presets;
 var origPresets;
@@ -196,6 +197,11 @@ $('#savePresets').click(function(){
     addPresetMenuItem(presetName, presets.length-1);
     // Set newly added item as selected
     $('#preset').val(presets.length-1);
+    $('#preset').blur();
+});
+
+$('#preset').change(function(){
+    $(this).blur();
 });
 
 // ANIMATION =============================================================================
@@ -204,6 +210,7 @@ $('#savePresets').click(function(){
 // Initialize main vanimatio and capturer variables
 var runAnimation = false // are we running?
 var animFrame = 0;  // animation frame
+var animMasterFrame = 0;
 var animDir = 1;    // animation direction
 var capturer;       // capture object
 
@@ -342,6 +349,13 @@ var animatedProperties = [
         max: 'aPathSpiralAmountMax',
         animate: false,
         override: false
+    },
+    {
+        propName: 'brushNoisePhase',
+        min: 'aBrushNoisePhaseMin',
+        max: 'aBrushNoisePhaseMax',
+        animate: false,
+        override: false
     }
 ]
 
@@ -372,6 +386,7 @@ function render() {
         renderAllPaths();
 
         animDir == 1 ? animFrame++ : animFrame--;
+        animMasterFrame++;
         
     if( typeof capturer !== 'undefined') {
         if( capturer) capturer.capture( canvas );
@@ -379,6 +394,9 @@ function render() {
 }
 
 function getAnimValue(animType, min, max) {
+    if (animType == 'flatForward') {
+        return flatForward(min);        
+    }
     if (animType == 'sine') {
         return sinAnim(min, max);
     }
@@ -394,6 +412,11 @@ function easingAnims(min, max, easing='easeInOutElasticAnim', phase=animFrame/50
     if (phase >= 1) {animDir = 0}
     if (phase <= 0) {animDir = 1};
     return parseInt(min) + parseFloat(animValue * range);
+}
+
+function flatForward(min, phase=animMasterFrame/50) {
+    phase = animMasterFrame / document.getElementById('aSpeed').value;
+    return min + phase;
 }
 
 function sinAnim(min, max, phase=animFrame/50) {
@@ -485,6 +508,7 @@ var p = {
     brushBubbleSize: 10,
     brushBubbleAmount: 4,
     brushBubbleType: 0,
+    brushBubbleIntersectOn: 0,
     brushBubbleInnerOn: 0,
     brushBubbleInnerColor: new Color(1,0,0),
     brushBubbleInnerSize: 10,
@@ -494,6 +518,16 @@ var p = {
     brushLeavesAmount: 6,
     brushLeavesSize: 10,
     brushLeavesLength: 30,
+    brushNoiseAmp: 10,
+    brushNoiseFreq: 10,
+    brushNoiseSmoothOn: 0,
+    brushNoisePhase: 0,
+    brushCircusAmount: 6,
+    brushCircusC1: new Color(0, 1, 0),
+    brushCircusC2: new Color(1, 0, 0),
+    brushCircusC3: new Color(0, 0, 1),
+    brushCircusC4: new Color(1, 1, 0),
+    brushCircusC5: new Color(0, 1, 1),
     noiseOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
@@ -533,6 +567,8 @@ var p = {
     aZigzagAmpMax: 0,
     aPathSpiralAmountMin: 0,
     aPathSpiralAmountMax: 0,
+    aBrushNoisePhaseMin: 0,
+    aBrushNoisePhaseMax: 0,
     aEasing: 'sine'
 }
 
@@ -544,7 +580,8 @@ var yin = p.noisePhase;
 var xinW = p.wavePhase / 10;
 var yinW = p.wavePhase;
 var wiggleT = 0;
-
+var xinX = 1, yinX = 10;
+var brushCircusPalette = [];
 
 // Load SVG from a file
 var canvas = document.getElementById('canvas');
@@ -749,6 +786,7 @@ function generateSprite(myP) {
 
         for (b = 0; b < myP.brushBubbleAmount; b++) {
             var bcenter = e.getPointAt(e.length / myP.brushBubbleAmount * b);
+            var bNextCenter = e.getPointAt(e.length / myP.brushBubbleAmount * (b+1));
             if (myP.brushBubbleType == 0) {
                 var c = new Path.Circle({
                     center: bcenter,
@@ -761,7 +799,21 @@ function generateSprite(myP) {
                     size: [rad*2, rad*2],
                 });
             }
-
+            if (myP.brushBubbleIntersectOn == 1) {
+                if (myP.brushBubbleType == 0) {
+                    var cNext = new Path.Circle({
+                        center: bNextCenter,
+                        radius: rad,
+                    });
+                }   
+                if (myP.brushBubbleType == 1) {
+                    var cNext = new Path.Rectangle({
+                        point: bNextCenter - new Point(rad, rad),
+                        size: [rad*2, rad*2],
+                    });
+                }
+                c = c.intersect(cNext);
+            }
             brush = brush.unite(c);
         }       
 
@@ -837,7 +889,135 @@ function generateSprite(myP) {
         brush.strokeWidth = myP.brushStrokeWidth;
     }
 
+    // Noise style brush
+    if (myP.bgType == 8) {
 
+        // console.log('P: ' + perlin.get(0.5,0.2));
+
+        var temp = new Path.Circle({
+            center: [myP.size/2,myP.size/2],
+            radius: myP.size/2,
+        });   
+
+        //Create a circle as a basis for this brush
+        var brush = new Path();
+        var normals = [];
+        xinX = 0.5 + myP.brushNoisePhase/10;
+        yinX = 0.2 + myP.brushNoisePhase/10;
+        // Add points on the circle 
+        for (i=0; i<myP.brushNoiseFreq; i++) {
+            var offset = temp.length / myP.brushNoiseFreq * i; // get offsets evenly across circle
+            var newP = temp.getPointAt(offset);         // get the coordinate point
+            brush.add(newP);                            // add new point to empty path
+            normals.push(temp.getNormalAt(offset));     // create array of normals
+        }
+        brush.closed = true;
+        temp.remove();                                  // get rid of the temporary circle
+         
+        //Offset each point based on perlin noise
+        for (d=0; d<normals.length; d++) {
+            var v = normals[d] * getNoiseVal();
+            brush.segments[d].point += v;
+        }
+        // Smooth the path
+        if (myP.brushNoiseSmoothOn == 1) {
+            brush.smooth();
+        }
+
+        brush.strokeColor = bc;
+        brush.blendMode = myP.brushBlend;
+        brush.fillColor = brushFill;
+        brush.strokeWidth = myP.brushStrokeWidth;
+
+        function getNoiseVal() {
+            xinX += myP.brushNoiseFreq/100;
+            yinX += myP.brushNoiseFreq/100; 
+            return (1 + perlin.get(xinX, yinX)) * myP.brushNoiseAmp;
+            
+        };
+    }
+
+    if (myP.bgType == 9) {
+
+        var brush = new Group();
+        
+
+        var bp = new Path.Circle({
+            center: new Point(myP.size/2, myP.size/2),
+            radius: myP.size/2
+        })
+
+        nArcs = myP.brushCircusAmount;
+
+
+        function getSlicePoints(n, path) {
+            var points = new Array(n+1);
+            for (var i = 0; i < n; i++) {
+                points[i] = path.getPointAt(path.length*i/n)
+            }
+            points[n] = points[0];
+            return points
+        }
+
+        sp = getSlicePoints(nArcs, bp);
+
+        function getArcs(n, sp, circle) {
+            // open circle
+            circle.split(circle.getLocationOf(sp[0]));
+            for (var i = 1; i <= n; i++) {
+                // split each arc in turn
+                var loc = circle.getLocationOf(sp[i]);
+                var remaining = circle.split(loc);
+                // console.log(circle);
+                // console.log(circle.fillColor);
+                // circle.strokeColor.hue = 1/n * i;
+                brush.addChild(circle);
+                if (circle.length === 0) {
+                    throw "length 0 at i=" + i;
+                    //console.log("length 0 at i=" + i);
+                }
+                circle = remaining;
+            }
+            // console.log("done with i=", i);
+        }
+
+        getArcs(nArcs, sp, bp);
+
+
+        
+        // console.log(brush);
+        
+                    
+        brush.strokeColor = bc;        
+        brush.blendMode = myP.brushBlend;
+        brush.fillColor = brushFill;
+        brush.strokeWidth = myP.brushStrokeWidth;
+        var k = 0;
+        for (i=0; i<brush.children.length; i++) {
+            // console.log(i)
+            // brush.children[i].strokeColor.lightness += i*0.05;
+            brush.children[i].strokeColor = brushCircusPalette[k];
+            k++;
+            if (k >= brushCircusPalette.length) { k = 0 };
+            // arc.strokeColor.hue += 0.1;
+        }
+        // for (i=1; i<=myP.brushCircusAmount; i++) {
+        //     var point = new Point(myP.size/2, myP.size/2,) + {
+        //         length: myP.size/2,
+        //         angle: 360 / myP.brushCircusAmount * i }
+
+        //     var loc = brush.getNearestLocation(point)
+        //     // var loc = brush.getLocationAt(brush.length/myP.brushCircusAmount * myP.brushCircusAmount-i);
+        //     // var loc = brush.getLocationAt(brush.length/2);
+        //     var newP = brush.splitAt(loc);       
+        //     console.log(newP); 
+        //     bg.addChild(newP);
+            
+        // }
+
+        // console.log(bg);
+
+    }
 
     // Gradient
     if (myP.bgStyle == 3) {
@@ -984,10 +1164,13 @@ function renderAllPaths() {
     myWords.scale(master[0].drawingSize);
 
     //Effect: Last point wiggle
-    for (var i = 0; i < myWords.children.length; i++) {
-        var ls = myWords.children[i].lastSegment;
-        var xChange = perlin.get(wiggleT+i, wiggleT+i) * p.lastPointWiggle /10;
-        ls.point.x += xChange;
+    function lastPointWiggle(path) {
+        var myP = master[path.index];
+        for (var i = 0; i < myWords.children.length; i++) {
+            var ls = myWords.children[i].lastSegment;
+            var xChange = perlin.get(wiggleT+i, wiggleT+i) * myP.lastPointWiggle;
+            ls.point.x += xChange;
+        }
     }
 
     //Effect: Zigzag
@@ -1087,6 +1270,9 @@ function renderAllPaths() {
         if (master[path.index].pathZigZagOn == 1) {
             zigzag(path);
         }  
+        if (master[path.index].lastPointWiggle > 0) {
+            lastPointWiggle(path);
+        }
         drawPath(generateSprite(master[path.index]), path);
     }
 
@@ -1387,6 +1573,7 @@ function updateOneParam(pathIndex, updates) {
 function updateUIParam(key, prop, msg) {
     var uiel = document.getElementById(key);
     var visibleValue = '';
+    // Custom sprite input is a file input, for time being just ignore it
     if (key == 'brushCustomSprite') {
         return
     }
@@ -1400,7 +1587,14 @@ function updateUIParam(key, prop, msg) {
     else {       
         // Update the sliders value into numerical indicator 
         uiel.value = prop;
+
+        if (uiel.type == 'checkbox') {
+            prop == 0 ? uiel.checked = false : uiel.checked = true;
+        }
+    
     }
+
+    
     //Slider components have span element for showing numerical representation of the value.
     if (uiel.type == "range") {
         visibleValue = Math.round(prop * 100) / 100;         
@@ -1792,6 +1986,29 @@ function easeInOutExpo(x) {
                 : (2 - Math.pow(2, -20 * x + 10)) / 2;
 }
 
+function easeInBack(x) {
+    var c1 = 1.70158;
+    var c3 = c1 + 1;
+    return c3 * x * x * x - c1 * x * x;
+}
+
+function easeInExpo(x) {
+    return x === 0 ? 0 : Math.pow(2, 10 * x - 10);
+}
+
+function easeInOutBack(x) {
+    var c1 = 1.70158;
+    var c2 = c1 * 1.525;
+    return x < 0.5
+        ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+        : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+}
+
+function easeInQuart(x) {
+    return x * x * x * x;
+}
+
+
 var dragging = false;
 
 function onMouseUp(event) {
@@ -1940,3 +2157,77 @@ function handleFile() {
         renderAllPaths();
     });
 }
+
+function pick(n, min, max) {
+    var results = [];
+    for (i = 1; i <= n; i++) {
+        var value = Math.floor(Math.random() * max + min);
+        results.push(value);
+    }
+    return results.sort(function(a, b){return a-b});
+}
+
+$('#brushCircusGenerate').click(function(){
+    var myP = master[0];
+    var inputCols = [];
+    
+    for (k = 0; k<5; k++) {
+        var myID = 'brushCircusLock' + parseInt(k+1);
+        var myIDC = 'brushCircusC' + parseInt(k+1);
+        console.log(myID);
+        var el = document.getElementById(myID);
+        if (el.checked) {
+            inputCols.push(rgb2col(myP[myIDC]));
+        } else {
+            inputCols.push('N');
+        }
+    }
+
+    var url = "http://colormind.io/api/";
+    var data = {
+        model : "default",
+        input : inputCols
+    }
+
+    var http = new XMLHttpRequest();
+
+    http.onreadystatechange = function() {
+        if(http.readyState == 4 && http.status == 200) {
+            var palette = JSON.parse(http.responseText).result;
+            brushCircusPalette = pal2rgb(palette);
+            palette = pal2rgb(palette);
+            for (n=0; n<palette.length; n++) {
+                $('#brushCircusC' + parseInt(n+1)).val(rgb2hex(palette[n]));
+            }
+            for (d=0; d<5; d++) {
+                var myIDC = 'brushCircusC' + parseInt(d+1);
+                var change = {};
+                change[myIDC] = palette[d];
+                console.log(change);
+                updateSelectedPathsParams(change);
+                renderAllPaths();
+            }
+        }
+    }
+
+    http.open("POST", url, true);
+    http.send(JSON.stringify(data));
+
+    function pal2rgb(pal) {
+        var palette = [];
+        for(i=0; i<pal.length; i++) {
+            palette.push(col2rgb(pal[i]));
+        }
+        return palette;
+    }
+
+    function col2rgb(col) {
+        var newCol = new Color(col[0]/255, col[1]/255, col[2]/255);
+        return newCol;
+    }
+
+    function rgb2col(rgb) {
+        var newCol = [rgb.red*255, rgb.green*255, rgb.blue*255];
+        return newCol;
+    }
+})

@@ -97,8 +97,30 @@ html
                         {label: 'Pyramid', value: 4},
                         {label: 'Bubble', value: 5, col: 'brushBubbleSize'},        
                         {label: 'Custom', value: 6, col: 'brushCustomSprite'},
-                        {label: 'Leaves', value: 7, col: 'brushLeaves'}                        
+                        {label: 'Leaves', value: 7, col: 'brushLeaves'},
+                        {label: 'Noise', value: 8, col: 'brushNoise'},
+                        {label: 'Circus', value: 9, col: 'brushCircus'}                        
                     ], 'collapsibleTrigger')  
+            div.collapseui#brushCircusCollapsible(style='display:none')
+                +input('range', 'Amount:', 'brushCircusAmount', 0, 50)
+                button#brushCircusGenerate Generate
+                +input('color', 'Color1', 'brushCircusC1')
+                +input('checkbox', 'Lock 1', 'brushCircusLock1', 0, 0, 0)
+                +input('color', 'Color2', 'brushCircusC2')
+                +input('checkbox', 'Lock 2', 'brushCircusLock2', 0, 0, 0)
+                +input('color', 'Color3', 'brushCircusC3')
+                +input('checkbox', 'Lock 3', 'brushCircusLock3', 0, 0, 0)
+                +input('color', 'Color4', 'brushCircusC4')
+                +input('checkbox', 'Lock 4', 'brushCircusLock4', 0, 0, 0)
+                +input('color', 'Color5', 'brushCircusC5')               
+                +input('checkbox', 'Lock 5', 'brushCircusLock5', 0, 0, 0) 
+
+            div.collapseui#brushNoiseCollapsible(style='display:none')
+                +input('range', 'Noise amp:', 'brushNoiseAmp', 0, 100)
+                +input('range', 'Noise freq:', 'brushNoiseFreq', 0, 100)
+                +input('checkbox', 'Smooth', 'brushNoiseSmoothOn', 0, 0, 0)
+                +input('range', 'Noise phase:', 'brushNoisePhase', 0, 100)
+
             div.collapseui#brushLeavesCollapsible(style='display:none')
                 +input('range', 'Leaves:', 'brushLeavesAmount', 0, 50)
                 +input('range', 'Size:', 'brushLeavesSize', 0, 100)         
@@ -133,6 +155,7 @@ html
                         { label: 'Circle', value: 0 }, 
                         { label: 'Rectangle', value: 1 }
                     ])
+                +input('checkbox', 'Intersect', 'brushBubbleIntersectOn', 0, 0, 0)
                 +input('checkbox', 'Inner', 'brushBubbleInnerOn', 0, 0, 0)
                 +input('color', 'Inner color', 'brushBubbleInnerColor')
                 +input('range', 'Inner size', 'brushBubbleInnerSize', 0, 100)
@@ -289,12 +312,17 @@ html
             div.anim-control
                 label Anim easing
                 select#aEasing
+                    option(value='flatForward') flatForward
                     option(value='sine') Sine
                     option(value='easeInOutCirc') easeInOutCirc
                     option(value='easeInOutElastic') easeInOutElastic
                     option(value='easeOutElastic') easeOutElastic
                     option(value='easeOutBounce') easeOutBounce
                     option(value='easeInOutExpo') easeInOutExpo
+                    option(value='easeInBack') easeInBack
+                    option(value='easeInExpo') easeInExpo
+                    option(value='easeInOutBack') easeInOutBack
+                    option(value='easeInQuart') easeInQuart
 
         
             mixin anim(label, id, min, max, name)
@@ -319,6 +347,7 @@ html
             +anim('Path completeness', 'aPathCompleteness', 0, 100, 'pathCompleteness')
             +anim('Zigzag amplitude', 'aZigzagAmp', 0, 100, 'pathZigzagAmp')
             +anim('Spiral amount', 'aPathSpiralAmount', 0, 100, 'pathSpiralAmount')
+            +anim('Brush noise phase', 'aBrushNoisePhase', 0, 100, 'brushNoisePhase')
                 
             .anim-basic-control
                 label Animation format
