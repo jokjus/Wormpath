@@ -81,11 +81,15 @@ html
             +section("Path")    
             .ui-generic
                 button#reversePath Reverse path
-            //- .drawingProperties
-            //-     +section("Sprite")
-            //-     .ui-generic
-            //-         input#uploadInput(type="file" name="myFile")
-            
+            +section('Project')
+            .projectSaving.ui-generic
+                select#projectSelector
+                button#loadProject Load project
+            .projectSaving.ui-generic 
+                input#projectName(type='text' placeholder='Project name')
+                button#saveProjectAs Save project as… 
+            .projectSaving.ui-generic
+                button#saveProject Save
 
 
         div.ui-section#brush
@@ -103,7 +107,12 @@ html
                     ], 'collapsibleTrigger')  
             div.collapseui#brushCircusCollapsible(style='display:none')
                 +input('range', 'Amount:', 'brushCircusAmount', 0, 50)
-                button#brushCircusGenerate Generate
+                +select('Type', 'brushCircusType', [
+                    {label: 'Circle', value: 0},
+                    {label: 'Square', value: 1}
+                ])
+                .ui-generic
+                    button#brushCircusGenerate Generate
                 +input('color', 'Color1', 'brushCircusC1')
                 +input('checkbox', 'Lock 1', 'brushCircusLock1', 0, 0, 0)
                 +input('color', 'Color2', 'brushCircusC2')

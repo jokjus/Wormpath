@@ -71,7 +71,7 @@ canvas[resize] {
 	opacity: 1;
 }
 
-#ui-row.inactive .drawingProperties {
+#ui-row.inactive .drawingProperties, #ui-row.inactive .projectSaving {
 	pointer-events: all;
 	opacity: 1;
 }

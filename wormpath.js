@@ -1,11 +1,129 @@
-// PRESETS ===============================================================================
-// =======================================================================================
+
 // Use with caution!
 
+// localStorage.removeItem("projects"); 
 // localStorage.clear(); 
+
+// PROJECTS ===============================================================================
+// =======================================================================================
+var wpProjects = [];
 var presets;
 var origPresets;
 
+if (localStorage.getItem("projects") !== null) {  // if localstorage item exists
+    wpProjects = JSON.parse(localStorage.getItem('projects'));
+    for (k = 0; k<wpProjects.length; k++) {
+        allHex2RGB(wpProjects[k].master);
+    }
+
+}
+
+populateProjectMenu();
+
+function createProjectObject() {
+    var projectName = $('#projectName').val();
+    var tempMaster = Object.assign({}, master);
+    var tempWords = words.exportSVG({ asString: true });
+
+    var newProject = {
+        name: projectName,
+        master: tempMaster,
+        drawing: tempWords
+    }
+
+    return newProject;
+}
+
+$('#saveProject').click(function(){
+    // Create the project object
+    var newProject = [createProjectObject()];
+
+    // Replace project with the same name 
+    wpProjects.map(obj => newProject.find(o => o.name === obj.name) || obj);
+
+    var pro = wpProjects;
+    // Loop through all projects and convert colors to hex values
+    for (d=0; d<pro.length; d++) {
+        allRGB2Hex(pro[d].master);
+    }
+    var js = JSON.parse(JSON.stringify(pro));
+    // write JSON string to a localStorage file
+    localStorage.setItem('projects', JSON.stringify(js));
+});
+
+$('#saveProjectAs').click(function(){
+    // if (wpProject.projectName) TODO: check if a project with the same name already exists
+
+    var newProject = createProjectObject();
+    wpProjects.push(newProject);
+
+    //Take a copy of all projects for saving
+    var pro = wpProjects;
+    // Loop through all presets and convert colors to hex values
+    for (d=0; d<pro.length; d++) {
+        allRGB2Hex(pro[d].master);
+    }
+    //Stringify for localstorage 
+    var js = JSON.parse(JSON.stringify(pro));
+    // write JSON string to a localStorage file
+    localStorage.setItem('projects', JSON.stringify(js));
+    // Add new item to the presets menu
+    addProjectMenuItem(newProject.name, wpProjects.length-1);
+    // Set newly added item as selected
+    $('#projectSelector').val(wpProjects.length-1);
+    $('#projectSelector').blur();
+});
+
+$('#loadProject').click(function(){ 
+    var projNo = $('#projectSelector').val();
+    master = wpProjects[projNo].master;
+    words.activate();
+    words.removeChildren();
+    project.importSVG(wpProjects[projNo].drawing, function(item) {
+
+        wordsImport = item;
+        
+        //let's ungroup imported SVG for easier access. Now paths are bare at words layer.
+        wordsImport.parent.insertChildren(wordsImport.index,  wordsImport.removeChildren());
+        wordsImport.remove();
+        
+        renderAllPaths();
+        buildUI();
+        updateUI();
+    });
+});
+
+
+function allRGB2Hex(obj) {
+    for (var i = 0; i < Object.keys(obj).length; i++) {
+        for (key in obj[i]) {
+            var val = obj[i][key];   
+
+            if (typeof val === 'object' && val != null) {                
+                if ('red' in val) {
+                    obj[i][key] = rgb2hex2(val);
+                }
+            }
+        }
+    }
+}
+
+
+// Populate UI menu for selecting a preset     
+function populateProjectMenu() {
+    for (i = 0; i < wpProjects.length; i++) {    
+        addProjectMenuItem(wpProjects[i]['name'], i);           
+    }
+} 
+
+// Add one option to presets menu
+function addProjectMenuItem(projectName, i) {
+    $('#projectSelector').append(new Option(projectName, i));
+}
+
+
+// PRESETS ===============================================================================
+// =======================================================================================
 function setOrigPresets() {
     origPresets = [
         {
@@ -136,16 +254,8 @@ function setOrigPresets() {
 // Populate variable
 if (localStorage.getItem("presets") !== null) {  // if localstorage item exists
     presets = JSON.parse(localStorage.getItem('presets'));
-
-    // Convert saved hex colors to RGB
-    for (i = 0; i < presets.length; i++) {    
-        for (key in presets[i]) {
-            var val = presets[i][key];   
-            if (/^#[0-9A-F]{6}$/i.test(val)) {
-                presets[i][key] = hex2rgb(val);
-            }
-        };
-    }
+    allHex2RGB(presets);
+    
 }
 // If localstorage is clear, get the hard coded presets
 else {
@@ -153,6 +263,18 @@ else {
 }
 
 populatePresetMenu();
+
+function allHex2RGB(obj) {
+    // Convert saved hex colors to RGB
+    for (var i = 0; i < obj.length; i++) {    
+        for (key in obj[i]) {
+            var val = obj[i][key];   
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                obj[i][key] = hex2rgb(val);
+            }
+        };
+    }
+}
 
 // Populate UI menu for selecting a preset     
 function populatePresetMenu() {
@@ -175,19 +297,9 @@ $('#savePresets').click(function(){
 
     // var newP = Object.assign({}, p);
     var newP = presets;
-
     // Loop through all presets and convert colors to hex values
-    for (i = 0; i < newP.length; i++) {
-        for (key in newP[i]) {
-            var val = newP[i][key];   
-
-            if (typeof val === 'object' && val != null) {                
-                if ('red' in val) {
-                    newP[i][key] = rgb2hex2(val);
-                }
-            }
-        }
-    }
+    allRGB2Hex(newP);
+    
 
     var js = JSON.parse(JSON.stringify(newP));
 
@@ -523,6 +635,7 @@ var p = {
     brushNoiseSmoothOn: 0,
     brushNoisePhase: 0,
     brushCircusAmount: 6,
+    brushCircusType: 0,
     brushCircusC1: new Color(0, 1, 0),
     brushCircusC2: new Color(1, 0, 0),
     brushCircusC3: new Color(0, 0, 1),
@@ -615,8 +728,6 @@ project.importSVG(url, function(item) {
     // This will be the main source of properties. There are alternative deep cloning methods commented.
     for (i=0; i<words.children.length; i++) {
         master.push(Object.assign({}, p));
-        // master.push(JSON.parse(JSON.stringify(p)));
-        // master.push(_.cloneDeep(p));
     }
     words.position = view.center;
     words.opacity = 0; // set words opacity to zero so it's not visible but remain selectable
@@ -941,15 +1052,23 @@ function generateSprite(myP) {
 
         var brush = new Group();
         
+        if (myP.brushCircusType == 0) {
+            var bp = new Path.Circle({
+                center: new Point(myP.size/2, myP.size/2),
+                radius: myP.size/2
+            })
+        }
 
-        var bp = new Path.Circle({
-            center: new Point(myP.size/2, myP.size/2),
-            radius: myP.size/2
-        })
+        if (myP.brushCircusType == 1) {
+            var bp = new Path.Rectangle({
+                point: new Point(0, 0),
+                size: [myP.size, myP.size]
+            })
+        }
 
         nArcs = myP.brushCircusAmount;
 
-
+        // generate split points for later use
         function getSlicePoints(n, path) {
             var points = new Array(n+1);
             for (var i = 0; i < n; i++) {
@@ -961,62 +1080,38 @@ function generateSprite(myP) {
 
         sp = getSlicePoints(nArcs, bp);
 
-        function getArcs(n, sp, circle) {
-            // open circle
-            circle.split(circle.getLocationOf(sp[0]));
+        // slice a path according to provided split points
+        function getArcs(n, sp, path) {
+            // open path
+            path.split(path.getLocationOf(sp[0]));
             for (var i = 1; i <= n; i++) {
                 // split each arc in turn
-                var loc = circle.getLocationOf(sp[i]);
-                var remaining = circle.split(loc);
-                // console.log(circle);
-                // console.log(circle.fillColor);
-                // circle.strokeColor.hue = 1/n * i;
-                brush.addChild(circle);
-                if (circle.length === 0) {
+                var loc = path.getLocationOf(sp[i]);
+                var remaining = path.split(loc);
+                // add split part of an arc to brush
+                brush.addChild(path);
+                if (path.length === 0) {
                     throw "length 0 at i=" + i;
-                    //console.log("length 0 at i=" + i);
                 }
-                circle = remaining;
+                path = remaining;
             }
-            // console.log("done with i=", i);
         }
 
         getArcs(nArcs, sp, bp);
 
-
-        
-        // console.log(brush);
-        
-                    
-        brush.strokeColor = bc;        
         brush.blendMode = myP.brushBlend;
         brush.fillColor = brushFill;
         brush.strokeWidth = myP.brushStrokeWidth;
-        var k = 0;
+
+        // apply color to each arc, in repeating pattern
+        var k = 1;
         for (i=0; i<brush.children.length; i++) {
-            // console.log(i)
-            // brush.children[i].strokeColor.lightness += i*0.05;
-            brush.children[i].strokeColor = brushCircusPalette[k];
+            var myCol = myP['brushCircusC' + k];
+            myCol.alpha = myP.brushStrokeOpacity / 100;
+            brush.children[i].strokeColor = myCol;
             k++;
-            if (k >= brushCircusPalette.length) { k = 0 };
-            // arc.strokeColor.hue += 0.1;
+            if (k > 5) { k = 1 };
         }
-        // for (i=1; i<=myP.brushCircusAmount; i++) {
-        //     var point = new Point(myP.size/2, myP.size/2,) + {
-        //         length: myP.size/2,
-        //         angle: 360 / myP.brushCircusAmount * i }
-
-        //     var loc = brush.getNearestLocation(point)
-        //     // var loc = brush.getLocationAt(brush.length/myP.brushCircusAmount * myP.brushCircusAmount-i);
-        //     // var loc = brush.getLocationAt(brush.length/2);
-        //     var newP = brush.splitAt(loc);       
-        //     console.log(newP); 
-        //     bg.addChild(newP);
-            
-        // }
-
-        // console.log(bg);
-
     }
 
     // Gradient
@@ -1542,14 +1637,14 @@ function drawPath(sprite, path) {
     }
 
     //Vertical lines only
-    if (myP.cap == 2) {
-        var l = lineGroup.children.length;
-        for (i = l-1; i>=0; i--) {            
-            if (lineGroup.children[i].data.direction == 'horiz') {
-                lineGroup.children[i].remove();
-            }
-        }
-    }
+    // if (myP.cap == 2) {
+    //     var l = lineGroup.children.length;
+    //     for (i = l-1; i>=0; i--) {            
+    //         if (lineGroup.children[i].data.direction == 'horiz') {
+    //             lineGroup.children[i].remove();
+    //         }
+    //     }
+    // }
 
     //Horizontal lines only
     if (myP.cap == 3) {
@@ -1845,6 +1940,8 @@ $('#log-params').click(function() {
     console.log(animatedProperties);
     console.log('selectedPaths:');
     console.log(selectedPaths);
+    console.log('projects:');
+    console.log(wpProjects);
 });
 
 
@@ -2146,18 +2243,18 @@ document.getElementById("uploadInput").addEventListener("change", handleFile, fa
 
 var myCustomSprite;
 
+// Import SVG for custom sprite
 function handleFile() {
     const fileList = this.files;
     project.importSVG(fileList[0], function(item) {
         selectedPaths.forEach(pathNro => 
             master[pathNro].brushCustomSprite = item.children[1]);
         
-        // myCustomSprite = item.children[1];
-        // generateSprite(master[0]);
         renderAllPaths();
     });
 }
 
+// Get an array of random numbers sorted in order
 function pick(n, min, max) {
     var results = [];
     for (i = 1; i <= n; i++) {
@@ -2167,14 +2264,14 @@ function pick(n, min, max) {
     return results.sort(function(a, b){return a-b});
 }
 
+// Get AI generated color palettes from colormind.com
 $('#brushCircusGenerate').click(function(){
-    var myP = master[0];
+    var myP = master[selectedPaths[0]];
     var inputCols = [];
     
     for (k = 0; k<5; k++) {
         var myID = 'brushCircusLock' + parseInt(k+1);
         var myIDC = 'brushCircusC' + parseInt(k+1);
-        console.log(myID);
         var el = document.getElementById(myID);
         if (el.checked) {
             inputCols.push(rgb2col(myP[myIDC]));
@@ -2182,6 +2279,7 @@ $('#brushCircusGenerate').click(function(){
             inputCols.push('N');
         }
     }
+    console.log(inputCols);
 
     var url = "http://colormind.io/api/";
     var data = {
@@ -2203,10 +2301,9 @@ $('#brushCircusGenerate').click(function(){
                 var myIDC = 'brushCircusC' + parseInt(d+1);
                 var change = {};
                 change[myIDC] = palette[d];
-                console.log(change);
                 updateSelectedPathsParams(change);
-                renderAllPaths();
             }
+            renderAllPaths();
         }
     }
 
