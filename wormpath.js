@@ -36,10 +36,16 @@ function createProjectObject() {
 
 $('#saveProject').click(function(){
     // Create the project object
-    var newProject = [createProjectObject()];
+    var newProject = createProjectObject();
+    var myName = $('#projectSelector option:selected').text();
+    newProject.name = myName;
+    // console.log(newProject);
 
     // Replace project with the same name 
-    wpProjects.map(obj => newProject.find(o => o.name === obj.name) || obj);
+    const index = wpProjects.findIndex((el) => el.name === myName);
+    // console.log(wpProjects[index]);
+    wpProjects[index] = newProject;
+    // wpProjects.map(obj => newProject.find(o => o.name === obj.name) || obj);
 
     var pro = wpProjects;
     // Loop through all projects and convert colors to hex values
@@ -78,7 +84,9 @@ $('#loadProject').click(function(){
     var projNo = $('#projectSelector').val();
     master = wpProjects[projNo].master;
     words.activate();
-    words.removeChildren();
+    words.removeChildren    ();
+    // var words = new Layer({position: view.center});
+    // words.name = 'words';
     project.importSVG(wpProjects[projNo].drawing, function(item) {
 
         wordsImport = item;
@@ -703,6 +711,7 @@ var url = 'images/pathsource.svg';
 var myWords;
 var master = [];
 var selectedPaths = [];
+var pathEffectsEnabled = true;
 
 var drawingBg = new Path.Rectangle({
     point: [0, 0],
@@ -1359,14 +1368,16 @@ function renderAllPaths() {
     //Run Draw path function for every path in the text
     
     for (path of myWords.children) {
-        if (master[path.index].pathSpiralOn == 1) {
-            spiral(path);
-        }        
-        if (master[path.index].pathZigZagOn == 1) {
-            zigzag(path);
-        }  
-        if (master[path.index].lastPointWiggle > 0) {
-            lastPointWiggle(path);
+        if (pathEffectsEnabled == true) {
+            if (master[path.index].pathSpiralOn == 1) {
+                spiral(path);
+            }        
+            if (master[path.index].pathZigZagOn == 1) {
+                zigzag(path);
+            }  
+            if (master[path.index].lastPointWiggle > 0) {
+                lastPointWiggle(path);
+            }
         }
         drawPath(generateSprite(master[path.index]), path);
     }
@@ -1377,6 +1388,8 @@ function renderAllPaths() {
     if (debugMode == true) {
         myWords.visible = true
         myWords.selected = true;
+        // words.selected = true;
+        // words.visible = true;
     };
 
     showSelections();
@@ -1950,6 +1963,8 @@ $('#debug').click(function() {
     if (debugMode) {
         myWords.visible = true;
         myWords.selected = true;
+        // words.visible = true;
+        // words.selected = true;
     }
     else {
         myWords.visible = false;
@@ -2139,8 +2154,10 @@ function onMouseUp(event) {
     }
 
     if (dragging) {
+        pathEffectsEnabled = false;
         updateWords();
         renderAllPaths();        
+        pathEffectsEnabled = true;
     }
     dragging = false;
     
@@ -2155,7 +2172,9 @@ $('#reversePath').click(function(){
     selectedPaths.forEach(function(item){
         words.children[item].reverse();
     });
-    update();
+    // pathEffectsEnabled = false;
+    renderAllPaths();
+    // pathEffectsEnabled = true;
 });
 
 // Toggle animation property's animateability
@@ -2232,8 +2251,9 @@ function onMouseDrag(event) {
 }
 
 function updateWords() {
-    words.removeChildren();
+    words.remove();
     words = myWords.clone();
+    words.name = "words";
     words.selected = false;
     words.scale(1/master[0].drawingSize);
 }
