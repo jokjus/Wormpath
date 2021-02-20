@@ -1057,6 +1057,7 @@ function generateSprite(myP) {
         };
     }
 
+    // Circus style brush
     if (myP.bgType == 9) {
 
         var brush = new Group();
