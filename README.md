@@ -6,8 +6,8 @@
 ## Setup
  1. Copy files to some directory on your hard drive. 
  2. Launch a local server of your choice. (I'm using CodeKit or Visual Studio Code Live Server). 
-    - Visual Studio https://code.visualstudio.com/  
-    - Visual Studio Code https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
+    - Visual Studio Code https://code.visualstudio.com/  
+    - Visual Studio Code Live Server https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer
     - CodeKit https://codekitapp.com/
  3. Install a pug compiler. CodeKit has it built-in, for Visual Code Studio you can use eg.:https://marketplace.visualstudio.com/items?itemName=jaheenafsarsyed.live-pug-compiler 
  3. Open wormpath.html in a browser.
