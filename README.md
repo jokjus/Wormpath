@@ -28,7 +28,8 @@
 In the General tab under Project-section you can save the full project with original path strokes and settings for each stroke. Projects are saved into browser's localstorage for now, so don't expect them to be safe forever.
 
 ## Known issues
- Drawing disappears on resize. Just change any value to redraw or hit "A" to select all paths and redraw the screen.
+ - Drawing disappears on resize. Just change any value to redraw or hit "A" to select all paths and redraw the screen.
+ - When loading a project elements with opacity become opaque. Must set the color again for those elements to recover.
 
 ## Keyboard commands
 A: select all paths
