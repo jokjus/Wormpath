@@ -23,17 +23,31 @@
 
 ## Presets
  There are a few hard coded presets, but you can save settings into your browser's localstorage. Controls are at the bottom of the screen.
+ 
+## Saving a project
+In the General tab under Project-section you can save the full project with original path strokes and settings for each stroke. Projects are saved into browser's localstorage for now, so don't expect them to be safe forever.
 
 ## Known issues
- Drawing disappears on resize. Just change any value to redraw.
+ Drawing disappears on resize. Just change any value to redraw or hit "A" to select all paths and redraw the screen.
+
+## Keyboard commands
+A: select all paths
+SHIFT + click path: add new control point
+X + click path: remove a control point
 
 ## Animation
- Animation is in very early steps, only a few properties are supported. Animations are loops where properties change according to sine wave. 
- 1. Enter the min/max values of each property in the animation tab. Test with *Step forward* if you like.
- 2. Press *Start animation*
- 3. Press *Start Capture*
- 4. When all frames have been generated, *Stop capture*
- 5. Press *Stop animation*
+ Animation is in very early steps, only a small portion of all properties are supported. Animations are loops where properties change according to the chosen easing function.
+ 1. Select those paths that you want to set animation properties.
+ 2. Enter the min/max values of each property in the animation tab. Test with *Step forward* if you like.
+ 3. Hit small AN -toggle in order to make any animatable property really animate.
+ 4. Press *Start animation*
+ 5. Select format of your choice. WEBM is great for testing, JPG or PNG series make a high quality master. 
+ 6. Press *Start Capture*
+ 7. When all frames have been generated, *Stop capture*
+ 8. Press *Stop animation*
+
+*NOTE* Animation speed isn't set per path, it's an universal property for the whole project.
+*NOTE2* flatForward easing function is the only easing function that isn't a loop. It runs straight forward at a fixed speed.
 
  The animation will be downloaded in a format of choice.
  Screen capture script by https://github.com/spite/ccapture.js
