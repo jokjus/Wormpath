@@ -160,7 +160,7 @@ function setOrigPresets() {
             lineWidth: "2",
             lines: "4",
             rotation: 20,
-            shadow: 20,
+            shadow: 0,
             size: "138",
             spikeAmp: 10,
             spikeFreq: 10,
@@ -429,6 +429,13 @@ var animatedProperties = [
         override: false
     },
     {
+        propName: 'noiseFreq',
+        min: 'aNoiseFreqMin',
+        max: 'aNoiseFreqMax',
+        animate: false,
+        override: false
+    },
+    {
         propName: 'waveNoiseOffset',
         min: 'aWaveNoiseOffsetMin',
         max: 'aWaveNoiseOffsetMax',
@@ -474,6 +481,13 @@ var animatedProperties = [
         propName: 'brushNoisePhase',
         min: 'aBrushNoisePhaseMin',
         max: 'aBrushNoisePhaseMax',
+        animate: false,
+        override: false
+    },
+    {
+        propName: 'wedge',
+        min: 'aWedgeMin',
+        max: 'aWedgeMax',
         animate: false,
         override: false
     }
@@ -562,6 +576,15 @@ bg.name = 'bg';
 var drawing = new Layer({position: view.center});
 drawing.name = 'drawing';
 
+var shadowLayer =  new Layer({position: view.center});
+shadowLayer.name = 'shadowLayer';
+
+var raster = new Raster('imagepainter');
+raster.visible = false;
+
+var depthMap = new Raster('depthMap');
+depthMap.visible = false;
+
 words.bringToFront();
 
 // Set default parameters
@@ -574,7 +597,7 @@ var p = {
     lines: 0,
     lineWidth: 3,
     density: 90,
-    bgColor: new Color(0.78039, 0, 0.11765),
+    bgColor: new Color(0.7, 0.7, 0.7),
     bgOpacity: 100,
     brushStrokeColor: new Color(0, 0, 0),
     brushStrokeWidth: 0,
@@ -585,7 +608,7 @@ var p = {
     waveNoiseOn: 0,
     waveNoiseOffset:0,
     wavePhase: 10,
-    shadow: 20,
+    shadow: 0,
     cap: 2,
     twist: 0,
     lineColor: new Color(1,1,1),
@@ -635,6 +658,7 @@ var p = {
     brushBubbleInnerAmount: 4,
     brushBubbleInnerType: 0,
     brushCustomSprite: null,
+    brushCustomSpriteOrigColors: false,
     brushLeavesAmount: 6,
     brushLeavesSize: 10,
     brushLeavesLength: 30,
@@ -649,13 +673,31 @@ var p = {
     brushCircusC3: new Color(0, 0, 1),
     brushCircusC4: new Color(1, 1, 0),
     brushCircusC5: new Color(0, 1, 1),
+    brushImagePainterResolution: 5,
+    brushImagePainterVScale: 20,
+    brushImagePainterHScale: 20,
+    brushImagePainterType: 0,
+    brushStripeCount: 5,
+    brushStripeWidth: 5,
+    brushDepthAmp: 10,
+    brushDepthGamma: 10,
+    brushDepthFreq: 10,
+    brushDepthResolution: 100,
+    brushDepthSmoothOn: 1,
+    brushDepthHollow: 0,
     noiseOn: 0,
+    noiseAngularOn: 0,
     noiseFreq: 10,
     noiseAmp: 50,
     noisePhase: 10,
     noisePathOffset: 0,
     lastPointWiggle: 0,
     pathCompleteness: 100,
+    directionalContrast: 0,
+    lineShadow: 0,
+    lineShadowDistance: 1,
+    lineShadowOffset: 0,
+    lineShadowBooleanOn: 0,
     pathZigZagOn: 0,
     pathZigzagAmp: 15,
     pathZigzagFreq: 10,
@@ -682,6 +724,8 @@ var p = {
     aWaveNoiseOffsetMax: 0,
     aNoiseAmpMin: 0,
     aNoiseAmpMax: 0,
+    aNoiseFreqMin: 0,
+    aNoiseFreqMax: 0,
     aPathCompletenessMin: 100,
     aPathCompletenessMax: 100,
     aZigzagAmpMin: 0,
@@ -690,7 +734,9 @@ var p = {
     aPathSpiralAmountMax: 0,
     aBrushNoisePhaseMin: 0,
     aBrushNoisePhaseMax: 0,
-    aEasing: 'sine'
+    aEasing: 'sine',
+    aWedgeMin: 0,
+    aWedgeMax: 0
 }
 
 var hue = 0;
@@ -765,11 +811,14 @@ function generateSprite(myP) {
     // Custom brush type, uploaded from SVG file
     if (myP.bgType == 6) {
         if (myP.brushCustomSprite != null) {
-            var brush = myP.brushCustomSprite;
-            brush.fillColor = brushFill;
-            brush.blendMode = myP.brushBlend;
+            var brush = myP.brushCustomSprite.clone();
+            if (myP.brushCustomSpriteOrigColors) {
+                brush.fillColor = brushFill;
+            }
+            
             brush.strokeWidth =  myP.brushStrokeWidth;
             brush.strokeColor = bc;
+            brush.blendMode = myP.brushBlend;
             var bounds = new Path.Rectangle({
                 point: [0, 0],
                 size: [myP.size, myP.size],
@@ -795,13 +844,28 @@ function generateSprite(myP) {
        
         if (myP.shadow > 0) {
             //Bottom rectangle that creates shadow
-            var recB = new Shape.Rectangle({
-                point: [0, myP.size-5],
-                size: [myP.size, 5],
-                fillColor: 'black'
+            // var recB = new Shape.Rectangle({
+            //     point: [0, myP.size-5],
+            //     size: [myP.size, 5],
+            //     fillColor: 'black'
+            // })
+
+            var recB = new Path.Line({
+                from: [3, myP.size-3],
+                to: [myP.size-3, myP.size-3],
+                strokeWidth: 3,
+                strokeColor: 'black'
+            })
+
+            var recC = new Path.Line({
+                from: [3, 3],
+                to: [myP.size-3, 3],
+                strokeWidth: 4,
+                strokeColor: 'white'
             })
 
             recB.opacity = myP.shadow/100;
+            recC.opacity = myP.shadow/100;
         }
     }
 
@@ -849,6 +913,7 @@ function generateSprite(myP) {
         brush.strokeWidth = myP.brushStrokeWidth;
 
     }
+
 
     // Cross type brush
     if (myP.bgType == 3) {
@@ -1049,6 +1114,32 @@ function generateSprite(myP) {
         brush.fillColor = brushFill;
         brush.strokeWidth = myP.brushStrokeWidth;
 
+        if (myP.shadow > 0) {
+            var lightCut = new Path.Rectangle({
+                from: brush.bounds.topLeft,
+                to: [brush.bounds.topRight.x, brush.bounds.topRight.y + 20]
+            });
+
+            var shadowCut = new Path.Rectangle({
+                from: [brush.bounds.bottomLeft.x, brush.bounds.bottomLeft.y - 20],
+                to: brush.bounds.bottomRight
+            });
+
+
+            var lightPath = brush.intersect(lightCut);
+            var shadowPath = brush.intersect(shadowCut);
+
+            setProps(lightPath, 'white');
+            setProps(shadowPath, 'black');
+
+            function setProps(pathToSet, setColor) {
+                pathToSet.strokeColor = setColor;
+                pathToSet.fillColor = null;
+                pathToSet.strokeWidth = myP.brushStrokeWidth;
+            }
+
+        }
+
         function getNoiseVal() {
             xinX += myP.brushNoiseFreq/100;
             yinX += myP.brushNoiseFreq/100; 
@@ -1124,6 +1215,14 @@ function generateSprite(myP) {
         }
     }
 
+    // Depth map
+    if (myP.bgType == 12) {
+        // The effect code is within DrawPath function
+        console.log('depthmap');
+        
+        var brush = new Path();
+    }
+
     // Gradient
     if (myP.bgStyle == 3) {
         var endCol = myP.brushGradientColor;
@@ -1147,6 +1246,48 @@ function generateSprite(myP) {
         }
     }
 
+    // Imagepainter
+    if (myP.bgType == 10) {
+        // The effect code is within DrawPath function
+        console.log('imageBrush');
+        
+        var brush = new Path();
+    }
+
+    //Stripe brush
+    if (myP.bgType == 11) {
+    var brush = new Group({
+        // applyMatrix: false
+    });
+    
+    var rec1 = new Path.Rectangle({
+        point: [0, 0],
+        size: [myP.size, 5],
+        parent: brush
+    });
+
+    var step = myP.size / (myP.brushStripeCount + 1);
+
+    for (d = 1; d < myP.brushStripeCount + 1; d++) {
+        var dot = new Path.Rectangle({
+            point: [step * d, 0],
+            size: [myP.brushStripeWidth, 5],
+            parent: brush,
+            fillColor: bc,
+            blendMode: myP.brushBlend
+        })
+    }
+
+    var strC = myP.brushStrokeColor;
+    strC.alpha = myP.lineOpacity/100;
+    brush.strokeColor = bc;
+    brush.blendMode = myP.brushBlend;
+    rec1.fillColor = brushFill;
+    brush.strokeWidth = myP.brushStrokeWidth;
+
+    }
+    
+
     // Brush none
     if (myP.bgStyle == 2) {
         brush.opacity = 0;
@@ -1159,7 +1300,7 @@ function generateSprite(myP) {
 
     //Group to hold the whole sprite
     var group = new Group({
-        children: [brush, brush2, recB, lines],
+        children: [brush, brush2, recB, recC, lines, lightPath, shadowPath],
         name: 'sprite'
         // pivot: myPivot
     });
@@ -1205,7 +1346,8 @@ function generateSprite(myP) {
     if (myP.textOn == 1) {
         var text = new PointText(new Point(myP.size, myP.size-20-(myP.size/100*myP.textYPos)));
         var textMask = new Path.Rectangle(new Point(myP.size-10, 0), new Size(10, myP.size));
-        text.content = document.getElementById('textContent').value;
+        // text.content = document.getElementById('textContent').value;
+        text.content = myP.textContent;
         text.fillColor = myP.textColor;
         text.fontSize = myP.size * myP.textSize/50;
         text.fontFamily = "Helvetica Neue";
@@ -1258,6 +1400,7 @@ function renderAllPaths() {
     // variable for keeping track of paths drawn
     // var orderNo = 0;    
     //Delete all previosly drawn worms
+    shadowLayer.removeChildren();
     drawing.removeChildren();
     myWords.remove();
 
@@ -1400,6 +1543,7 @@ var factorPhase = 0;
 
 // Draw sprite along a path
 function drawPath(sprite, path) {
+    
     var myP = master[path.index];
     drawing.activate();
     var steps = path.length / ((101 - myP.density)) * 2;
@@ -1428,6 +1572,14 @@ function drawPath(sprite, path) {
     xinW = myP.wavePhase / 10;
     yinW = myP.wavePhase;
     var lineGroup;
+    var bc = myP.brushStrokeColor;
+    bc.alpha = myP.brushStrokeOpacity / 100;
+    var brushFill = myP.bgColor;
+    brushFill.alpha = myP.bgOpacity / 100;
+    var stripesDelta = 0;
+    var noiseAngularCounter = 0;
+    var noiseScaleAng;
+    var depthMapCounter = 0;
 
     var points = [];
     for (k=0; k<steps*myP.pathCompleteness/100; k++) {
@@ -1435,6 +1587,7 @@ function drawPath(sprite, path) {
     }
 
     var sCopy;
+    // console.log(sprite);
     for (k=0; k<steps; k++) {
         
         //First let's take a clone that we can manipulate with effects
@@ -1443,6 +1596,7 @@ function drawPath(sprite, path) {
         sCopy.visible = true;
         lineGroup = sCopy.lastChild;
         
+
         // Spike effect 
         if (myP.lineStyle == 8) {
             if (spikeCounter < myP.spikeFreq * path.length/steps) {
@@ -1525,10 +1679,171 @@ function drawPath(sprite, path) {
             bulbscale += bulbadd/1000;     
         }
 
+        // depth map
+        if (myP.bgType == 12) {
+
+            // Create temporary circle just for reference
+            var temp = new Path.Circle({
+                center: [myP.size/2,myP.size/2],
+                radius: myP.size/2,
+            });   
+    
+            //Create an empty path object as a basis for this brush
+            var brush = new Path();
+            // Initialize array to house a set of displacement normals
+            var normals = [];
+            // Add points on the circle with fixed intervals 
+            for (i=0; i<myP.brushDepthResolution; i++) {
+                var offset = temp.length / myP.brushDepthResolution * i; // get offsets evenly across circle
+                var newP = temp.getPointAt(offset);         // get the coordinate point
+
+                brush.add(newP);                            // add new point to empty path
+                normals.push(temp.getNormalAt(offset));     // create array of 0 length normals
+                brush.pivot = [myP.size/2, myP.size/2];
+            }
+
+            brush.closed = true;
+            // Get rid of the reference circle
+            temp.remove();                                  
+            
+            var stepsPerMap = steps / myP.brushDepthFreq * 10;
+            
+            if (depthMapCounter > stepsPerMap) depthMapCounter = 0;
+
+            var le = depthMap.size.height / stepsPerMap * depthMapCounter;
+            //Offset each point based on image luminosity value
+            // var le = parseInt(depthMap.size.height / steps * k);
+            
+
+            for (d=0; d < normals.length; d++) {
+                // Get color object for a single pixel
+                var col = depthMap.getPixel(depthMap.size.width / myP.brushDepthResolution * d, le);
+                var gray = 1 - col.gray;
+                var gammaCorrectedGray = Math.pow(gray,  myP.brushDepthGamma / 10);
+
+                if (gammaCorrectedGray  > 0) {
+                    // Scale normals based on pixel luminance
+                    var v = normals[d] * gammaCorrectedGray * myP.brushDepthAmp; 
+                    // Move each point based on normal value
+                    brush.segments[d].point += v;
+                }
+            }
+
+            depthMapCounter++;
+
+
+            // Smooth the path
+            if (myP.brushDepthSmoothOn == 1) {
+                brush.smooth();
+            }
+
+            if (myP.brushDepthHollow > 0) {
+                var hole = Path.Circle({
+                    center: [myP.size/2,myP.size/2],
+                    radius: myP.size / 200 * myP.brushDepthHollow,
+                })
+
+                var b2 = brush;
+
+                brush = b2.subtract(hole);
+                b2.remove();
+                hole.remove();
+            
+            }
+
+            brush.strokeColor = bc;
+            brush.strokeWidth = myP.brushStrokeWidth;
+            brush.blendMode = myP.brushBlend;
+            brush.fillColor = brushFill;
+
+            if (myP.bgStyle == 3) {
+                var endCol = myP.brushGradientColor;
+                endCol.alpha = (100 - myP.brushGradientTransparency) /100;    
+                var orig = [myP.size/2,myP.size/2];
+                if (myP.brushGradientType == 0) {
+                    var orig = brush.bounds.leftCenter;
+                }
+        
+                var start = (myP.brushGradientBalance-50)/100*2;
+                if (myP.brushGradientBalance <= 50) start = 0;
+                var end = (myP.brushGradientBalance)/100*2;
+                if (myP.brushGradientBalance >= 50) end = 1;
+                brush.fillColor = {
+                    gradient: {
+                        stops: [[myP.bgColor, start], [endCol, end]],
+                        radial: Boolean(parseInt(myP.brushGradientType))
+                    },
+                    origin: orig,
+                    destination: brush.bounds.rightCenter
+                }
+            }
+
+            sCopy.children[0] = brush;
+            sCopy.pivot = [myP.size/2, myP.size/2];
+        }
+
+        // imagepainter
+        if (myP.bgType == 10) {
+            
+
+            var brush = new Path();
+
+            var res = myP.brushImagePainterResolution;
+            var hScale = myP.brushImagePainterHScale/10;
+            var offset = path.index * res * hScale;
+            var vScale = myP.brushImagePainterVScale/10;
+
+            for(i = 0; i<res; i++) {
+                var col = raster.getPixel(offset + i*hScale, k*vScale);
+                var v = 1 - col.gray;
+                if (myP.brushImagePainterType == 0) {
+                    var e = new Path.Circle({
+                        center: [i*myP.size/res, 0],
+                        radius: [v * myP.size / res,  v * myP.size / res]
+                    });
+                }
+                if (myP.brushImagePainterType == 1) {
+                    var e = new Path.Rectangle({
+                        point: new Point(i*myP.size/res, 0),
+                        size: new Size(v * myP.size/res, myP.size/res)
+                    })   
+                   
+                }
+                brush = brush.unite(e);
+            }
+            
+            brush.strokeColor = bc;
+            brush.strokeWidth = myP.brushStrokeWidth;
+            brush.blendMode = myP.brushBlend;
+            brush.fillColor = brushFill;
+
+            sCopy.children[0] = brush;
+            
+        }
+
         // Noise effect
+        
         if (myP.noiseOn == 1) {
             var noiseScale = 1 + perlin.get(xin, yin) * myP.noiseAmp / 50;
-            sCopy.scale(noiseScale);
+            
+            // console.log(noiseAngularCounter);    
+            if (myP.noiseAngularOn == 1) {
+                if (noiseAngularCounter < myP.noiseFreq) {
+                    sCopy.scale(noiseScaleAng);
+                    noiseAngularCounter++;
+                    // console.log(noiseAngularCounter); 
+                }
+                else {
+                    sCopy.scale(noiseScale);
+                    noiseScaleAng = noiseScale;
+                    noiseAngularCounter = 0;
+                }
+            }
+            
+            if (myP.noiseAngularOn == 0) {
+                sCopy.scale(noiseScale);
+            }
+
             xin += myP.noiseFreq/1000 * path.length/steps / 2;
             yin += myP.noiseFreq/1000 * path.length/steps / 2;
         }
@@ -1573,8 +1888,7 @@ function drawPath(sprite, path) {
             text.position.x += textPos;
             textContainer.position.x += myP.textBump
             textPos += textadd;
-        }
-        
+        }        
         
         //Wavy line effect
         if (myP.lineStyle == 6) {
@@ -1618,17 +1932,42 @@ function drawPath(sprite, path) {
            
             sCopy.scale(wedgeScale);    
         }
+        
+        // Directional contrast effect
+        if (myP.directionalContrast > 0) {
+            var myOffset = path.getOffsetOf(points[k]); 
+            var myTangent = path.getTangentAt(myOffset);
+            var myAngle = Math.abs(myTangent.angle);
+            var dirScale;
+            if (myAngle <= 90) dirScale = 1 + myAngle / 90;
+            if (myAngle > 90) dirScale = 1 + (180 - myAngle) / 90;             
+            sCopy.scale(dirScale ** (myP.directionalContrast / 20));
+        }
 
+        // Stripes effect
+        if (myP.bgType == 11) {
+            // var stripes = sCopy.children[0].children;
+            // var stripeCount = stripes.length;            
+            // var change = sinBetween(0, myP.size / 3, stripesDelta);
 
+            // for (s = 1; s < 6; s++) {
+            //     var myX = myP.size / 6 * s;
+            //     stripes[s].translate([change - myX / 2, 0]);
+            // }
+            // stripesDelta += 0.1; 
+        }
+
+        
         // Put sprite to it's place along the path
         var cPos = points[k];
         sCopy.position = cPos;
-
+        
+        
         //Rotation + twist
         var rot = myP.rotation + parseInt(k*twistadd/250);
         sCopy.rotate(rot);
-
-        // Cap style dome
+        
+        // Cap style point
         if (myP.cap == 4) {
             if (k > steps - capSteps) {
                 var s = Math.abs((steps-k)- capSteps);
@@ -1636,6 +1975,83 @@ function drawPath(sprite, path) {
             }
         }
         
+        // Cap style dome
+        if (myP.cap == 5) {
+            if (k > steps - capSteps) {
+                var s = Math.abs((steps-k)- capSteps);
+                var myScale = 1 - ( 1 / (1.2 ** capSteps) * (1.2 ** s));
+                sCopy.scale(myScale);
+            }
+        }
+        
+        // Line shadow effect
+        if (myP.lineShadow > 0) {
+            var shaCopy = sCopy.clone();
+            var shaPath = shaCopy.children[0];
+            var shaSize = shaPath.length / 100 * myP.lineShadow;
+            if (myP.lineShadowBooleanOn == 0) {
+                drawing.addChild(shaCopy);
+            }
+            if (myP.lineShadowBooleanOn == 1) {
+                shadowLayer.addChild(shaCopy);
+            }
+            shaCopy.visible = true;
+            shaCopy.strokeColor = 'red';
+            shaCopy.strokeWidth = 1;     
+            shaCopy.fillColor = null;
+
+            var shaMiddle = shaPath.getOffsetOf(shaPath.bounds.topCenter) + shaPath.length / 100 * myP.lineShadowOffset;
+            var leftCut = shaPath.getLocationAt(shaMiddle - shaSize);
+            var rightCut = shaPath.getLocationAt(shaMiddle + shaSize);
+
+            var newp;
+            newp = shaPath.splitAt(leftCut);
+            newp = shaPath.splitAt(rightCut);
+
+            if (newp != null) {
+                newp.opacity = 0; // do not destroy the path in order to keep pivot in place
+            }
+
+            shaCopy.position += new Point(0, myP.lineShadowDistance);
+            
+            
+        }
+    }
+
+    if (myP.lineShadowBooleanOn == 1) {
+        console.log('NYt unitetaan!');
+        console.log(shadowLayer);
+
+        // for each sprite
+        // take a clone of topmost brush
+        //var b = drawing.children[x].children[0].clone();
+        var b = new Path({
+            name: 'brusheli'
+        });
+        // add that clone to shadow layer
+        shadowLayer.addChild(b);
+
+        for (x = parseInt(steps); x > 0; x-- ) {
+            shadowLayer.activate();
+
+            // take a clone of next brush backwards
+            var d = drawing.children[x].children[0].clone();
+            //add that clone to shadow layer
+            shadowLayer.addChild(d);
+            // unite brushed that are already united + next brush sprite
+            b = b.unite(d, {insert: false});
+            d.remove();
+            //get shadow
+            var mySha = shadowLayer.children[x-1].children[0];
+            //remove that opacity 0 part of the shadow (needed just for pivoting)
+            shadowLayer.children[x-1].children[1].remove();
+            var shaBool = mySha.subtract(b, {trace: false});
+            mySha.remove();
+            //shaBool.selected = true;
+            shaBool.strokeColor = 'orange';
+            // b.remove();
+        }
+        b.remove();
     }
 
     //Cap styles

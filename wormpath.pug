@@ -37,6 +37,8 @@ html
     script(src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js" integrity="sha256-ur/YlHMU96MxHEsy3fHGszZHas7NzH4RQlD4tDVvFhw=" crossorigin="anonymous")
   body
     canvas#canvas(resize='' hidpi="off")
+    img( src='images/imagepainter.png' id='imagepainter')
+    img( src='images/depth-displace.png' id='depthMap')
 
     #progress
     button#export-button Export as SVG
@@ -103,8 +105,15 @@ html
                         {label: 'Custom', value: 6, col: 'brushCustomSprite'},
                         {label: 'Leaves', value: 7, col: 'brushLeaves'},
                         {label: 'Noise', value: 8, col: 'brushNoise'},
-                        {label: 'Circus', value: 9, col: 'brushCircus'}                        
+                        {label: 'Circus', value: 9, col: 'brushCircus'},
+                        {label: 'Image painter', value: 10, col: 'brushImagePainter'},                      
+                        {label: 'Stripe', value: 11, col: 'brushStripe'},
+                        {label: 'Depth map', value: 12, col: 'brushDepthMap'},
                     ], 'collapsibleTrigger')  
+            div.collapseui#brushStripeCollapsible(style='display:none')
+                +input('range', 'Stripes:', 'brushStripeCount', 0, 30)
+                +input('range', 'Width:', 'brushStripeWidth', 0, 100)
+
             div.collapseui#brushCircusCollapsible(style='display:none')
                 +input('range', 'Amount:', 'brushCircusAmount', 0, 50)
                 +select('Type', 'brushCircusType', [
@@ -129,6 +138,14 @@ html
                 +input('range', 'Noise freq:', 'brushNoiseFreq', 0, 100)
                 +input('checkbox', 'Smooth', 'brushNoiseSmoothOn', 0, 0, 0)
                 +input('range', 'Noise phase:', 'brushNoisePhase', 0, 100)
+            
+            div.collapseui#brushDepthMapCollapsible(style='display:none')
+                +input('range', 'Depth amp:', 'brushDepthAmp', 0, 200)
+                +input('range', 'Depth gamma:', 'brushDepthGamma', 0, 100)
+                +input('range', 'Depth freq:', 'brushDepthFreq', 0, 100)
+                +input('range', 'Depth resolution:', 'brushDepthResolution', 0, 500)
+                +input('checkbox', 'Smooth', 'brushDepthSmoothOn', 0, 0, 0)
+                +input('range', 'Hollow:', 'brushDepthHollow', 0, 100)
 
             div.collapseui#brushLeavesCollapsible(style='display:none')
                 +input('range', 'Leaves:', 'brushLeavesAmount', 0, 50)
@@ -139,6 +156,7 @@ html
                 .ui-generic
                     label Custom sprite SVG
                     input#uploadInput(type="file" name="myFile")
+                +input('checkbox', 'Original colors', 'brushCustomSpriteOrigColors', 0, 0, 0)
 
             div.collapseui#brushDoubleCircleCollapsible(style='display:none')
                 +input('range', 'Innercircle size', 'inCircleSize')
@@ -173,7 +191,14 @@ html
                         { label: 'Circle', value: 0 }, 
                         { label: 'Rectangle', value: 1 }
                     ])
-
+            div.collapseui#brushImagePainterCollapsible(style='display:none')
+                +input('range', 'Resolution:', 'brushImagePainterResolution')
+                +input('range', 'Horiz scale:', 'brushImagePainterHScale')
+                +input('range', 'Vert scale:', 'brushImagePainterVScale')
+                +select('Brush type:', 'brushImagePainterType', [
+                    {label: 'Circle', value: 0},
+                    {label: 'Line', value: 1}
+                ])
 
             +input('range', 'Brush size:', 'size', 0, 400)
             +input('range', 'Rotation:', 'rotation', 0, 360)
@@ -222,7 +247,8 @@ html
                     {label: 'Open', value: 1},
                     {label: 'Horizontal', value: 2},
                     {label: 'Vertical', value: 3},
-                    {label: 'Dome', value: 4}
+                    {label: 'Pointed', value: 4},
+                    {label: 'Dome', value: 5}
                 ])                    
    
             +select('Brush effect:', 'bgEffect', [
@@ -267,6 +293,12 @@ html
             +input('range', 'Wedge:', 'wedge', 0, 100)
             +input('range', 'Last point wiggle:', 'lastPointWiggle', 0, 100)
             +input('range', 'Path completeness:', 'pathCompleteness', 0, 100)
+            +input('range', 'Directional contrast:', 'directionalContrast', 0, 100)
+            +input('range', 'LineShadow:', 'lineShadow', 0, 100)
+            +input('range', 'Shadow distance:', 'lineShadowDistance', 0, 100)
+            +input('range', 'Shadow offset:', 'lineShadowOffset', 0, 100)
+            +input('checkbox', 'Shadow boolean (slow)', 'lineShadowBooleanOn', 0, 0, 0)
+
 
         div.ui-section#text
             +input('checkbox', 'Text', 'textOn', 0, 0, 0)
@@ -298,8 +330,9 @@ html
 
         div.ui-section#noise
             +input('checkbox', 'Noise', 'noiseOn', 0, 0, 0)
+            +input('checkbox', 'Angular', 'noiseAngularOn', 0, 0, 0)
             +input('range', 'Noise freq:', 'noiseFreq')    
-            +input('range', 'Noise Amp:', 'noiseAmp') 
+            +input('range', 'Noise Amp:', 'noiseAmp', 0, 200) 
             +input('range', 'Noise Phase:', 'noisePhase', 0, 100)
             +input('range', 'Paths offset:', 'noisePathOffset', 0, 100)
 
@@ -352,11 +385,13 @@ html
             +anim('Bulb freq variation', 'aBulbFreq', 0, 100, 'bulbFreq')
             +anim('Noise phase', 'aNoisePhase', 0, 100, 'noisePhase')
             +anim('Noise amp', 'aNoiseAmp', 0, 100, 'noiseAmp')
+            +anim('Noise freq', 'aNoiseFreq', 0, 100, 'noiseFreq')
             +anim('Wave phase', 'aWaveNoiseOffset', 0, 100, 'waveNoiseOffset')
             +anim('Path completeness', 'aPathCompleteness', 0, 100, 'pathCompleteness')
             +anim('Zigzag amplitude', 'aZigzagAmp', 0, 100, 'pathZigzagAmp')
             +anim('Spiral amount', 'aPathSpiralAmount', 0, 100, 'pathSpiralAmount')
             +anim('Brush noise phase', 'aBrushNoisePhase', 0, 100, 'brushNoisePhase')
+            +anim('Wedge', 'aWedge', 0, 100, 'wedge')
                 
             .anim-basic-control
                 label Animation format
