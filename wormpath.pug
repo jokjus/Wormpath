@@ -51,6 +51,7 @@ html
         .tab(data-target="brush") Brush
         .tab(data-target="lines-section") Lines
         .tab(data-target="effects") Effects
+        .tab(data-target="lineshadow") Shadow
         .tab(data-target="text") Text
         .tab(data-target="stitch") Stitch
         .tab(data-target="noise") Noise
@@ -209,7 +210,7 @@ html
 
             +section("Stroke")
             +input('color', 'Brush stroke color', 'brushStrokeColor')
-            +input('range', 'Brush stroke width', 'brushStrokeWidth', 0, 100)
+            +input('range', 'Brush stroke width', 'brushStrokeWidth', 0, 20)
             +input('range', 'Brush stroke opacity', 'brushStrokeOpacity', 0, 100)
 
             +section("Style")
@@ -294,11 +295,14 @@ html
             +input('range', 'Last point wiggle:', 'lastPointWiggle', 0, 100)
             +input('range', 'Path completeness:', 'pathCompleteness', 0, 100)
             +input('range', 'Directional contrast:', 'directionalContrast', 0, 100)
-            +input('range', 'LineShadow:', 'lineShadow', 0, 100)
-            +input('range', 'Shadow distance:', 'lineShadowDistance', 0, 100)
-            +input('range', 'Shadow offset:', 'lineShadowOffset', 0, 100)
-            +input('checkbox', 'Shadow boolean (slow)', 'lineShadowBooleanOn', 0, 0, 0)
 
+        div.ui-section#lineshadow 
+            +input('range', 'Shadow width:', 'lineShadow', 0, 100)
+            +input('range', 'Shadow distance:', 'lineShadowDistance', 0, 20)
+            +input('range', 'Shadow offset:', 'lineShadowOffset', 0, 100)
+            +input('color', 'Shadow color', 'lineShadowColor')
+            +input('range', 'Shadow width:', 'lineShadowWidth', 0, 20)
+            +input('checkbox', 'Shadow boolean (slow)', 'lineShadowBooleanOn', 0, 0, 0)
 
         div.ui-section#text
             +input('checkbox', 'Text', 'textOn', 0, 0, 0)

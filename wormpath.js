@@ -698,6 +698,8 @@ var p = {
     lineShadowDistance: 1,
     lineShadowOffset: 0,
     lineShadowBooleanOn: 0,
+    lineShadowColor: new Color(1, 0, 0),
+    lineShadowWidth: 1,
     pathZigZagOn: 0,
     pathZigzagAmp: 15,
     pathZigzagFreq: 10,
@@ -1077,8 +1079,6 @@ function generateSprite(myP) {
     // Noise style brush
     if (myP.bgType == 8) {
 
-        // console.log('P: ' + perlin.get(0.5,0.2));
-
         var temp = new Path.Circle({
             center: [myP.size/2,myP.size/2],
             radius: myP.size/2,
@@ -1089,6 +1089,7 @@ function generateSprite(myP) {
         var normals = [];
         xinX = 0.5 + myP.brushNoisePhase/10;
         yinX = 0.2 + myP.brushNoisePhase/10;
+
         // Add points on the circle 
         for (i=0; i<myP.brushNoiseFreq; i++) {
             var offset = temp.length / myP.brushNoiseFreq * i; // get offsets evenly across circle
@@ -1100,7 +1101,7 @@ function generateSprite(myP) {
         temp.remove();                                  // get rid of the temporary circle
          
         //Offset each point based on perlin noise
-        for (d=0; d<normals.length; d++) {
+        for (d = 0; d < normals.length; d++) {
             var v = normals[d] * getNoiseVal();
             brush.segments[d].point += v;
         }
@@ -1114,31 +1115,31 @@ function generateSprite(myP) {
         brush.fillColor = brushFill;
         brush.strokeWidth = myP.brushStrokeWidth;
 
-        if (myP.shadow > 0) {
-            var lightCut = new Path.Rectangle({
-                from: brush.bounds.topLeft,
-                to: [brush.bounds.topRight.x, brush.bounds.topRight.y + 20]
-            });
+        // if (myP.shadow > 0) {
+        //     var lightCut = new Path.Rectangle({
+        //         from: brush.bounds.topLeft,
+        //         to: [brush.bounds.topRight.x, brush.bounds.topRight.y + 20]
+        //     });
 
-            var shadowCut = new Path.Rectangle({
-                from: [brush.bounds.bottomLeft.x, brush.bounds.bottomLeft.y - 20],
-                to: brush.bounds.bottomRight
-            });
+        //     var shadowCut = new Path.Rectangle({
+        //         from: [brush.bounds.bottomLeft.x, brush.bounds.bottomLeft.y - 20],
+        //         to: brush.bounds.bottomRight
+        //     });
 
 
-            var lightPath = brush.intersect(lightCut);
-            var shadowPath = brush.intersect(shadowCut);
+        //     var lightPath = brush.intersect(lightCut);
+        //     var shadowPath = brush.intersect(shadowCut);
 
-            setProps(lightPath, 'white');
-            setProps(shadowPath, 'black');
+        //     setProps(lightPath, 'white');
+        //     setProps(shadowPath, 'black');
 
-            function setProps(pathToSet, setColor) {
-                pathToSet.strokeColor = setColor;
-                pathToSet.fillColor = null;
-                pathToSet.strokeWidth = myP.brushStrokeWidth;
-            }
+        //     function setProps(pathToSet, setColor) {
+        //         pathToSet.strokeColor = setColor;
+        //         pathToSet.fillColor = null;
+        //         pathToSet.strokeWidth = myP.brushStrokeWidth;
+        //     }
 
-        }
+        // }
 
         function getNoiseVal() {
             xinX += myP.brushNoiseFreq/100;
@@ -1218,9 +1219,8 @@ function generateSprite(myP) {
     // Depth map
     if (myP.bgType == 12) {
         // The effect code is within DrawPath function
-        console.log('depthmap');
         
-        var brush = new Path();
+        // var brush = new Path();
     }
 
     // Gradient
@@ -1300,7 +1300,8 @@ function generateSprite(myP) {
 
     //Group to hold the whole sprite
     var group = new Group({
-        children: [brush, brush2, recB, recC, lines, lightPath, shadowPath],
+        // children: [brush, brush2, recB, recC, lines, lightPath, shadowPath],
+        children: [brush, brush2, recB, recC, lines],
         name: 'sprite'
         // pivot: myPivot
     });
@@ -1587,7 +1588,7 @@ function drawPath(sprite, path) {
     }
 
     var sCopy;
-    // console.log(sprite);
+    // console.log(steps);
     for (k=0; k<steps; k++) {
         
         //First let's take a clone that we can manipulate with effects
@@ -1779,6 +1780,7 @@ function drawPath(sprite, path) {
             }
 
             sCopy.children[0] = brush;
+            brush.remove();
             sCopy.pivot = [myP.size/2, myP.size/2];
         }
 
@@ -1984,26 +1986,35 @@ function drawPath(sprite, path) {
             }
         }
         
-        // Line shadow effect
+        // Line shadow effect 
         if (myP.lineShadow > 0) {
+            // Take copy of the sprite
             var shaCopy = sCopy.clone();
+            // Put brush path into a variable
             var shaPath = shaCopy.children[0];
+            // Calculate how large percentage of the whole length of the brush path is a shadow
             var shaSize = shaPath.length / 100 * myP.lineShadow;
+            // If we use normal drawing mode, shadow elements are put in between sprites
             if (myP.lineShadowBooleanOn == 0) {
                 drawing.addChild(shaCopy);
             }
+            // If boolean mode is on, we can put shadows into their own layer since they are cut to size
             if (myP.lineShadowBooleanOn == 1) {
                 shadowLayer.addChild(shaCopy);
             }
+            // Presentation attributes of the shadow (TO DO)
             shaCopy.visible = true;
-            shaCopy.strokeColor = 'red';
-            shaCopy.strokeWidth = 1;     
+            shaCopy.strokeColor = myP.lineShadowColor;
+            shaCopy.strokeWidth = myP.lineShadowWidth;     
             shaCopy.fillColor = null;
 
+            // Calculate the mid point on brush path where shadow starts
             var shaMiddle = shaPath.getOffsetOf(shaPath.bounds.topCenter) + shaPath.length / 100 * myP.lineShadowOffset;
+            // Calculate left + right points where shadow reaches
             var leftCut = shaPath.getLocationAt(shaMiddle - shaSize);
             var rightCut = shaPath.getLocationAt(shaMiddle + shaSize);
 
+            // Cut sprite at left + right points
             var newp;
             newp = shaPath.splitAt(leftCut);
             newp = shaPath.splitAt(rightCut);
@@ -2012,45 +2023,56 @@ function drawPath(sprite, path) {
                 newp.opacity = 0; // do not destroy the path in order to keep pivot in place
             }
 
+            // Move shadow according to user input
             shaCopy.position += new Point(0, myP.lineShadowDistance);
             
             
         }
     }
 
+    // Line shadow effect boolean (this is a slow method, meant for creating svg material usable on a pen plotter)
     if (myP.lineShadowBooleanOn == 1) {
-        console.log('NYt unitetaan!');
-        console.log(shadowLayer);
 
-        // for each sprite
-        // take a clone of topmost brush
-        //var b = drawing.children[x].children[0].clone();
+        // create a dummy path
         var b = new Path({
-            name: 'brusheli'
+            name: 'unitedSprites'
         });
-        // add that clone to shadow layer
+
+        // add dummy to shadow layer
         shadowLayer.addChild(b);
 
-        for (x = parseInt(steps); x > 0; x-- ) {
+        // console.log('steps: ' + steps);
+        // console.log(drawing.children);
+
+        // Loop through worm sprites from end to begin
+        for (x = Math.floor(steps); x > 0; x-- ) {
+
             shadowLayer.activate();
 
-            // take a clone of next brush backwards
+            // take a clone of a current sprite
             var d = drawing.children[x].children[0].clone();
             //add that clone to shadow layer
             shadowLayer.addChild(d);
-            // unite brushed that are already united + next brush sprite
+
+            // unite brushes that are already united + next brush sprite
             b = b.unite(d, {insert: false});
+            // remove temporary clone
             d.remove();
-            //get shadow
+
+            // get shadow that is one step behind united sprites
             var mySha = shadowLayer.children[x-1].children[0];
-            //remove that opacity 0 part of the shadow (needed just for pivoting)
+
+            // remove opacity 0 part of the shadow (needed just for pivot point positioning)
             shadowLayer.children[x-1].children[1].remove();
+
+            // subtract from shadow line all sprites that are on top of it
             var shaBool = mySha.subtract(b, {trace: false});
+
+            // remove shadow line, since subracting created a new result path
             mySha.remove();
-            //shaBool.selected = true;
-            shaBool.strokeColor = 'orange';
-            // b.remove();
+            // shaBool.strokeColor = 'orange';
         }
+        // When boolean operation is done, remove united sprites
         b.remove();
     }
 
