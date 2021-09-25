@@ -13,7 +13,7 @@ canvas[resize] {
     height: 100vh;
 }
 
-#export-button, #switch, #log-params, #debug {
+#export-button, #switch, #log-params, #debug, #export-simple, #export-simple-amount {
 	position:fixed;
 	bottom:0;
 	right:0;
@@ -32,6 +32,13 @@ canvas[resize] {
 }
 #debug {
 	right: 200px;
+}
+#export-simple {
+	right: 300px;
+}
+#export-simple-amount {
+	right: 420px;
+	width: 70px;
 }
 
 #savePresets {
@@ -234,6 +241,10 @@ canvas[resize] {
 
 input[type='color'] {
 	height: 20px;
+}
+
+input[type='number'] {
+	width: 30px;
 }
 
 .ui-generic {

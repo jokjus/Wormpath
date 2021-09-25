@@ -44,6 +44,8 @@ html
     button#export-button Export as SVG
     button#log-params Log params
     button#debug Debug
+    button#export-simple Export simplified
+    input#export-simple-amount(type='number' value='10')
     
 
     #ui-tabs
@@ -231,7 +233,8 @@ html
                     {label: 'Default', value: 0},
                     {label: 'Unicorn', value: 1},
                     {label: 'None', value: 2},
-                    {label: 'Gradient', value: 3, col: 'brushGradient'}], 
+                    {label: 'Gradient', value: 3, col: 'brushGradient'},
+                    {label: 'Random', value: 4, col: 'brushRandomColor'}], 
                     'collapsibleTrigger')
 
             .collapseui#brushGradientCollapsible(style='display:none')
@@ -243,6 +246,16 @@ html
                 ])           
                 +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
 
+            .collapseui#brushRandomColorCollapsible(style='display:none')
+                - var n = 1;
+                while n < 7
+                    -var lab = 'Color ' + n
+                    -var id = 'brushRandomColor' + n
+                    -var biasId = 'brushRandomColorBias' + n
+                    +input('color', lab, id)
+                    +input('number', 'Bias', biasId, 0, 100, 10)
+                    -n++
+               
             +select('Cap:', 'cap', [
                     {label: 'Filled', value: 0},
                     {label: 'Open', value: 1},
@@ -254,11 +267,26 @@ html
    
             +select('Brush effect:', 'bgEffect', [
                     {label: 'None', value: 0},
-                    {label: 'Bulp', value: 1, col: 'bulb'}                    
+                    {label: 'Bulp', value: 1, col: 'bulb'},
+                    {label: 'Pattern', value: 2, col: 'pattern'}                    
                 ], 'collapsibleTrigger')
             div.collapseui#bulbCollapsible(style='display:none')
                 +input('range', 'Bulb amp:', 'bulbAmp', 0, 100)
                 +input('range', 'Bulb freq:', 'bulbFreq', 0, 100)
+            div.collapseui#patternCollapsible(style='display:none')
+                +select('Pattern:', 'patternType', [
+                        {label: 'Urdy', value: 0},
+                        {label: 'Fir-twigged', value: 1},
+                        {label: 'Cross', value: 2},
+                        {label: 'Dovetailed', value: 3},
+                        {label: 'Nebuly', value: 4},
+                        {label: 'Bastionné', value: 5},
+                        {label: 'Indented pommetty', value: 6},
+                        {label: 'Rayonny', value: 7},
+                    ])
+                +input('range', 'Strength:', 'patternStrength', 0, 100)
+                +input('range', 'Width:', 'patternWidth', 0, 100)
+                +input('range', 'Density:', 'patternDensity', 0, 100)
         
         div.ui-section#lines-section
             +input('range', 'Lines:', 'lines', 0, 30)
@@ -413,3 +441,4 @@ html
                 //- .anim-control
                 //-     label Rotation increment
                 //-     input#aRotationInc(type='number' min='0' max='360' value='')
+    script(type='text/paperscript' canvas='canvas' src='misc/filesaver/FileSaver.js')

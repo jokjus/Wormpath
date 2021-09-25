@@ -10,6 +10,7 @@ var wpProjects = [];
 var presets;
 var origPresets;
 
+
 if (localStorage.getItem("projects") !== null) {  // if localstorage item exists
     wpProjects = JSON.parse(localStorage.getItem('projects'));
     for (k = 0; k<wpProjects.length; k++) {
@@ -620,6 +621,10 @@ var p = {
     bgEffect: 0,
     bulbAmp: 15,
     bulbFreq: 50,
+    patternType: 0,
+    patternStrength: 3,
+    patternWidth: 10,
+    patternDensity: 10,
     textOn: 0,
     textSize: 50,
     textColor: new Color(1,1,1),
@@ -647,6 +652,18 @@ var p = {
     brushGradientTransparency: 0,
     brushGradientType: 1,
     brushGradientBalance: 50,
+    brushRandomColor1: new Color('#4e908b'),
+    brushRandomColor2: new Color('#568baa'),
+    brushRandomColor3: new Color('#d98a19'),
+    brushRandomColor4: new Color('#1e4181'),
+    brushRandomColor5: new Color('#741852'),
+    brushRandomColor6: new Color('#38123a'),
+    brushRandomColorBias1: 10,
+    brushRandomColorBias2: 10,
+    brushRandomColorBias3: 10,
+    brushRandomColorBias4: 10,
+    brushRandomColorBias5: 10,
+    brushRandomColorBias6: 10,
     brushCrossWidth: 10,
     brushBubbleSize: 10,
     brushBubbleAmount: 4,
@@ -752,6 +769,85 @@ var wiggleT = 0;
 var xinX = 1, yinX = 10;
 var brushCircusPalette = [];
 
+var patterns = [
+    {
+      name: 'Laine',
+      offs: [0, 50, 0],
+      dists: [0, 50, 100],
+      handles: [
+        [['left', 0], ['right', 25]],
+        [['left', 25], ['right', 25]],
+        [['left', 25], ['right', 0]]
+      ]
+    },
+    {
+      name: 'Turkiskoro',
+      offs: [0, 20, 30,  20,   0, -20, -30, -20],
+      dists: [0,  0, 25, 50, 50, 50, 75, 100]
+    },
+    {
+      name: 'Havukoro',
+      offs:   [0, 20, 30, 50,  40, 60, 60, 40, 50, 30, 20,  0, -20, -30, -50, -40, -60, -60, -40, -50, -30, -20,  0],
+      dists: [25, 25,  0,   0, 25, 25, 50, 50, 75, 75, 50, 50,  50,  25,  25,  50,  50,  75,  75, 100, 100,  75, 75]
+    },
+    {
+      name: 'Ristikoro',
+      offs:  [ -25, 0,  0, 25,  25,  50, 50,  25,  25,  0,   0,  -25, -25, -50, -50,   -25,  -25],
+      dists: [ 25, 25,  0,  0,  25,  25,  50,  50, 75,  75,  50,  50,  75,  75,  100, 100,  125]
+    },
+    {
+      name: 'Lohenpyrstö',
+      offs:  [ six,  -six,  -six,   six,   six],
+      dists: [ six,     0, 4*six, 3*six, 7*six ]
+    },
+    {
+      name: 'Pilvikoro',
+      offs:    [-40, -20,    20,  40,   20,    -20, -40],
+      dists:   [0,  37.5,  12.5,  50,  87.5,  62.5, 100 ],
+      handles: [[['left', 10], ['right', 10]], [['down', 10], ['up', 10]], [['down', 10], ['up', 10]], [['left', 10], ['right', 10]], [['up', 10], ['down', 10]], [['up', 10], ['down', 10]], [['right', 10], ['left', 10]] ] 
+    },
+    {
+      name: 'Linnakekoro',
+      offs:    [-40, -20,    20,  40,   20,    -20, -40],
+      dists:   [0,  37.5,  12.5,  50,  87.5,  62.5, 100 ]
+    },
+    {
+      name: 'Kuulalärkikoro',
+      offs:    [ -4*six, -3*six, -2*six, 2*six, 3*six, 4*six, 3*six, 2*six, -2*six, -3*six, -4*six],
+      dists:   [  0,     six, 0.5*six, 2.5*six, 2*six, 3*six, 4*six,  3.5*six,  5.5*six,  5*six, 6*six ],
+      handles: [[['left', 10], ['right', 10]], 
+      [['down', 10], ['up', 10]], 
+      [['right', 0], ['up', 0]], 
+      [['down', 0], ['left', 0]], 
+      [['down', 10], ['up', 10]], 
+      [['left', 10], ['right', 10]], 
+      [['up', 10], ['down', 10]], 
+      [['right', 0], ['up', 0]], 
+      [['up', 0], ['right', 0]], 
+      [['up', 10], ['down', 10]], 
+      [['left', 10], ['right', 10]] ] 
+    },
+    {
+      name: 'Liekki',
+      offs:    [0, 30, 80, 120, 70, 40,   0],
+      dists:   [20, 0, 20,  0, 65, 60, 100],
+      handles:  [
+        [['up', 0],['up', 0]],
+        [['down', 20],['up', 20]],
+        [['down', 15],['up', 20]],
+        [['up', 0],['up', 0]],
+        [['up', 30],['down', 10]],
+        [['up', 10],['down', 20]],
+        [['up', 0],['up', 0]]
+      ]
+    }
+	
+
+    
+  ]
+
+var six = 100/6;
+
 // Load SVG from a file
 var canvas = document.getElementById('canvas');
 var scope = paper.setup(canvas);
@@ -779,7 +875,6 @@ project.importSVG(url, function(item) {
     //let's ungroup imported SVG for easier access. Now paths are bare at words layer.
     wordsImport.parent.insertChildren(wordsImport.index,  wordsImport.removeChildren());
     wordsImport.remove();
-
 
     // Create an array where there's one set of all properties for every path in scene
     // This will be the main source of properties. There are alternative deep cloning methods commented.
@@ -809,6 +904,8 @@ function generateSprite(myP) {
 
     var brushFill = myP.bgColor;
     brushFill.alpha = myP.bgOpacity / 100;
+
+
 
     // Custom brush type, uploaded from SVG file
     if (myP.bgType == 6) {
@@ -1141,6 +1238,9 @@ function generateSprite(myP) {
 
         // }
 
+
+        
+
         function getNoiseVal() {
             xinX += myP.brushNoiseFreq/100;
             yinX += myP.brushNoiseFreq/100; 
@@ -1214,6 +1314,17 @@ function generateSprite(myP) {
             k++;
             if (k > 5) { k = 1 };
         }
+    }
+
+    if (parseInt(myP.bgEffect) == 2) {
+        var brush = pattern(brush, myP.patternType, myP.patternStrength, myP.patternWidth, myP.patternDensity, false)
+
+        var strC = myP.brushStrokeColor;
+        strC.alpha = myP.lineOpacity/100;
+        brush.strokeColor = bc;
+        brush.blendMode = myP.brushBlend;
+        brush.fillColor = brushFill;
+        brush.strokeWidth = myP.brushStrokeWidth;
     }
 
     // Depth map
@@ -1293,6 +1404,8 @@ function generateSprite(myP) {
         brush.opacity = 0;
     }
 
+    
+
     //Group for all lines
     var lines = new Group({
         name: 'lines'
@@ -1305,6 +1418,7 @@ function generateSprite(myP) {
         name: 'sprite'
         // pivot: myPivot
     });
+    console.log(group)
 
 
     // Step for each line
@@ -1389,6 +1503,8 @@ function generateSprite(myP) {
         group.insertChild(1, mask);
         mask.clipMask = true;
     }
+
+   
 
     group.visible = false;
 
@@ -1873,6 +1989,31 @@ function drawPath(sprite, path) {
             }
             hue += .1;
         }
+
+        // Random background color style
+        if (myP.bgStyle == 4) {
+            var totalBias = 0;
+            var biases = [0];
+
+            for (b = 1; b < 7; b++) {
+                var myBias = myP['brushRandomColorBias' + b];
+                totalBias += myBias;
+                biases.push(totalBias);
+            }
+
+            var lot = getRandomInt(totalBias) + 1;
+
+            for (c = 0; c < 7; c++) {
+                if (between(lot, biases[c], biases[c+1])) {
+                    myColorNumber = c + 1;
+                    break;
+                }
+            }
+            
+            var myCol = eval('myP.brushRandomColor' + myColorNumber);
+            sCopy.children[0].fillColor = myCol;
+        }
+        
         
         //Unicorn Line style
         if (myP.lineStyle == 0) {
@@ -2366,6 +2507,11 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
+function between(x, min, max) {
+    return x >= min && x <= max;
+}
+  
+
 function sinBetween(min, max, t) {
     return ((max - min) * Math.sin(t) + max + min) / 2.
 }
@@ -2374,12 +2520,43 @@ function allEqual(arr) {
     return new Set(arr).size == 1;
   }
 
-$('#export-button').click(function() {
-    var svg = project.exportSVG({ asString: true });
-    downloadDataUri({
-        data: 'data:image/svg+xml;base64,' + btoa(svg),
-        filename: 'export.svg'
-    });
+// Export SVG ========================================================
+
+var  exportButton = document.getElementById('export-button');
+
+exportButton.addEventListener("click", function(e) {
+	var svg = project.exportSVG({asString: true});
+	var blob = new Blob([svg], {type: "image/svg+xml;charset=utf-8"});
+	saveAs(blob, 'image.svg');
+
+}, false);
+
+
+
+// $('#export-button').click(function() {
+//     var svg = project.exportSVG({ asString: true });
+//     downloadDataUri({
+//         data: 'data:image/svg+xml;base64,' + btoa(svg),
+//         filename: 'export.svg'
+//     });
+// });
+
+$('#export-simple').click(function() {
+    var mypaths = drawing.children;
+    var simpAmount = document.getElementById('export-simple-amount').value / 10000;
+    for (p=0; p<mypaths.length; p++) {
+        mypaths[p].children[0].simplify(simpAmount);
+    }
+
+    var svg = project.exportSVG({asString: true});
+	var blob = new Blob([svg], {type: "image/svg+xml;charset=utf-8"});
+	saveAs(blob, 'image.svg');
+
+    // var svg = project.exportSVG({ asString: true });
+    // downloadDataUri({
+    //     data: 'data:image/svg+xml;base64,' + btoa(svg),
+    //     filename: 'export.svg'
+    // });
 });
 
 // Console log debug information
@@ -2787,3 +2964,97 @@ $('#brushCircusGenerate').click(function(){
         return newCol;
     }
 })
+
+
+
+// Patterns ========================================================
+
+function pattern(path, patternNo, patternStrength, patternWidth, patternDensity, randomize) {
+    
+	
+    var newL = new Path({
+      strokeJoin: 'bevel'
+    });
+
+    var l = path.length;
+    var pats = parseInt(l / patternWidth);     // how many patterns fit onto the path?   
+    var myWidth = l / pats;               // The actual width of a one pattern that fits exactly on path length
+    var offs = patterns[patternNo].offs;  // Normal offsets from the path of this pattern
+    var dists = patterns[patternNo].dists;// Distances along the path of this pattern
+    var handles = patterns[patternNo].handles;// handle definitions for each segment (can be left empty)
+    
+	// console.log('l: ' + l + ' pats: ' + pats + ' myWidth: ' + myWidth);
+
+    for (var p = 0; p < pats; p++) {
+		var r = Math.random()
+		if (r <  patternDensity && p > 1 && p < pats - 1) {
+			if (randomize) {
+				var myPat = patterns[Math.floor(Math.random()*patterns.length)];
+
+				offs = myPat.offs
+				dists = myPat.dists
+				handles = myPat.handles
+			}
+
+			for (var n = 0; n < offs.length; n++) {
+				var h = null;
+				if (handles) h = handles[n];     
+				var newPoint = offset(p + (dists[n] / 100), path, offs[n] * patternStrength / 10, myWidth, h);
+				newL.add(newPoint);
+			}
+		}
+		else {
+			var newPoint = path.getPointAt(p * myWidth)
+			newL.add(newPoint)
+		}
+    }
+	newL.add(path.getPointAt(path.length))
+
+	return newL;
+
+}
+
+  function offset(p, path, value, myWidth, handles) {
+    var l1 = p * myWidth;
+    var p1 = path.getPointAt(l1);
+    var n1 = normal(path, l1, value);
+    var p1 = p1 + n1;
+    if (handles) {
+      
+      
+      var t1 = path.getTangentAt(l1);
+
+      if (t1 != null) {
+        var hI = new Point({
+          length: handles[0][1] * p.patternStrength / 10, // 5 = strength
+          angle: t1.angle
+        });
+
+        if (handles[0][0] == 'left') hI.angle = t1.angle - 180;
+        if (handles[0][0] == 'right') hI.angle = t1.angle - 180;
+        if (handles[0][0] == 'up') hI.angle = t1.angle - 90;
+        if (handles[0][0] == 'down') hI.angle = t1.angle + 90;
+        
+        var hO = new Point({
+          length: handles[1][1] * p.patternStrength / 10, // 5 = strength
+          angle: t1.angle
+        });
+
+        if (handles[1][0] == 'left') hO.angle = t1.angle;
+        if (handles[1][0] == 'right') hO.angle = t1.angle;
+        if (handles[1][0] == 'up') hO.angle = t1.angle - 90;
+        if (handles[1][0] == 'down') hO.angle = t1.angle + 90;
+        
+        var myS = new Segment(p1, hI, hO);
+        return myS;
+      }
+    }
+
+    return p1;
+  }
+  
+  
+  function normal(path, loc, value) {
+    var vector = path.getNormalAt(loc) * value;
+    return vector;
+  }
