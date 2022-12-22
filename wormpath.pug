@@ -60,6 +60,7 @@ html
         .tab(data-target="zigzag") Zigzag
         .tab(data-target="spiral") Spiral
         .tab(data-target="hollow") Hollow
+        .tab(data-target="stripes") Stripes
         .tab(data-target="anim") Animation
 
         .brand Wormpath 2021 by 
@@ -85,7 +86,17 @@ html
                 button#savePresets Save preset
             +section("Path")    
             .ui-generic
-                button#reversePath Reverse path
+                button#reversePath Reverse
+            .ui-generic
+                button#backwardsPath Back    
+            .ui-generic
+                button#forwardPath Front                    
+            .ui-generic
+                button#deletePath Del
+            .ui-generic
+                button#smoothPath Smooth
+            .ui-generic
+                button#randomPath Random
             +section('Project')
             .projectSaving.ui-generic
                 select#projectSelector
@@ -247,6 +258,8 @@ html
                 +input('range', 'Balance:', 'brushGradientBalance', 0, 100)
 
             .collapseui#brushRandomColorCollapsible(style='display:none')
+                .ui-generic
+                    button#refreshRandomColor Refresh
                 - var n = 1;
                 while n < 7
                     -var lab = 'Color ' + n
@@ -263,7 +276,8 @@ html
                     {label: 'Vertical', value: 3},
                     {label: 'Pointed', value: 4},
                     {label: 'Dome', value: 5}
-                ])                    
+                ])    
+            +input('checkbox', 'Both ends', 'capBothEnds', 0, 0, 0)                
    
             +select('Brush effect:', 'bgEffect', [
                     {label: 'None', value: 0},
@@ -371,7 +385,13 @@ html
         .ui-section#zigzag
             +input('checkbox', 'Zigzag:', 'pathZigZagOn', 0, 0, 0)
             +input('range', 'Zigzag amp:', 'pathZigzagAmp', 0, 100)    
-            +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)   
+            +input('range', 'Zigzag freq:', 'pathZigzagFreq', 0, 100)
+
+        .ui-section#stripes  
+            +input('checkbox', 'Stripes:', 'pathStripesOn', 0, 0, 0)
+            +input('range', 'Stripe count:', 'pathStripesCount', 0, 100) 
+            +input('color', 'Stripe color', 'pathStripesColor')   
+            +input('range', 'Stripe width:', 'pathStripesWidth', 0, 40)
 
         .ui-section#spiral
             +input('checkbox', 'Spiral:', 'pathSpiralOn', 0, 0, 0)

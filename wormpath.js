@@ -23,7 +23,7 @@ populateProjectMenu();
 
 function createProjectObject() {
     var projectName = $('#projectName').val();
-    var tempMaster = Object.assign({}, master);
+    var tempMaster = Object.assign([], master);
     var tempWords = words.exportSVG({ asString: true });
 
     var newProject = {
@@ -287,6 +287,7 @@ function allHex2RGB(obj) {
 
 // Populate UI menu for selecting a preset     
 function populatePresetMenu() {
+    addPresetMenuItem('<Choose:>', 0)
     for (i = 0; i < presets.length; i++) {    
         addPresetMenuItem(presets[i]['name'], i);           
     }
@@ -550,6 +551,7 @@ function easingAnims(min, max, easing='easeInOutElasticAnim', phase=animFrame/50
 }
 
 function flatForward(min, phase=animMasterFrame/50) {
+    console.log('min: ' + min)
     phase = animMasterFrame / document.getElementById('aSpeed').value;
     return min + phase;
 }
@@ -611,6 +613,7 @@ var p = {
     wavePhase: 10,
     shadow: 0,
     cap: 2,
+    capBothEnds: 0,
     twist: 0,
     lineColor: new Color(1,1,1),
     lineOpacity: 100,
@@ -727,6 +730,10 @@ var p = {
     hollowOn: 0,
     hollowSize: 50,
     hollowType: 0,
+    pathStripesOn: 0,
+    pathStripesCount: 10,
+    pathStripesColor: new Color(0, 0, 0),
+    pathStripesWidth: 1,
     aRotationMin: 20,
     aRotationMax: 20,
     aBrushSizeMin: 50,
@@ -768,6 +775,8 @@ var yinW = p.wavePhase;
 var wiggleT = 0;
 var xinX = 1, yinX = 10;
 var brushCircusPalette = [];
+var brushRandomColors = [1,1];
+var brushRandomColorsLocked = false;
 
 var patterns = [
     {
@@ -1316,6 +1325,7 @@ function generateSprite(myP) {
         }
     }
 
+    // Pattern brush effect
     if (parseInt(myP.bgEffect) == 2) {
         var brush = pattern(brush, myP.patternType, myP.patternStrength, myP.patternWidth, myP.patternDensity, false)
 
@@ -1360,7 +1370,7 @@ function generateSprite(myP) {
     // Imagepainter
     if (myP.bgType == 10) {
         // The effect code is within DrawPath function
-        console.log('imageBrush');
+        // console.log('imageBrush');
         
         var brush = new Path();
     }
@@ -1418,7 +1428,6 @@ function generateSprite(myP) {
         name: 'sprite'
         // pivot: myPivot
     });
-    console.log(group)
 
 
     // Step for each line
@@ -1697,6 +1706,8 @@ function drawPath(sprite, path) {
     var noiseAngularCounter = 0;
     var noiseScaleAng;
     var depthMapCounter = 0;
+    var stripes = []
+    var stripeDensity = 10
 
     var points = [];
     for (k=0; k<steps*myP.pathCompleteness/100; k++) {
@@ -1713,6 +1724,7 @@ function drawPath(sprite, path) {
         sCopy.visible = true;
         lineGroup = sCopy.lastChild;
         
+
 
         // Spike effect 
         if (myP.lineStyle == 8) {
@@ -1992,26 +2004,36 @@ function drawPath(sprite, path) {
 
         // Random background color style
         if (myP.bgStyle == 4) {
-            var totalBias = 0;
-            var biases = [0];
+            var myColorNumber;
 
-            for (b = 1; b < 7; b++) {
-                var myBias = myP['brushRandomColorBias' + b];
-                totalBias += myBias;
-                biases.push(totalBias);
+            if (brushRandomColorsLocked == true && brushRandomColors.length > 0) {
+                myColorNumber = brushRandomColors[k];
             }
 
-            var lot = getRandomInt(totalBias) + 1;
+            else {
+                var totalBias = 0;
+                var biases = [0];
 
-            for (c = 0; c < 7; c++) {
-                if (between(lot, biases[c], biases[c+1])) {
-                    myColorNumber = c + 1;
-                    break;
+                for (b = 1; b < 7; b++) {
+                    var myBias = myP['brushRandomColorBias' + b];
+                    totalBias += myBias;
+                    biases.push(totalBias);
+                }
+
+                var lot = getRandomInt(totalBias) + 1;
+
+                for (c = 0; c < 7; c++) {
+                    if (between(lot, biases[c], biases[c+1])) {
+                        myColorNumber = c + 1;
+                        brushRandomColors.push(myColorNumber);
+                        break;
+                    }
                 }
             }
             
             var myCol = eval('myP.brushRandomColor' + myColorNumber);
             sCopy.children[0].fillColor = myCol;
+            // console.log(brushRandomColors);
         }
         
         
@@ -2125,6 +2147,15 @@ function drawPath(sprite, path) {
                 var myScale = 1 - ( 1 / (1.2 ** capSteps) * (1.2 ** s));
                 sCopy.scale(myScale);
             }
+
+            if(capBothEnds) {
+                if (k < capSteps) {
+                    // var s = Math.abs((steps-k)- capSteps);
+                    var s = capSteps - k
+                    var myScale = 1 - ( 1 / (1.2 ** capSteps) * (1.2 ** s));
+                    sCopy.scale(myScale);
+                } 
+            }
         }
         
         // Line shadow effect 
@@ -2169,7 +2200,20 @@ function drawPath(sprite, path) {
             
             
         }
+
+        // Stripes along the path effect
+        if (myP.pathStripesOn == 1 && sCopy != undefined) {
+
+            var stripedPath = sCopy.children[0]
+            
+            for (var i = 0; i < myP.pathStripesCount; i++) {
+                var stripePoint = stripedPath.getPointAt(stripedPath.length / myP.pathStripesCount * i)
+                stripes.push(stripePoint)
+            }
+        }
     }
+
+    brushRandomColorsLocked = true;
 
     // Line shadow effect boolean (this is a slow method, meant for creating svg material usable on a pen plotter)
     if (myP.lineShadowBooleanOn == 1) {
@@ -2182,9 +2226,6 @@ function drawPath(sprite, path) {
         // add dummy to shadow layer
         shadowLayer.addChild(b);
 
-        // console.log('steps: ' + steps);
-        // console.log(drawing.children);
-
         // Loop through worm sprites from end to begin
         for (x = Math.floor(steps); x > 0; x-- ) {
 
@@ -2192,11 +2233,13 @@ function drawPath(sprite, path) {
 
             // take a clone of a current sprite
             var d = drawing.children[x].children[0].clone();
+
             //add that clone to shadow layer
             shadowLayer.addChild(d);
 
             // unite brushes that are already united + next brush sprite
             b = b.unite(d, {insert: false});
+            
             // remove temporary clone
             d.remove();
 
@@ -2211,7 +2254,6 @@ function drawPath(sprite, path) {
 
             // remove shadow line, since subracting created a new result path
             mySha.remove();
-            // shaBool.strokeColor = 'orange';
         }
         // When boolean operation is done, remove united sprites
         b.remove();
@@ -2247,6 +2289,25 @@ function drawPath(sprite, path) {
                 lineGroup.children[i].remove();
             }
         }
+    }
+
+    //debug only
+    if (myP.pathStripesOn == 1) {
+
+        for (var s = 0; s < myP.pathStripesCount; s++) {
+
+            var stripe = new Path({
+                strokeColor: myP.pathStripesColor,
+                strokeWidth: myP.pathStripesWidth
+            })
+
+            for (var p = 0; p < steps; p++) {
+                stripe.add(stripes[p * myP.pathStripesCount + s])
+            }
+
+            stripe.smooth()
+        }
+
     }
 }
 
@@ -2319,9 +2380,10 @@ function updateUI() {
 
             allEqual(compareProps) ? updateUIParam(prop, compareProps[0]) : updateUIParam(prop, 0, 'mixed');
 
-        }
-        
+        }        
     }
+
+    document.getElementById('preset').value = 0
 }
 
 // Update all selected paths with params given in function parameters 
@@ -2533,14 +2595,6 @@ exportButton.addEventListener("click", function(e) {
 
 
 
-// $('#export-button').click(function() {
-//     var svg = project.exportSVG({ asString: true });
-//     downloadDataUri({
-//         data: 'data:image/svg+xml;base64,' + btoa(svg),
-//         filename: 'export.svg'
-//     });
-// });
-
 $('#export-simple').click(function() {
     var mypaths = drawing.children;
     var simpAmount = document.getElementById('export-simple-amount').value / 10000;
@@ -2552,11 +2606,6 @@ $('#export-simple').click(function() {
 	var blob = new Blob([svg], {type: "image/svg+xml;charset=utf-8"});
 	saveAs(blob, 'image.svg');
 
-    // var svg = project.exportSVG({ asString: true });
-    // downloadDataUri({
-    //     data: 'data:image/svg+xml;base64,' + btoa(svg),
-    //     filename: 'export.svg'
-    // });
 });
 
 // Console log debug information
@@ -2571,6 +2620,8 @@ $('#log-params').click(function() {
     console.log(selectedPaths);
     console.log('projects:');
     console.log(wpProjects);
+    console.log('myWords:');
+    console.log(myWords);
 });
 
 
@@ -2738,43 +2789,50 @@ function easeInQuart(x) {
 
 
 var dragging = false;
+var segment, path, handle;
 
 function onMouseUp(event) {
-    // If user clicks on the background, clear the selection
-    if (event.item.layer.name == 'bg') {
-        myWords.selected = false;
-        selectedPaths.length = 0;
-        updateUI();
-        // updateSelectedPathsParams();    
-        
-        $('#ui-row').addClass('inactive');
-        $('.collapseui').hide(); //hide other collapsibles
-
-    }
-    
-    // If user clicks on any path of the drawing
-    if (event.item.layer.name == 'myWords') {
-        // If path is already selected, unselect it
-        if (selectedPaths.includes(event.item.index) && !event.modifiers.shift) {
-           selectedPaths = selectedPaths.filter(e => e !== event.item.index)
-            event.item.selected = false;
-        }
-        //otherwise add it to selection
-        else {
-            selectedPaths.push(event.item.index);
-            event.item.selected = true;
-            $('#ui-row').removeClass('inactive');
-        }
-        showSelections();
-        updateUI();
-    }
 
     if (dragging) {
         pathEffectsEnabled = false;
         updateWords();
-        renderAllPaths();        
+        renderAllPaths();
+        showSelection()   
         pathEffectsEnabled = true;
     }
+    else {
+        if (!event.modifiers.shift && !event.modifiers.alt && !Key.isDown('c') && !Key.isDown('x')) {
+
+            // If user clicks on the background, clear the selection
+            if (event.item.layer.name !== 'myWords') {
+                myWords.fullySelected = false;
+                selectedPaths.length = 0;
+                updateUI();
+                
+                $('#ui-row').addClass('inactive');
+                $('.collapseui').hide(); //hide other collapsibles
+
+            }
+            
+            // If user clicks on any path of the drawing
+            if (event.item.layer.name == 'myWords' ) {        
+                // If path is already selected, unselect it
+                if (selectedPaths.includes(event.item.index)) {
+                    selectedPaths = selectedPaths.filter(e => e !== event.item.index)
+                    event.item.selected = false;
+                }
+                //otherwise add it to selection
+                else {
+                    selectedPaths.push(event.item.index);
+                    event.item.fullySelected = true;
+                    $('#ui-row').removeClass('inactive');
+                }
+                showSelection();
+                updateUI();
+            }
+        }
+    }
+    
     dragging = false;
     
 }
@@ -2816,53 +2874,154 @@ var hitOptions = {
 	segments: true,
 	stroke: true,
 	fill: true,
+    handles: true,
 	tolerance: 5
 };
 
-var segment, path;
+
 var movePath = false;
 
 function onMouseDown(event) {
-	segment = path = null;
+	segment = path = handle = null;
 	var hitResult = project.hitTest(event.point, hitOptions);
-	if (!hitResult)
-		return;
 
-	if (hitResult) {
-        path = hitResult.item;
+	if (!hitResult) {        
+        return;
+    }
+    
+	if (hitResult) {        
+        // If clicked on empty area with ctrl pressed, start drawing a new path and select it
+        if (event.modifiers.alt) {
+
+            if (selectedPaths.length == 0) {
+                master.push(Object.assign({}, p))   //get a copy of default params
+                newPath = new Path({                //initialize new path
+                    strokeWidth: 15,
+                    strokeColor: 'black'
+                })                  
+                newPath.add(event.point)            //add mouse location to new path
+                myWords.addChild(newPath)           //add new path to myWords temp copy of all paths in the project
+                selectedPaths.push(newPath.index)   //select created path
+                updateWords()                       //update master of all paths as a clone of myWords
+                renderAllPaths()                    //draw all paths, including the new one (one point isn't visible though)
+                showSelection()                    //show selected paths
+                updateUI()
+
+                // return
+            }
+            else if (selectedPaths.length == 1) {
+                myWords.children[selectedPaths[0]].add(event.point) 
+                updateWords()
+                renderAllPaths()
+                showSelection()
+                updateUI()
+                // return
+
+            } else {
+                return
+            }
+            
+            $('#ui-row').removeClass('inactive');
+        }
+
+        // Modify bezier handles
+        if (hitResult.type == 'handle-in') {
+            handle = hitResult.segment.handleIn;
+        }
+
+        if (hitResult.type == 'handle-out') {
+            handle = hitResult.segment.handleOut;
+        }
+        
+
+        // if (event.item.layer.name == 'myWords') {            
+            
         // If clicked on a corner point
-		if (hitResult.type == 'segment') {
+        if (hitResult.type == 'segment') {
+
             segment = hitResult.segment;
             // Remove corner point by simultanously pressing x
             if (Key.isDown('x')) {
-                segment.remove();
+                segment.remove()
+                updateWords()
+                renderAllPaths()
+                showSelection()
             }
-         // If clicked a already selected path with shift pressed – add a new control point
-		} else if (hitResult.type == 'stroke' && selectedPaths.includes(path.index) && event.modifiers.shift) {
-            var location = hitResult.location;
-            segment = path.insert(location.index + 1, event.point);            
-            path.smooth();
-		}
+
+            if (Key.isDown('c')) {
+                var tan = segment.location.tangent
+                segment.handleIn -= tan * 20
+                segment.handleOut += tan * 20
+                updateWords()
+                renderAllPaths()
+                showSelection()
+            }
+
+            if (Key.isDown('s')) {
+                if (selectedPaths.length == 1) {
+
+                    
+                    var thisPIndex = selectedPaths[0]
+                    var thisP = myWords.children[thisPIndex]
+                    var path2 = thisP.splitAt(segment.location)
+                    console.log(path2)
+
+                    // myWords.insertChild(path2, thisPIndex)           // put splitted path into (this probable not needed)
+                    master.push(Object.assign({}, master[thisPIndex]))  // insert copy of current path to master array
+
+                    updateWords()
+                    renderAllPaths()
+                    showSelection()
+                    updateUI()
+                }
+
+
+                
+
+                updateWords()
+                renderAllPaths()
+                showSelection()
+            }
+        }
+
+        // If clicked a already selected path with shift pressed – add a new control point
+        if (hitResult.type == 'stroke') {
+            path = hitResult.item
+
+            if (selectedPaths.includes(path.index) && event.modifiers.shift) {
+                var location = hitResult.location;
+                segment = path.insert(location.index + 1, event.point);            
+            }   
+        }
+
+        // }
 	}
 }
 
 function showSelection() {
-    for (path of myWords.children) {
-        if (selectedPaths.includes(path.index)) {path.selected = true} 
+    for (var path of myWords.children) {
+        if (selectedPaths.includes(path.index)) {
+            path.fullySelected = true
+        } 
     }
 }
 
 // Move path or single point by dragging with mouse
 function onMouseDrag(event) {
     dragging = true;
+    
 	if (segment) {
 		segment.point += event.delta;
         // path.smooth();
-        
+    }
     
-	} else if (path) {
-        path.position += event.delta;        
-        
+	if (path) {
+        path.position += event.delta;                
+	}
+    
+    if (handle) {
+		handle.x += event.delta.x;
+		handle.y += event.delta.y;
 	}
 }
 
@@ -2872,6 +3031,147 @@ function updateWords() {
     words.name = "words";
     words.selected = false;
     words.scale(1/master[0].drawingSize);
+}
+
+$('#smoothPath').click(function(){
+    
+    selectedPaths.forEach(function(item){
+        myWords.children[item].smooth()           
+    })
+
+    updateWords()            
+    renderAllPaths()
+    showSelection()
+})
+
+
+// Move selected paths backwards in the stacking order
+$('#backwardsPath').click(function(){
+    selectedPaths.forEach(function(item){
+        myWords.children[item].sendToBack()           // Move the path itself to back        
+        master.unshift(master.splice(item, 1)[0])   // Modify the master array to reflect the change
+    });
+
+    selectedPaths = []
+    updateWords()            
+    renderAllPaths()
+    showSelection()
+});
+
+// Move selected paths backwards in the stacking order
+$('#forwardPath').click(function(){
+    
+    selectedPaths.forEach(function(item){
+        myWords.children[item].bringToFront()   // Move path itself to front
+        master.push(master.splice(item, 1)[0])  // Modify maste array to reflect the change
+        item = myWords.length
+    });
+
+    selectedPaths = []
+
+    updateWords()            
+    renderAllPaths()
+    showSelection()
+});
+
+
+// Delete selected paths
+$('#deletePath').click(function(){
+    console.log('del')
+    var pathsToDelete = selectedPaths
+    pathsToDelete.sort()
+
+    for (var i = pathsToDelete.length - 1; i >= 0; i-- ) {
+        myWords.children[pathsToDelete[i]].remove()   // Move path itself to front
+        master.splice(pathsToDelete[i], 1)  // Modify maste array to reflect the change        
+    }
+
+    selectedPaths = []
+
+    updateWords()            
+    renderAllPaths()
+    showSelection()
+});
+
+$('#randomPath').click(function(){
+    var brushesToRandomize = [0,2,3,4,5,7,8,12]
+    var brushesShadow = [0,8,12]
+    var randBrushType = brushesToRandomize[getRandomInt2(0, brushesToRandomize.length)]
+
+
+    for (var i = 0; i < selectedPaths.length; i++) {
+        var thisP = myWords.children[selectedPaths[i]]
+        thisP.removeSegments()
+
+        for (var pp = 0; pp < getRandomInt2(3, 10); pp++) {
+            thisP.add(view.size * Point.random())            
+        }
+
+        thisP.smooth()
+
+        
+        var m = master[selectedPaths[i]]
+        console.log(m)
+        m['size'] = getRandomInt2(10, 200)
+        m['brushStrokeWidth'] = 1
+        m['bgType'] = randBrushType
+        m['noiseOn'] = trueOrFalse()
+        m['noiseAngularOn'] = trueOrFalse()
+        m['noiseFreq'] = getRandomInt2(5, 30)
+        m['noiseAmp'] = getRandomInt2(5, 200)
+        m['noiseAmp'] = getRandomInt2(5, 200)
+        m['density'] = getRandomInt2(70,99)
+        m['twist'] = getRandomInt2(0,200)
+        m['directionalContrast'] = getRandomInt2(0,30)
+        m['directionalContrast'] = getRandomInt2(0,30)
+        m['brushNoiseAmp'] = getRandomInt2(0, 20)
+        m['brushNoiseFreq'] = getRandomInt2(0, 50)
+        m['wedge'] = getRandomInt2(0, 100)
+        if (brushesShadow.includes(m['bgType'])) {
+            console.log('on')
+            m['lineShadow'] = getRandomInt2(0, 100)
+            m['lineShadowWidth'] = 1
+            m['lineShadowColor'] = new Color(0,0,0)
+        }
+        else {
+            m['lineShadow'] = 0
+        }
+
+        if (randBrushType == 8) {
+            m['brushNoiseAmp'] = getRandomInt2(0, 50)
+            m['brushNoiseFreq'] = getRandomInt2(0, 100)
+            m['brushNoiseSmoothOn'] = trueOrFalse()
+        }
+        
+        var col = getRandomInt2(50,200) / 255
+        m['bgColor'] = new Color(col,col,col)
+        // m['brushNoiseOn'] = trueOrFalse()
+
+       // console.log(m)
+    }
+    
+
+    function zeroOrOne() {
+        return Math.round(Math.random())
+    }
+
+    function trueOrFalse() {
+        return (Math.round(Math.random()) == 0 ? false : true)
+    }
+    updateWords()
+    updateUI()
+    renderAllPaths()
+
+});
+
+
+// Random colors refresh
+document.getElementById("refreshRandomColor").addEventListener("click", refreshRandomColors, false);
+
+function refreshRandomColors() {
+    brushRandomColors = [];
+    brushRandomColorsLocked = false;
+    renderAllPaths();
 }
 
 // CUSTOM SPRITE UPLOAD
@@ -2915,7 +3215,7 @@ $('#brushCircusGenerate').click(function(){
             inputCols.push('N');
         }
     }
-    console.log(inputCols);
+    // console.log(inputCols);
 
     var url = "http://colormind.io/api/";
     var data = {
